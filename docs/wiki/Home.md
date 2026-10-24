@@ -1,14 +1,26 @@
-# Semantic Shared Control — Architecture and Data Contracts
+# Semantic Shared Control — Project Documentation
 
 **Design Draft v0.1 · 24 October 2026 · Documentation only**
 
-This document specifies a proposed data contract for continuous, joystick-guided robotic assistance. It is intended for supervisors reviewing the research design and engineers implementing the perception, fusion, optimization, and robot interfaces.
+The technical documentation specifies a proposed data contract for continuous, joystick-guided robotic assistance. It is intended for supervisors reviewing the research design and engineers implementing the perception, fusion, optimization, and robot interfaces.
 
 The central research question is how task semantics and scene geometry can assist a user's ongoing two-dimensional command while preserving direct influence over each next motion step. A VLM supplies task relevance and generated geometric relation programs. A separate online computation combines those results with current joystick input and measured robot state.
 
-This is a design specification, not a report of an implemented or experimentally validated shared-control system. **MUST** and **MUST NOT** identify requirements of the proposed contract; they do not claim that inherited code already enforces those requirements. **SHOULD** identifies a design recommendation with an explanation required for deviation.
+The technical pages are a design specification, not a report of an implemented or experimentally validated shared-control system. In those pages, **MUST** and **MUST NOT** identify requirements of the proposed contract; they do not claim that inherited code already enforces those requirements. **SHOULD** identifies a design recommendation with an explanation required for deviation.
 
-## Reading order
+## Working on the project
+
+**Development Policy v1.0** defines the active contribution process, separately from the technical design draft. Read these pages before creating or executing tasks:
+
+| Page | Purpose |
+| --- | --- |
+| [Development Workflow](https://github.com/ZenWang00/semantic-shared-control/wiki/Development-Workflow) | Follow ownership, tiered AI autonomy, implementation, independent review, acceptance, and handoff. |
+| [Issue Standards](https://github.com/ZenWang00/semantic-shared-control/wiki/Issue-Standards) | Define complete task cards sized to one working conversation, with staged decomposition and verifiable outcomes. |
+| [Project Board](https://github.com/ZenWang00/semantic-shared-control/wiki/Project-Board) | Use board states, priorities, labels, work-in-progress limits, and completion rules. |
+
+Use the [development board](https://github.com/users/ZenWang00/projects/3) and create future tasks through the [Issue template chooser](https://github.com/ZenWang00/semantic-shared-control/issues/new/choose). The governance bootstrap initializes the rules and an empty board; it does not create a development backlog.
+
+## Technical reading order
 
 | Page | Purpose |
 | --- | --- |

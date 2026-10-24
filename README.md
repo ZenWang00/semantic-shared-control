@@ -18,6 +18,18 @@ The first prototype is scoped to a static scene and a fixed robot base. The oper
 
 The Wiki is a publication copy of `docs/wiki/`. Change the source on a project branch, review it, and synchronize the same Markdown files into the separate Wiki Git repository. The Wiki publication commit records the source project commit.
 
+## Development policy
+
+**Development Policy v1.0** governs human and AI contributions independently of the technical design draft:
+
+- [Development workflow](docs/wiki/Development-Workflow.md)
+- [Issue standards and conversation-sized execution](docs/wiki/Issue-Standards.md)
+- [Project board and tracking rules](docs/wiki/Project-Board.md)
+- [Live development board](https://github.com/users/ZenWang00/projects/3)
+- [Create an issue using a task template](https://github.com/ZenWang00/semantic-shared-control/issues/new/choose)
+
+Execution issues should fit one working conversation's context, including implementation, verification, and handoff. Split larger outcomes into independently verifiable stages before starting. Repository agents begin with [AGENTS.md](AGENTS.md).
+
 ## Implementation baseline
 
 Git history and existing source files are inherited from [ZenWang00/vla-grasp-server](https://github.com/ZenWang00/vla-grasp-server) at commit [`2390315`](https://github.com/ZenWang00/vla-grasp-server/tree/2390315278ad6f734f28a345483f3c144793a5a0). The upstream remote identifies that source repository.
