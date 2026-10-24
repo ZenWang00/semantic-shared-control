@@ -7,6 +7,8 @@ body:
       value: |
         Read [Issue Standards](https://github.com/ZenWang00/semantic-shared-control/wiki/Issue-Standards) and [Development Workflow](https://github.com/ZenWang00/semantic-shared-control/wiki/Development-Workflow) before starting.
 
+        Create this issue in the repository that owns the deliverable. Use full URLs for cross-repository parents and dependencies; record companion revisions and integration evidence when relevant. Add ROS2 project issues explicitly to [Project #3](https://github.com/users/ZenWang00/projects/3) and verify their board fields.
+
         One execution issue should fit one work conversation, including context, execution, debugging, verification, and handoff. Split larger research into staged, independently verifiable sub-issues with persistent inputs and outputs.
 
         Unknown information may be recorded explicitly in Backlog; resolve it before Ready. Negative or inconclusive findings can complete a task when its evidence and acceptance requirements are met. Research conclusions intended for a thesis or external communication require human confirmation. Delivery and Handoff is optional at creation in Backlog; specify planned artifacts before Ready, then fill in actual results, evidence, and handoff details at delivery or transfer.

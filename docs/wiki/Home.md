@@ -10,15 +10,16 @@ The technical pages are a design specification, not a report of an implemented o
 
 ## Working on the project
 
-**Development Policy v1.0** defines the active contribution process, separately from the technical design draft. Read these pages before creating or executing tasks:
+**Development Policy v1.1** defines the active contribution process, separately from the technical design draft. Read these pages before creating or executing tasks:
 
 | Page | Purpose |
 | --- | --- |
 | [Development Workflow](https://github.com/ZenWang00/semantic-shared-control/wiki/Development-Workflow) | Follow ownership, tiered AI autonomy, implementation, independent review, acceptance, and handoff. |
 | [Issue Standards](https://github.com/ZenWang00/semantic-shared-control/wiki/Issue-Standards) | Define complete task cards sized to one working conversation, with staged decomposition and verifiable outcomes. |
 | [Project Board](https://github.com/ZenWang00/semantic-shared-control/wiki/Project-Board) | Use board states, priorities, labels, work-in-progress limits, and completion rules. |
+| [Repository Ownership and Cross-Repository Workflow](https://github.com/ZenWang00/semantic-shared-control/wiki/Repository-Ownership-and-Cross-Repository-Workflow) | Place work in the server or ROS2 repository and verify their shared interfaces and version pairs. |
 
-Use the [development board](https://github.com/users/ZenWang00/projects/3) and create future tasks through the [Issue template chooser](https://github.com/ZenWang00/semantic-shared-control/issues/new/choose). The governance bootstrap initializes the rules and an empty board; it does not create a development backlog.
+Use the [shared development board](https://github.com/users/ZenWang00/projects/3) for both repositories and the [phase-one Epic](https://github.com/ZenWang00/semantic-shared-control/issues/2) for its current execution cards. Create tasks in the repository that owns their deliverables. The server repository owns shared contracts, algorithms and offline archival/replay; the ROS2 repository owns device adapters, coordination, final motion authority and the complete offline loop runner. Repository ownership does not change the initial deployment locations.
 
 ## Technical reading order
 
@@ -58,8 +59,8 @@ Dynamic scene tracking is an extension point. Versioned feature identities are i
 
 ## Provenance and document maintenance
 
-The project preserves the Git history of [vla-grasp-server at 2390315](https://github.com/ZenWang00/vla-grasp-server/tree/2390315278ad6f734f28a345483f3c144793a5a0). Robot integration observations refer to [Grasp-Pose-Generation at 00a42b3](https://github.com/ZenWang00/Grasp-Pose-Generation/tree/00a42b32ef6d82863d298ccd876d0ee9523afa5d). These pinned sources distinguish inspected code from later repository changes.
+The project preserves the Git history of [vla-grasp-server at 2390315](https://github.com/ZenWang00/vla-grasp-server/tree/2390315278ad6f734f28a345483f3c144793a5a0). Robot integration observations refer to [Grasp-Pose-Generation at 00a42b3](https://github.com/ZenWang00/Grasp-Pose-Generation/tree/00a42b32ef6d82863d298ccd876d0ee9523afa5d), the target of its annotated [`v1.0.0` Git tag](https://github.com/ZenWang00/Grasp-Pose-Generation/tree/v1.0.0). These pinned sources distinguish inspected code from later repository changes; they do not establish a validated shared-control version pair.
 
-The authoring source is [`docs/wiki/`](https://github.com/ZenWang00/semantic-shared-control/tree/main/docs/wiki). The separate Wiki repository publishes the reviewed source files. Readers should treat Design Draft v0.1 as a coherent set; updates to shared fields or behavior must update examples and diagrams together.
+The single authoritative authoring source for both repositories' shared policy and contracts is [`semantic-shared-control/docs/wiki/`](https://github.com/ZenWang00/semantic-shared-control/tree/main/docs/wiki). The separate Wiki repository publishes the reviewed source files; ROS2 documentation links here. Readers should treat Design Draft v0.1 as a coherent set; updates to shared fields or behavior must update examples and diagrams together. The [cross-repository workflow](https://github.com/ZenWang00/semantic-shared-control/wiki/Repository-Ownership-and-Cross-Repository-Workflow) defines dependency pins and integration evidence.
 
 Implementation still requires selecting and measuring solver budgets, control rates, device calibration, and robot-side stop behavior. Those are recorded as open implementation parameters rather than invented experimental results.

@@ -21,6 +21,8 @@ The first level is appropriate for this release. The remaining levels require fu
 
 For each future test run, record the software revisions, configuration ID, robot model and calibration IDs, input artifacts, expected outcome, actual outcome, and diagnostic logs. A hardware result must also identify the machine, controller configuration, and test conditions. A configured deadline is a requirement to be tested, not evidence that the deadline is met.
 
+Cross-repository runs must identify both the server library version/exact commit and the ROS2 version/exact commit, together with the installed dependency manifest, message schema, generated-function ABI and validator policy. Follow [Repository Ownership and Cross-Repository Workflow](https://github.com/ZenWang00/semantic-shared-control/wiki/Repository-Ownership-and-Cross-Repository-Workflow) for ownership, compatibility and evidence handoff. The ROS2-owned offline runner exercises coordination with the server-owned algorithms; successful component tests do not establish acceptance of the combined version pair. The phase-one matrix must leave P05's capture-time TF adapter validation deferred and identify P08 evidence as synthetic feedback provenance only.
+
 ## 2. Proposed acceptance scenarios
 
 The following matrix is a minimum implementation acceptance suite. All scenarios are **proposed and not executed in this documentation release**. Rejection means that invalid data cannot activate a scene or produce an accepted motion command; it does not require every component to implement the same error transport.
@@ -84,6 +86,8 @@ These outcomes describe software behavior to implement. In hardware tests, obser
 ## 3. Legacy evidence and reuse boundaries
 
 The implementation baseline is [vla-grasp-server at `2390315`](https://github.com/ZenWang00/vla-grasp-server/tree/2390315278ad6f734f28a345483f3c144793a5a0). Robot-side references are pinned to [Grasp-Pose-Generation at `00a42b3`](https://github.com/ZenWang00/Grasp-Pose-Generation/tree/00a42b32ef6d82863d298ccd876d0ee9523afa5d). These references establish source behavior at those revisions, not the configuration currently running in the laboratory.
+
+The robot baseline is also the target of annotated Git tag [`v1.0.0`](https://github.com/ZenWang00/Grasp-Pose-Generation/tree/v1.0.0), tag object `06eec60d8682d18b58d5e8a56d12a38e05afa962`. No GitHub Release was published when this ownership update was checked. The tag preserves a baseline reference; it does not demonstrate the new shared-control contracts, validated stopping behavior, or compatibility with a future server-library version.
 
 | Existing component or behavior | Evidence | Intended reuse and boundary |
 |---|---|---|

@@ -15,6 +15,8 @@ The proposed output is one short-horizon TCP pose. A continuous user command par
 
 ROS2 is a communication and component framework, not a physical location. A ROS2 node can also run on the laboratory GPU workstation. The initial recommendation separates expensive asynchronous computation from the robot-facing control path.
 
+Source ownership is specified in [Repository Ownership and Cross-Repository Workflow](https://github.com/ZenWang00/semantic-shared-control/wiki/Repository-Ownership-and-Cross-Repository-Workflow). The server repository maintains shared contracts and algorithm libraries, including fusion and optimization. The ROS2 repository consumes a versioned library and owns devices, active-context coordination, snapshots, final command acceptance, and lifecycle/stop behavior. The locations below remain unchanged: server-owned algorithm code can execute on the robot computer without a network service or reverse dependency on ROS2.
+
 | Component | Initial location | Responsibility |
 | --- | --- | --- |
 | Capture adapter | Robot computer | Synchronize RGB and aligned depth, attach source timestamps/calibration, retain the camera transform at capture. |
@@ -82,6 +84,8 @@ The optimizer is intended to combine joystick consistency, object-weighted geome
 The requested velocity is not a promise that the robot always achieves it. Reachability, collision checks, and motion limits may reduce or prevent motion. A zero or disabled joystick request is handled by the local command gate and cannot be overridden by semantic assistance or a smoothness objective.
 
 Generated residuals are soft assistance terms. Positive residuals are expected during approach and do not automatically require stopping. Invalid inputs, invalid computation, stale results, and rejected host constraints are separate conditions.
+
+The shared optimizer accepts host constraints through a transport-independent interface; robot-specific implementations and model configuration belong to the ROS2 repository. The robot-side gate independently rechecks the proposed target against current authority, timing, controller state and host constraints. Injecting constraints into an algorithm neither authorizes its result nor creates a server-to-ROS2 source dependency.
 
 ## Transport and reuse
 
