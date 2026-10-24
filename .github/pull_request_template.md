@@ -2,7 +2,8 @@
 https://github.com/ZenWang00/semantic-shared-control/wiki/Development-Workflow
 https://github.com/ZenWang00/semantic-shared-control/wiki/Issue-Standards
 
-Use an ordinary issue reference, for example Refs #123. Do not use automatic
+Use an ordinary issue reference, for example Refs #123 within this repository or
+Refs ZenWang00/semantic-shared-control#123 across repositories. Do not use automatic
 issue-closing keywords: acceptance, review, and required human decisions precede
 explicit issue closure and the board's Done transition.
 
@@ -22,7 +23,9 @@ document changes. For a partial stage, state its deliverable and remaining stage
 ## Verification and Evidence
 
 <!-- Map results to acceptance criteria. Include commands/checks, environment,
-commit or artifact versions, and evidence links. Distinguish simulation, replay,
+commit or artifact versions, and evidence links. For cross-repository work, link
+companion PRs and record both tested source revisions and shared package/contract
+versions; distinguish component checks from combined integration evidence. Distinguish simulation, replay,
 and real-robot evidence. Use appropriate document checks for documentation;
 do not add tests simply to mirror the implementation or for low-impact edits.
 If a check was not run, state that explicitly and explain the remaining limit. -->

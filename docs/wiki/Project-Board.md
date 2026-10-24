@@ -1,21 +1,21 @@
 # Project Board
 
-**Development Policy v1.0 · 24 October 2026**
+**Development Policy v1.1 · 24 October 2026**
 
 This page defines the task tracking configuration and operating rules. It does not change the technical contracts or claim that the proposed control system has been implemented. Read it with [Issue Standards](https://github.com/ZenWang00/semantic-shared-control/wiki/Issue-Standards) and [Development Workflow](https://github.com/ZenWang00/semantic-shared-control/wiki/Development-Workflow).
 
 ## Sources of truth
 
-The repository's Issues hold task scope, acceptance criteria, dependencies, and delivery evidence. The Project presents their status and priority. Pull requests hold implementation differences and review evidence. The version-controlled Wiki source holds stable policies and technical decisions; the published Wiki is its synchronized copy. Do not maintain a second task list in chat or another document.
+The two repositories' Issues hold task scope, acceptance criteria, dependencies, and delivery evidence. The Project presents their status and priority. Pull requests hold implementation differences and review evidence. The version-controlled Wiki source holds stable policies and technical decisions; the published Wiki is its synchronized copy. Do not maintain a second task list in chat or another document.
 
-The public Project is [**Semantic Shared Control — Development**](https://github.com/users/ZenWang00/projects/3), owned by `ZenWang00` and linked to `ZenWang00/semantic-shared-control`. Public issues, board fields, and comments must not contain credentials or private experimental data; use accessible, appropriately permissioned evidence references instead.
+The public Project is [**Semantic Shared Control — Development**](https://github.com/users/ZenWang00/projects/3), owned by `ZenWang00` and linked to `ZenWang00/semantic-shared-control` and `ZenWang00/Grasp-Pose-Generation`. Public issues, board fields, and comments must not contain credentials or private experimental data; use accessible, appropriately permissioned evidence references instead.
 
 ## Views and fields
 
 | Setting | Value and meaning |
 | --- | --- |
 | Default view | **Board**, grouped by Status in the order below |
-| Secondary view | **All Tasks**, a table with Title, Status, Priority, Assignees, and Labels |
+| Secondary view | **All Tasks**, a flat table showing Title, Assignees, Status, Labels, Priority, and Repository |
 | Card source | Repository Issues only; link PRs to their issue rather than adding duplicate PR cards |
 | Status | Backlog, Ready, In progress, Review, Done |
 | Priority | P0: urgent blocker; P1: next focus; P2: normal backlog work |
@@ -37,7 +37,7 @@ Use exactly one task type label: `type:engineering`, `type:bug`, or `type:resear
 
 The execution owner maintains status at claim, review submission, completion, and handoff. A request for changes returns the task to In progress when work resumes. A waiting human decision remains in Review. A task that loses its Ready conditions returns to Backlog with the reason documented.
 
-The work-in-progress limit is **two cards total across In progress and Review**, including blocked cards. This is an operating rule, not a claim that GitHub enforces a hard limit. Multiple agents can serve one card within agreed modification boundaries. To pause a blocked task and free capacity, record its current state and next action, move it to Backlog, and retain the blocker information. Do not increase the limit simply to hide unfinished review work.
+The work-in-progress limit is **two cards total across In progress and Review across both repositories**, including blocked cards. This is an operating rule, not a claim that GitHub enforces a hard limit. Multiple agents can serve one card within agreed modification boundaries. To pause a blocked task and free capacity, record its current state and next action, move it to Backlog, and retain the blocker information. Do not increase the limit simply to hide unfinished review work.
 
 ## Parent tasks and phased execution
 
@@ -57,7 +57,8 @@ Cancel abandoned or duplicate work with reason `not planned`, record why and lin
 
 | Workflow | Required configuration |
 | --- | --- |
-| Auto-add to project | Select this repository; filter `is:issue is:open` |
+| Auto-add to project | Select `ZenWang00/semantic-shared-control`; filter `is:issue is:open`. The current plan permits only one auto-add workflow. |
+| ROS2 issue enrollment | Explicitly add each project Issue from `Grasp-Pose-Generation` using its existing URL when creating/transferring it; verify Backlog and set the intended priority. |
 | Item added to project | Set Status to Backlog |
 | Item closed | Disabled: closing is not sufficient evidence of acceptance |
 | Pull request merged | Disabled: PRs are not separate execution cards |
@@ -71,6 +72,18 @@ Cancel abandoned or duplicate work with reason `not planned`, record why and lin
 Auto-add handles future matching issue creation or updates; it is not a historical backfill guarantee. If a new card is absent, the execution owner adds its existing Issue URL manually and sets Backlog without creating another issue. CLI/API-created issues follow the same content and label rules as browser forms. Forms and automation are aids, not server-side enforcement of every policy.
 
 GitHub's default workflows can mark closed items and merged PRs Done; disable them during initialization. See the official [built-in automation](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-built-in-automations) and [auto-add](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/adding-items-automatically) documentation.
+
+## Cross-repository operation
+
+Use the built-in Repository field to identify ownership. Filter All Tasks with `repo:ZenWang00/semantic-shared-control` or `repo:ZenWang00/Grasp-Pose-Generation` when reviewing one side; clear the filter for global WIP and integration decisions. Both repositories share the same Status, Priority, type labels and acceptance rules. The server Epic can retain native children in either repository. Do not create a second Project or duplicate Epic/card to represent the same work.
+
+The browser currently disables Duplicate workflow because the auto-add workflow limit has been reached. Linking a second repository does not expand the existing workflow. Keep server auto-add enabled and add ROS2 project Issues explicitly, for example:
+
+```sh
+gh project item-add 3 --owner ZenWang00 --url https://github.com/ZenWang00/Grasp-Pose-Generation/issues/NUMBER
+```
+
+Replace NUMBER with the existing Issue number. Verify the item and its fields afterward; transfers should reuse any retained item. Do not bulk-import unrelated historical issues. If the plan later supports a second workflow, configure it for the ROS2 repository and verify a real matching task before claiming automatic coverage.
 
 ## Initialization and maintenance
 
@@ -90,4 +103,10 @@ Configuration checked on 24 October 2026:
 - Only Auto-add to project and Item added to project are enabled. Auto-add selects this repository with `is:issue is:open`; Item added sets Backlog. Other automatic status/closure paths are disabled.
 - Three English forms and the PR template are checked for structure and policy consistency. Browser forms are previewed after integration without submitting test issues.
 
-These are configuration checks. Auto-add and initial status have not been exercised by a real task because the bootstrap intentionally creates none. The implementation delivery identifies the source PR and Wiki publication commit; the Wiki commit records the exact source revision. No runtime, robot, or experimental validation is implied by these management checks.
+At initial bootstrap these were configuration checks only. Subsequent Phase 1 issue creation exercised server auto-add and initial Backlog status. The dual-repository update retains that workflow, links both repositories, and uses explicit enrollment for ROS2 Issues because a second auto-add workflow is unavailable. The implementation delivery identifies the source PR and Wiki publication commit; the Wiki commit records the exact source revision. No runtime, robot, or experimental validation is implied by these management checks.
+
+### Dual-repository configuration record
+
+On 24 October 2026, Project #3 was linked to both repositories and All Tasks was saved as a flat table with Repository visible. Six robot-owned Phase 1 Issues were transferred to the ROS2 repository while retaining their Project #3 item IDs and fields. Native parent/blocker relations and Issue bodies are verified as part of [the governance task](https://github.com/ZenWang00/semantic-shared-control/issues/19).
+
+The legacy [grasp Project #2](https://github.com/users/ZenWang00/projects/2) automatically enrolled those transfers. Its repository auto-add workflow was disabled and the six duplicate legacy Project items were archived; their Issues remain open and tracked in Project #3. The legacy Project itself is retained. These management checks do not establish runtime or hardware validation.

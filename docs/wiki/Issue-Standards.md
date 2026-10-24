@@ -1,6 +1,6 @@
 # Issue Standards
 
-**Development Policy v1.0 · 24 October 2026**
+**Development Policy v1.1 · 24 October 2026**
 
 An execution Issue defines one independently verifiable outcome. Another agent must be able to pick it up using the Issue and its linked persistent artifacts without recovering an earlier chat. This page defines the outline to use when tasks are eventually decomposed; it does not create an initial backlog.
 
@@ -41,6 +41,12 @@ All task types use the following eight sections. Backlog items may explicitly ma
 | **Delivery and Handoff** | Planned deliverables initially; later the actual PR or artifact links, revision, verification evidence, limitations, unresolved work, and resumption instructions if needed. |
 
 Use the real GitHub owner in Assignees and the defined project Priority field. Record the executor or agent and working branch in a claim or handoff comment. Do not invent an AI GitHub account. Label the Issue with exactly one task type and add `review:human` when its acceptance requires the owner's confirmation.
+
+## Repository and cross-repository context
+
+These rules apply to both project repositories. Create the Issue where its main deliverable is implemented, following [Repository Ownership](https://github.com/ZenWang00/semantic-shared-control/wiki/Repository-Ownership-and-Cross-Repository-Workflow). Keep project-level Epics and shared design in the server repository; link native sub-issues and blockers across repositories. Use full URLs or `owner/repository#N` for cross-repository references.
+
+In **Scope and Non-goals**, identify the owning repository and affected consumers. In **Dependencies and Inputs**, identify required companion revisions/interfaces. In **Delivery and Handoff**, record related PRs, both tested revisions and compatibility evidence when integration spans repositories. Transfer an existing card rather than duplicating it, preserving acceptance, ownership and board fields; verify parent and dependency relations after transfer.
 
 ## Task types
 

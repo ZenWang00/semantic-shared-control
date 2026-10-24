@@ -1,10 +1,10 @@
 # Development Workflow
 
-**Development Policy v1.0 · 24 October 2026**
+**Development Policy v1.1 · 24 October 2026**
 
-This policy governs development by the project owner and AI agents. It defines how work becomes ready, how changes are reviewed, and what evidence permits completion. It does not change the status of the technical specifications: Design Draft v0.1 remains a proposed design, not a claim of implementation or validation.
+This policy governs development by the project owner and AI agents in both `ZenWang00/semantic-shared-control` and `ZenWang00/Grasp-Pose-Generation`. It defines how work becomes ready, how changes are reviewed, and what evidence permits completion. It does not change the status of the technical specifications: Design Draft v0.1 remains a proposed design, not a claim of implementation or validation.
 
-Read this page with [Issue Standards](https://github.com/ZenWang00/semantic-shared-control/wiki/Issue-Standards) and [Project Board](https://github.com/ZenWang00/semantic-shared-control/wiki/Project-Board). The reviewed files in `docs/wiki/` are the authoring source; the GitHub Wiki is their published copy. Keep policy changes and templates consistent in the same pull request.
+Read this page with [Issue Standards](https://github.com/ZenWang00/semantic-shared-control/wiki/Issue-Standards) and [Project Board](https://github.com/ZenWang00/semantic-shared-control/wiki/Project-Board). The reviewed files in `docs/wiki/` are the authoring source; the GitHub Wiki is their published copy. Keep canonical policy changes and server templates consistent in the same pull request; synchronize the ROS2 template copy through a linked PR before accepting a policy update. The shared policy has one authoring source, not separate per-repository versions.
 
 ## Responsibilities and decision authority
 
@@ -33,7 +33,7 @@ Every substantive feature, bug fix, experiment, refactor, or documentation chang
 | **Review** | Deliverables, self-check evidence, and known limitations are available. Independent review and any required human confirmation can now assess the result. |
 | **Done** | Every acceptance criterion is satisfied, independent review is recorded, necessary human decisions are recorded, and repository changes are merged into `main`. |
 
-Keep at most **two Issues across In progress and Review combined**. Blocked Issues and tracking parents in Review count toward this limit. Pause work by returning it to Backlog with its reason and a persistent handoff. Parent Issues summarize staged work; only their executable children are claimed for implementation. Board fields, blocking, cancellation, and synchronization are defined in [Project Board](https://github.com/ZenWang00/semantic-shared-control/wiki/Project-Board).
+Keep at most **two Issues across In progress and Review combined across both repositories**. Blocked Issues and tracking parents in Review count toward this limit. Pause work by returning it to Backlog with its reason and a persistent handoff. Parent Issues summarize staged work; only their executable children are claimed for implementation. Board fields, blocking, cancellation, and synchronization are defined in [Project Board](https://github.com/ZenWang00/semantic-shared-control/wiki/Project-Board).
 
 Before editing, read the relevant design and inspect the implementation. Distinguish proposed behavior from behavior that exists. Do not infer that an interface or safeguard has been implemented merely because its specification is detailed.
 
@@ -43,11 +43,17 @@ Use a task branch and PR for substantive repository changes. Use a separate chec
 
 PRs target `main` and use squash merge by default. A PR must describe the concrete behavior or artifact change, its reason, verification evidence, limitations, and the related Issue. Prefer one coherent, independently reviewable change per PR.
 
-Use `Refs #N` to link an Issue. Do not use automatic-closing keywords such as `Closes #N` or `Fixes #N`: merging code may precede experimental analysis, hardware checks, or other acceptance work. Close the Issue and synchronize the board explicitly only after the complete acceptance decision.
+Use `Refs #N` within the same repository and `Refs owner/repository#N` across repositories to link an Issue. Do not use automatic-closing keywords such as `Closes #N` or `Fixes #N`: merging code may precede experimental analysis, hardware checks, or other acceptance work. Close the Issue and synchronize the board explicitly only after the complete acceptance decision.
 
 The executing agent performs an appropriate self-check. An independent reviewer then checks the **final diff**, relevant design and acceptance criteria, and verification evidence. Record the reviewer identity or agent/session reference, reviewed commit, findings, and disposition in the PR. Resolve substantive findings before merge. If follow-up edits change the result, review the new diff and rerun only checks affected by those edits; do not reuse approval of an obsolete version.
 
 Review records may be posted by the coordinating agent on behalf of an independent reviewer, provided the attribution is explicit. A successful tool call, an agent's completion message, or a green check alone does not establish acceptance.
+
+## Cross-repository delivery
+
+Follow [Repository Ownership](https://github.com/ZenWang00/semantic-shared-control/wiki/Repository-Ownership-and-Cross-Repository-Workflow) when choosing the implementation repository. The server repository owns shared contracts, reusable algorithms and evidence tools; the ROS2 repository owns integration, runtime coordination and final motion authority. Code ownership does not change deployment location.
+
+Use one Project and the canonical server Wiki. Place executable Issues in the repository that owns their outcome, retain cross-repository parent/blocker relations, and avoid duplicate cards. Link all participating PRs. A coordinated delivery records both source revisions, the shared package/contract versions, configuration and integration evidence. A merged producer PR does not establish consumer compatibility or complete aggregate acceptance. Repository-specific setup documentation stays with its code.
 
 ## Verification and research evidence
 
