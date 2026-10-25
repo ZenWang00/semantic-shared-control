@@ -21,8 +21,11 @@ class RejectHeavyImport(importlib.abc.MetaPathFinder):
             raise AssertionError("unexpected dependency import: " + fullname)
 sys.meta_path.insert(0, RejectHeavyImport())
 import ssc_core
-from ssc_core import parse_record, NUMERIC_OFFLINE_V1
+from ssc_core import parse_record, NUMERIC_OFFLINE_V1, SessionRegistry
 parse_record("Pose", {"position_xyz": [0, 0, 0], "quaternion_xyzw": [0, 0, 0, 1]}, policy=NUMERIC_OFFLINE_V1)
+registry = SessionRegistry("package-check", policy=NUMERIC_OFFLINE_V1)
+registry.register_record("TaskContext", {"task_id": "task", "revision": 1, "instruction": "approach"}, session_id="package-check")
+assert registry.get_record("TaskContext", {"task_id": "task", "revision": 1}, session_id="package-check").instruction == "approach"
 files = [str(p) for p in importlib.metadata.files("ssc-core")]
 assert all(p.startswith(("ssc_core/", f"ssc_core-{ssc_core.__version__}.dist-info/")) for p in files), files
 assert not (blocked & sys.modules.keys())
@@ -30,5 +33,5 @@ print(json.dumps({"version": importlib.metadata.version("ssc-core"), "origin": s
 '''
     completed = subprocess.run([sys.executable, "-I", "-c", program], cwd=tmp_path, text=True, capture_output=True, check=True)
     result = json.loads(completed.stdout)
-    assert result["version"] == ssc_core.__version__ == "0.2.0"
+    assert result["version"] == ssc_core.__version__ == "0.3.0"
     assert "site-packages" in result["origin"]
