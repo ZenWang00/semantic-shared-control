@@ -764,3 +764,25 @@ def test_same_execution_settings_allow_a_new_receipt_reference(graph):
     arguments = bundle_args(graph)
     arguments['execution_binding_refs'][0] = binding['binding_id']
     assert registry.resolve_bundle(**arguments).receipts[0].receipt_id == receipt['receipt_id']
+
+
+@pytest.mark.parametrize('sign', [-1, 1])
+def test_unbounded_timestamp_seconds_remain_idempotent_without_decimal_encoding(graph, sign):
+    registry = SessionRegistry(SESSION, policy=POLICY)
+    message = deepcopy(graph['messages']['JoystickSample'])
+    seconds = sign * 10 ** 5000
+    message['meta']['produced_at']['sec'] = seconds
+    message['payload']['sampled_at']['sec'] = seconds
+    first = registry.register_message(message)
+    assert registry.register_message(message) == first
+    assert registry.get_message(first.meta.message_id, session_id=SESSION) == first
+
+
+@pytest.mark.parametrize('before,after', [(0, 0.0), (0.0, -0.0)])
+def test_identity_preserves_numeric_type_and_signed_zero(graph, before, after):
+    registry = SessionRegistry(SESSION, policy=POLICY)
+    message = deepcopy(graph['messages']['JoystickSample'])
+    message['payload']['u_xy'][1] = before
+    registry.register_message(message)
+    message['payload']['u_xy'][1] = after
+    assert_error(lambda: registry.register_message(message), 'immutable_conflict')

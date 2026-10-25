@@ -7,7 +7,6 @@ Opaque resources without a record schema remain the caller's responsibility.
 
 from dataclasses import dataclass
 from hashlib import sha256
-import json
 from typing import Any, TypeVar
 
 from . import records as r
@@ -89,9 +88,23 @@ def _same(actual: Any, expected: Any, path: str) -> None:
         _fail(path, "incompatible_reference", f"expected {expected!r}, got {actual!r}")
 
 
-def _content(record: r.Record) -> str:
-    # Dict insertion order is not content; array order and exact number forms are.
-    return json.dumps(to_dict(record), sort_keys=True, ensure_ascii=True, allow_nan=False)
+def _canonical(value: Any) -> tuple:
+    """Compare JSON-shaped values without limiting TimePoint's integer seconds.
+
+    Decimal JSON encoding can reject large valid integers. A typed tree keeps
+    exact integers, number types and signed zero without global decoder changes.
+    """
+    if type(value) is dict:
+        return ("object", tuple((key, _canonical(item)) for key, item in sorted(value.items())))
+    if type(value) in (list, tuple):
+        return ("array", tuple(_canonical(item) for item in value))
+    if type(value) is float:
+        return ("float", value.hex())
+    return (type(value).__name__, value)
+
+
+def _content(record: r.Record) -> tuple:
+    return _canonical(to_dict(record))
 
 
 def _definition(geometry: r.SceneGeometry) -> tuple:
@@ -105,13 +118,13 @@ def _definition(geometry: r.SceneGeometry) -> tuple:
     )
 
 
-def _coordinates(geometry: r.SceneGeometry) -> str:
+def _coordinates(geometry: r.SceneGeometry) -> tuple:
     """Geometry version values, independent of storage order or provenance ID."""
-    return json.dumps((
+    return _canonical((
         geometry.frame_id,
         sorted((kp.keypoint_id, kp.position_xyz) for kp in geometry.keypoints),
         sorted((axis.axis_id, axis.unit_direction_xyz) for axis in geometry.axes),
-    ), ensure_ascii=True, allow_nan=False)
+    ))
 
 
 class SessionRegistry:
@@ -131,8 +144,8 @@ class SessionRegistry:
         self._records: dict[tuple[type, str | tuple[str, int]], r.Record] = {}
         self._messages: dict[str, r.Message] = {}
         self._definitions: dict[tuple[str, str], tuple] = {}
-        self._coordinate_versions: dict[tuple[str, str, int], str] = {}
-        self._execution_settings: dict[tuple[str, str], str] = {}
+        self._coordinate_versions: dict[tuple[str, str, int], tuple] = {}
+        self._execution_settings: dict[tuple[str, str], tuple] = {}
 
     @property
     def session_id(self) -> str:
@@ -188,7 +201,7 @@ class SessionRegistry:
                       "changed coordinates or frame within a feature set require a new geometry revision")
         if type(record) is r.ProgramExecutionBinding:
             known_settings = self._execution_settings.get((record.config_id, record.program_id))
-            settings = json.dumps((record.normalization_scale, record.weight), allow_nan=False)
+            settings = _canonical((record.normalization_scale, record.weight))
             if known_settings is not None and known_settings != settings:
                 _fail("$.config_id", "binding_configuration_conflict",
                       "changed scale or weight for a program requires a new configuration")
@@ -199,8 +212,8 @@ class SessionRegistry:
             self._definitions[(record.scene_id, record.feature_set_id)] = _definition(record)
             self._coordinate_versions[(record.scene_id, record.feature_set_id, record.revision)] = _coordinates(record)
         if type(record) is r.ProgramExecutionBinding:
-            self._execution_settings[(record.config_id, record.program_id)] = json.dumps(
-                (record.normalization_scale, record.weight), allow_nan=False)
+            self._execution_settings[(record.config_id, record.program_id)] = _canonical(
+                (record.normalization_scale, record.weight))
 
     def register_record(
         self, record_type: str | type[_R], data: dict | _R, *, session_id: str,

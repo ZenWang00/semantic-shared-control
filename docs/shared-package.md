@@ -214,8 +214,10 @@ Every input, stored value and public return is detached through the parsing
 boundary, including inputs already constructed as dataclasses. Ordinary writes
 are prevented by frozen records and tuple fields. Registering identical content
 again is idempotent. Changed content under the same identity is rejected, using
-the complete canonical JSON representation: object-key order is ignored, array
-order and exact numeric serialization are preserved, so `1` and `1.0` differ.
+complete canonical JSON-shaped values: object-key order is ignored, array
+order, numeric types and signed zero are preserved, so `1` and `1.0` differ.
+Identity comparison does not decimal-encode unbounded TimePoint seconds or
+change global Python integer conversion limits.
 TaskContext identities include both task ID and revision. Geometry IDs cannot be
 reused for a different revision; exact GeometryRef resolution checks both fields.
 A matching source hash never substitutes for the full program content check.
