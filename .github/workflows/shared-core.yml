@@ -10,6 +10,7 @@ on:
       - 'tests/fixtures/shared_control/**'
       - 'pyproject.toml'
       - 'docs/shared-package.md'
+      - 'docs/reference/verify_evaluator_isolation.py'
       - 'docs/wiki/Generated-Constraint-Program-Contract.md'
       - '.github/workflows/shared-core.yml'
 
@@ -29,13 +30,19 @@ jobs:
       - name: Install wheel into a clean environment
         run: |
           python -m venv .venv-acceptance
-          .venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.4.0-py3-none-any.whl[test]'
+          .venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.5.0-py3-none-any.whl[test]'
       - name: Verify installed package
         run: |
           .venv-acceptance/bin/python -m pytest tests/shared_control --junitxml=test-results.xml
           .venv-acceptance/bin/python -m pip check
           .venv-acceptance/bin/python -m pip freeze > dependencies.txt
           sha256sum dist/*.whl > wheel-sha256.txt
+      - name: Measure evaluator isolation on Linux
+        run: |
+          .venv-acceptance/bin/python -B docs/reference/verify_evaluator_isolation.py \
+            --source-revision "$(git rev-parse HEAD)" \
+            --wheel-sha256 "$(sha256sum dist/*.whl | cut -d ' ' -f 1)" \
+            --output evaluator-evidence.json
       - name: Retain wheel and verification evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -46,3 +53,4 @@ jobs:
             test-results.xml
             dependencies.txt
             wheel-sha256.txt
+            evaluator-evidence.json
