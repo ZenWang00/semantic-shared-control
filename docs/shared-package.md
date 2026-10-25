@@ -1,11 +1,13 @@
-# Shared validation and reference-resolution package
+# Shared validation, resolution and residual-evaluation package
 
-`ssc-core==0.3.0` implements scene/artifact and live/control record validation,
-immutable session registries and deterministic reference resolution for schema
-`1.0`, using an explicit host policy. The parsing API and schema remain source
-compatible with 0.2.0. The inherited grasp service is separate. Resolution checks
-typed-record compatibility; an active bundle, live control loop, program
-execution, command gate and robot integration remain separate responsibilities.
+`ssc-core==0.4.0` implements scene/artifact and live/control record validation,
+immutable session registries, deterministic reference resolution and a restricted
+`geometry-residual-v1` numerical interpreter for schema `1.0`, using an explicit
+host policy. The parsing, registry and schema APIs remain source compatible with
+0.3.0. The inherited grasp service is separate. Resolution checks typed-record
+compatibility and the interpreter evaluates accepted source; process isolation,
+receipt issuance, an active bundle, live control loop, command gate and robot
+integration remain separate responsibilities.
 
 ## Install and test
 
@@ -26,7 +28,7 @@ To test the actual wheel in a second clean environment:
 ```sh
 .venv-ssc/bin/python -m pip wheel --no-deps --wheel-dir dist .
 python3.12 -m venv .venv-acceptance
-.venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.3.0-py3-none-any.whl[test]'
+.venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.4.0-py3-none-any.whl[test]'
 .venv-acceptance/bin/python -m pytest tests/shared_control
 .venv-acceptance/bin/python -m pip check
 ```
@@ -61,7 +63,7 @@ wire_value = to_dict(pose)
 - `ValidationError` exposes `path`, `code`, and `message`, identifying the invalid
   field. Validation fails at the first diagnosed violation.
 
-The parsing API is unchanged in 0.3.0. Supported message payloads are
+The parsing API is unchanged in 0.4.0. Supported message payloads are
 SessionConfig, TaskContext, SceneObservation, SceneGeometry, SemanticContext,
 ConstraintProgram, ProgramExecutionBinding, ProgramValidationReceipt, Parameter,
 JoystickSample, RobotState, ControlSnapshot, ObjectWeights and ControlResult.
@@ -141,8 +143,9 @@ bundle resolution requires compatible program coverage for every candidate.
 Parsing checks SHA-256 for lowercase 64-digit format only. Registry registration
 also recomputes the exact UTF-8 source hash and rejects immutable-ID reuse with
 changed content. Resolution checks typed reference existence and
-task/scene/frame/policy compatibility. Source syntax, numerical probes, execution
-isolation and receipt trust remain later validation responsibilities. Parsing or
+task/scene/frame/policy compatibility. The interpreter below checks source
+syntax, shapes and numerical evaluation; numerical probes, execution isolation
+and receipt trust remain later validation responsibilities. Parsing or
 resolving an `accepted` receipt neither issues it nor establishes host trust.
 
 JoystickSample requires a finite two-component vector within the unit disk and
@@ -263,9 +266,9 @@ Resolved values are frozen containers with the following fields:
 
 Resolution uses only the standard library and preserves source numeric values.
 It does not create NumPy arrays or run generated code. Empty numeric-source
-bindings are empty tuples. A later evaluator must construct read-only float64
-arrays with the ABI shapes `(K, 3)`, `(A, 3)` and `(P,)`, including explicit
-`(0, 3)` feature-array shapes for empty bindings.
+bindings are empty tuples. The interpreter accepts these tuples directly as the
+ABI shapes `(K, 3)`, `(A, 3)` and `(P,)`, where an empty feature binding is a
+`(0, 3)` array, and copies them to float64 values on each evaluation.
 
 RobotState control/TCP frames must match configuration. History entries must be
 JoystickSample messages with the current input's mapping ID and clock domain.
@@ -346,6 +349,82 @@ With the unchanged fixture this call raises RegistryError with
 `code="missing_reference"` for an unissued receipt. Registering a structurally
 valid accepted-status receipt alone would not establish trusted validation.
 
+## Restricted residual interpreter
+
+`compile_program(program, *, policy)` accepts a ConstraintProgram record or
+mapping and returns an immutable `CompiledProgram`, or raises
+`InterpreterError`. It re-parses the artifact under the explicit policy,
+recomputes the exact UTF-8 source hash, rejects oversized source before parsing
+and bounds AST nodes, depth and assignments before lowering. The accepted body is
+lowered to a small immutable expression tree; Python `eval`/`exec` are never used
+and generated source can reach only its five inputs, its locals and the host
+primitives.
+
+Continuing the registry example above, the resolved bottle program evaluates at
+the fixture's initial TCP pose:
+
+```python
+from ssc_core import compile_program
+
+compiled = compile_program(program.program, policy=NUMERIC_OFFLINE_V1)
+identity = ((1, 0, 0), (0, 1, 0), (0, 0, 1))
+g = compiled.evaluate((0.4, 0, 0.3), identity, program.keypoints, program.axis_dirs, program.params)
+assert abs(g - 0.01) <= 1e-9  # positive during approach: a valid, unsatisfied relation
+```
+
+`evaluate` takes lists or tuples of `int`/`float` with shapes `(3,)`, `(3, 3)`,
+`(K, 3)`, `(A, 3)` and `(P,)`, where K, A and P are the artifact's binding and
+parameter counts; `ResolvedProgram` supplies the ordered feature and parameter
+tuples. Convert NumPy arrays with `tolist()`; array scalar types, Booleans and
+strings are rejected. Inputs are copied to float64 values on each call and are
+never written. The rotation must satisfy `R^T R = I` and `det R = 1` within the
+policy's rotation tolerance, and every axis row must have unit norm within the
+unit-norm tolerance, including unused bindings. Nothing is normalized or
+repaired. The result is one finite Python `float`; positive, zero and negative
+residuals are all successful evaluations. Relation satisfaction, penalties and
+normalization remain the caller's computation.
+
+The accepted language is exactly the Generated Constraint Program Contract
+section 7 grammar: one undecorated `def evaluate(p_tcp, R_control_tcp,
+keypoints, axis_dirs, params)` with no defaults or annotations, then single-target
+assignments to local names and one final `return`. Locals may be reassigned;
+inputs, primitive names and `evaluate` cannot be bound. Expressions are finite
+`int`/`float` literals, names, `+ - * /`, unary `+ -`, direct positional calls to
+`norm`, `dot`, `cross`, `sqrt`, `sin`, `cos`, `acos`, `abs`, `minimum`,
+`maximum` and `clip`, and indexing with literal nonnegative integers or full
+`:` slices on any array-valued expression. Array arithmetic requires equal
+shapes or a scalar operand; there is no other broadcasting. Every shape, index
+bound and primitive signature is checked statically, and the return value must
+be a scalar.
+
+`numeric-offline-v1` sets 8192 UTF-8 source bytes, 512 AST nodes, AST depth 32,
+64 assignments, 256 elements per array and rotation/unit-norm tolerance 1e-8.
+AST nodes and depth are counted over `ast.iter_child_nodes` from the module root
+under Python 3.12, including expression-context and operator nodes, with the
+module at depth 1. These are language limits; they do not bound memory or time.
+
+`InterpreterError` carries `stage`, `path`, `code` and `message` and is
+pickle-safe. Compile paths name an artifact field or a one-based
+`$.source_code:LINE:COL` location; input paths name the element, such as
+`$.axis_dirs[1]`. Messages do not echo literal values. CPython may emit
+`SyntaxWarning`s while parsing (for example, invalid escapes in a string
+literal) under the host's warnings filter; such source is rejected either way,
+but an error filter turns the rejection code into `syntax_error`.
+
+| Stage | Codes |
+| --- | --- |
+| `compile` | `invalid_artifact`, `source_limit`, `source_hash_mismatch`, `syntax_error`, `ast_limit`, `function_structure`, `signature`, `forbidden_syntax`, `forbidden_call`, `undefined_name`, `input_rebinding`, `input_mutation`, `reserved_name`, `invalid_literal`, `arity`, `shape_mismatch`, `invalid_index`, `index_out_of_bounds`, `array_limit`, `non_scalar_return` |
+| `input` | `input_type`, `input_shape`, `non_finite_input`, `invalid_rotation`, `non_unit_axis` |
+| `evaluation` | `division_by_zero`, `domain_error`, `non_finite` |
+
+Division by zero (including by `-0.0`), `sqrt` of a negative value, `acos`
+outside [-1, 1], `clip` with `lo > hi` and any nonfinite intermediate fail,
+even in an unused local. A failure never becomes a zero residual; callers
+invalidate the evaluation. Compilation does not issue a validation receipt,
+run numerical probes or activate a program. Acceptance is a grammar check, not
+a sandbox: the evaluator must still run in the supervised worker with the
+profile's memory and wall-time budgets.
+
 ## Pure host-constraint interface
 
 `ssc_core.host_constraints.HostConstraintChecker` is a callable protocol taking
@@ -382,6 +461,14 @@ Registry checks additionally cover defensive copying, immutable-content conflict
 exact task/geometry references, cross-session rejection, source integrity,
 feature definitions, ordered bindings and compatible bundle/snapshot/weight
 resolution. They do not exercise a generated-code validator or a live controller.
+
+Interpreter checks cover the Wiki distance and undirected-axis examples, the
+catalog's recorded `raw_g` values, the profile's directed-axis and division
+variants, every primitive and indexing form, table-driven rejected syntax,
+signatures, limits and artifacts, invalid inputs, numerical failures, sign
+invariance, determinism, input immutability and the absence of `eval`/`exec`.
+These are language and numerical checks only. They do not establish process
+isolation, memory or time bounds, receipt trust or physical safety.
 
 PR evidence records the tested commit, wheel hash, exact environment and package
 versions, commands, test result and independent final-diff review. Component
