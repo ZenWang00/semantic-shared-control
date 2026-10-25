@@ -4,6 +4,8 @@ import json
 import subprocess
 import sys
 
+import ssc_core
+
 
 def test_import_is_standalone_and_standard_library_only(tmp_path):
     program = '''
@@ -22,11 +24,11 @@ import ssc_core
 from ssc_core import parse_record, NUMERIC_OFFLINE_V1
 parse_record("Pose", {"position_xyz": [0, 0, 0], "quaternion_xyzw": [0, 0, 0, 1]}, policy=NUMERIC_OFFLINE_V1)
 files = [str(p) for p in importlib.metadata.files("ssc-core")]
-assert all(p.startswith(("ssc_core/", "ssc_core-0.1.0.dist-info/")) for p in files), files
+assert all(p.startswith(("ssc_core/", f"ssc_core-{ssc_core.__version__}.dist-info/")) for p in files), files
 assert not (blocked & sys.modules.keys())
 print(json.dumps({"version": importlib.metadata.version("ssc-core"), "origin": ssc_core.__file__}))
 '''
     completed = subprocess.run([sys.executable, "-I", "-c", program], cwd=tmp_path, text=True, capture_output=True, check=True)
     result = json.loads(completed.stdout)
-    assert result["version"] == "0.1.0"
+    assert result["version"] == ssc_core.__version__ == "0.2.0"
     assert "site-packages" in result["origin"]

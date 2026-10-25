@@ -1,4 +1,4 @@
-"""Explicit, immutable policy for the scene/artifact validation boundary."""
+"""Explicit, immutable policy for the structural validation boundary."""
 
 from dataclasses import dataclass, fields
 from math import isfinite
@@ -21,11 +21,12 @@ class ValidationPolicy:
     max_keypoint_bindings: int
     max_axis_bindings: int
     max_parameters: int
+    weight_sum_tolerance: float = 1e-12
 
     def __post_init__(self) -> None:
         if type(self.policy_id) is not str or not self.policy_id:
             raise ValueError("policy_id must be a nonempty string")
-        for name in ("unit_norm_tolerance", "hard_margin_tolerance"):
+        for name in ("unit_norm_tolerance", "hard_margin_tolerance", "weight_sum_tolerance"):
             value = getattr(self, name)
             try:
                 valid = type(value) in (int, float) and isfinite(value) and value >= 0
@@ -49,4 +50,5 @@ NUMERIC_OFFLINE_V1 = ValidationPolicy(
     max_keypoint_bindings=32,
     max_axis_bindings=32,
     max_parameters=32,
+    weight_sum_tolerance=1e-12,
 )
