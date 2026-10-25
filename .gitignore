@@ -4,6 +4,7 @@ __pycache__/
 
 # Virtual environments
 .venv/
+.venv-*/
 venv/
 
 # Local data and generated outputs
@@ -16,6 +17,12 @@ models/
 
 # OS/editor noise
 .DS_Store
+
+# Shared Python package build and test outputs
+build/
+dist/
+*.egg-info/
+.pytest_cache/
 
 # LaTeX build artifacts
 latex/out/

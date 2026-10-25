@@ -1,12 +1,14 @@
 # Semantic Shared Control
 
-**Status: design and documentation phase — Design Draft v0.1.**
+**Status: scene/artifact structural validation implemented; the complete shared-control runtime remains planned.**
 
 This project investigates continuous shared control of a robot end effector from a two-dimensional joystick, task semantics from a vision-language model (VLM), and geometric information represented by keypoints and axes. The proposed optimizer combines these inputs with measured robot state to propose the next short-horizon TCP pose.
 
 The first prototype is scoped to a static scene and a fixed robot base. The operator controls motion in the base XY plane; geometric assistance can influence height and orientation. Gripper actuation, attached-object motion, and autonomous multi-stage tasks are outside this first contract.
 
 ## Documentation
+
+- [Install and use the shared validation package](docs/shared-package.md) — `ssc-core==0.1.0`, strict schema 1.0 records and the pure host-constraint interface.
 
 - [Technical documentation on GitHub Wiki](https://github.com/ZenWang00/semantic-shared-control/wiki)
 - [Version-controlled documentation source](docs/wiki/Home.md)
