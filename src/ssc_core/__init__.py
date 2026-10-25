@@ -2,8 +2,8 @@
 
 Parsing validates local invariants; registries enforce immutable identities and
 typed-record compatibility; the restricted interpreter evaluates accepted
-geometry-residual-v1 source. None of them issues receipts, activates programs or
-authorizes motion.
+geometry-residual-v1 source. HostProgramValidator composes trusted host reviews
+and bounded probes to issue receipts. No API activates programs or authorizes motion.
 """
 
 from .errors import ValidationError
@@ -27,10 +27,18 @@ from .registry import (
 )
 
 from .supervision import EVALUATOR_LIMITS, EvaluationOutcome, EvaluatorLimits, SupervisedEvaluator
+from .penalties import HostNormalization, ResidualDiagnostic, residual_diagnostic
+from .receipts import (
+    AcceptanceError, HostBindingPolicy, HostProgramValidator, ProgramValidationReport,
+    UnitReview, feature_definition_digest, program_content_digest,
+)
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 __all__ = [
+    "AcceptanceError", "HostBindingPolicy", "HostNormalization", "HostProgramValidator",
+    "ProgramValidationReport", "ResidualDiagnostic", "UnitReview", "feature_definition_digest",
+    "program_content_digest", "residual_diagnostic",
     "EVALUATOR_LIMITS", "EvaluationOutcome", "EvaluatorLimits", "SupervisedEvaluator",
     "AssetRef", "Axis", "CommandAcceptanceRecord", "CompiledProgram",
     "ConstraintEvaluation", "ConstraintMargin", "ConstraintProgram", "ControlResult",

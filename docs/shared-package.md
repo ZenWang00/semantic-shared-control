@@ -1,13 +1,14 @@
 # Shared validation, resolution and residual-evaluation package
 
-`ssc-core==0.5.0` implements scene/artifact and live/control record validation,
+`ssc-core==0.6.0` implements scene/artifact and live/control record validation,
 immutable session registries, deterministic reference resolution and a restricted
 `geometry-residual-v1` numerical interpreter for schema `1.0`, using an explicit
-host policy. Version 0.5.0 adds asynchronous evaluator supervision; existing
-parsing, registry and interpreter APIs remain source compatible with 0.4.0. The inherited grasp service is separate. Resolution checks typed-record
+host policy. Version 0.6.0 adds host-reviewed unit declarations, bounded numerical
+probes, locally trusted receipts and execution bindings. Existing parsing, registry,
+interpreter and evaluator APIs remain source compatible with 0.5.0. The inherited grasp service is separate. Resolution checks typed-record
 compatibility; the interpreter and Linux supervisor evaluate source under enforced
-process budgets. Receipt issuance, an active bundle, live control loop, command gate and robot
-integration remain separate responsibilities.
+process budgets. HostProgramValidator owns receipt issuance; active-bundle activation,
+the live control loop, command gate and robot integration remain separate responsibilities.
 
 ## Install and test
 
@@ -28,7 +29,7 @@ To test the actual wheel in a second clean environment:
 ```sh
 .venv-ssc/bin/python -m pip wheel --no-deps --wheel-dir dist .
 python3.12 -m venv .venv-acceptance
-.venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.5.0-py3-none-any.whl[test]'
+.venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.6.0-py3-none-any.whl[test]'
 .venv-acceptance/bin/python -m pytest tests/shared_control
 .venv-acceptance/bin/python -m pip check
 ```
@@ -63,7 +64,7 @@ wire_value = to_dict(pose)
 - `ValidationError` exposes `path`, `code`, and `message`, identifying the invalid
   field. Validation fails at the first diagnosed violation.
 
-The parsing API is unchanged in 0.5.0. Supported message payloads are
+The parsing API is unchanged in 0.6.0. Supported message payloads are
 SessionConfig, TaskContext, SceneObservation, SceneGeometry, SemanticContext,
 ConstraintProgram, ProgramExecutionBinding, ProgramValidationReceipt, Parameter,
 JoystickSample, RobotState, ControlSnapshot, ObjectWeights and ControlResult.
@@ -144,8 +145,8 @@ Parsing checks SHA-256 for lowercase 64-digit format only. Registry registration
 also recomputes the exact UTF-8 source hash and rejects immutable-ID reuse with
 changed content. Resolution checks typed reference existence and
 task/scene/frame/policy compatibility. The interpreter below checks source
-syntax, shapes and numerical evaluation; numerical probes, execution isolation
-and receipt trust remain later validation responsibilities. Parsing or
+syntax, shapes and numerical evaluation. The supervised evaluator enforces process
+budgets; HostProgramValidator below adds probes and local receipt trust. Parsing or
 resolving an `accepted` receipt neither issues it nor establishes host trust.
 
 JoystickSample requires a finite two-component vector within the unit disk and
@@ -520,7 +521,7 @@ sandbox for arbitrary hostile Python**: no seccomp, filesystem namespace,
 network namespace, cgroup/RSS cap or protection against a kernel/interpreter
 exploit is claimed. The generated grammar provides no file/network/process
 capabilities. Future solver supervision (1 GiB/150 ms), robot-side watchdog,
-command gate and receipt issuance remain separate tasks.
+and command gate remain separate tasks. Host receipt issuance is described below.
 
 Run the reference-platform benchmark from a checkout with its wheel installed:
 
@@ -585,3 +586,134 @@ checks do not establish two-repository compatibility, complete-loop behavior,
 control performance or physical safety. Worker process enforcement has separate
 Linux evidence as described above. Subsequent cards consume
 this parsing API and fixtures without importing the inherited pipeline.
+
+## Host program validation and receipt trust (0.6.0)
+
+`HostProgramValidator` composes the existing immutable registry and supervised
+worker. It runs synchronously during initialization while motion is disabled;
+do not call it from input/release/gate callbacks. All access to the authority and
+its registry must be serialized by the host. It requires the complete unchanged
+`NUMERIC_OFFLINE_V1` policy, not merely an equal policy ID.
+
+The owner approved **host-reviewed unit declarations bound to the complete
+artifact** for #9. Automatic dimensional inference is outside this delivery.
+A trusted reviewer inspects the formula, parameter/output units, feature
+ownership and meaning, then supplies a `UnitReview`. The application loads those
+reviews from trusted host configuration. Never construct reviews by copying
+unit claims or review records from a generator response. The record asserts a
+review has occurred; it cannot perform or prove that review.
+
+A review pins `program_content_digest(program)`, `scene_id`, `feature_set_id`,
+`feature_definition_digest(geometry)`, ordered parameter units, output unit,
+reviewer and rationale. The `ssc-review-v1` digest uses a typed canonical tree
+(sorted dict keys, preserved array order, float hex values) serialized as compact
+ASCII JSON and hashed with SHA-256. It distinguishes number types and signed
+zero. Every program field, including description, exact source, final newline,
+parameters, ordered bindings and declared hash, participates. The feature digest
+covers frame plus the registry's order-independent membership, ownership, axis
+origin and directedness definitions. Coordinates and display labels do not
+establish feature identity; coordinate provenance is pinned separately.
+
+`HostBindingPolicy(config_id, program_id, HostNormalization(unit, scale, weight))`
+provides immutable host settings. Scale must be finite/positive and weight
+finite/nonnegative; the unit must match the program output declaration. The unit
+is local host configuration and is **not added** to the public binding schema.
+Changed scale/weight needs a new configuration ID under the existing registry
+rules. Duplicate review IDs or configuration/program policies are rejected.
+
+```python
+from ssc_core import (
+    HostProgramValidator, HostBindingPolicy, HostNormalization, UnitReview,
+    program_content_digest, feature_definition_digest,
+)
+
+# program/geometry are the EXACT records inspected by the trusted reviewer.
+# This example records a reviewed metre-distance formula, not arbitrary source.
+review = UnitReview(
+    review_id="review-distance-1",
+    program_digest=program_content_digest(program),
+    scene_id=geometry.scene_id,
+    feature_set_id=geometry.feature_set_id,
+    feature_digest=feature_definition_digest(geometry),
+    output_unit="m", parameter_units=("m",), reviewer="host fixture review",
+    rationale="Metre displacement norm minus metre tolerance at the bound approach target",
+)
+authority = HostProgramValidator(
+    registry, unit_reviews=(review,),
+    binding_policies=(HostBindingPolicy(config_id, program.program_id,
+                                       HostNormalization("m", .01, 1.)),),
+)
+report = authority.validate(program, geometry=geometry, config_id=config_id,
+                            motion_disabled=True)
+if report.receipt.status == "accepted":
+    binding = authority.create_binding(
+        "binding-host-1", receipt_id=report.receipt.receipt_id,
+        geometry_ref={"geometry_id": geometry.geometry_id, "revision": geometry.revision},
+        config_id=config_id,
+    )
+```
+
+Register SessionConfig and its SceneObservation dependency before validation.
+The validator parses detached copies, registers/checks complete artifact and
+geometry identity, resolves frame/configuration/object/features, matches trusted
+review and normalization, then probes only through a fresh supervised worker.
+Malformed structure, ABI or unit enums raise `ValidationError` without inventing
+a receipt. Structurally valid hash, identity, reference, policy, review, unit or
+probe failures receive a `rejected` receipt with diagnostics. Invalid geometry
+structure also raises before a provenance-bearing receipt can be formed.
+The receipt's hash is recomputed from actual UTF-8 bytes, including on a hash
+mismatch rejection; the report preserves the submitted artifact's claimed hash.
+Resource/registry storage failure can raise, but never grants a trusted receipt.
+Failed validation can leave immutable inputs and a rejected receipt registered;
+this never activates them or overwrites existing records.
+
+The numerical stage runs 49 ordered profile poses, each bound keypoint at
+identity (covering approach targets), and each directed axis's aligned/opposed
+TCP-X orientations at the profile origin. At every pose, it reverses each bound
+undirected axis independently and compares with `atol=rtol=1e-9`. Legitimately
+empty bindings remain empty. All calls retain worker outcome/deadline/resource
+and cleanup evidence. Invalid values, domain errors, crashes, stalls, resource
+violations and unconfirmed retirement prevent acceptance. Parameters are never
+randomly perturbed. This finite set does not prove future candidates, formula
+intent, runtime authority or physical safety.
+
+A receipt is trusted only by the authority instance that issued it after all
+checks. `verify_receipt(receipt_id, program_ref=..., geometry_ref=..., config_id=...)`
+checks the private issuance ledger, exact registered receipt, complete artifact,
+current scene/features/frame, exact policy, host review and original probe
+geometry provenance. `validate_binding(binding_id, geometry_ref=..., config_id=...)`
+also checks configuration and exact host scale/weight. Imported accepted-status
+records and receipts from another/new authority are untrusted. The ledger is not
+cryptographic attestation; arbitrary code inside the host remains trusted.
+After restart, revalidate; persisted reports are replay evidence, not restored
+acceptance authority. Session boundaries cannot be crossed by importing receipts.
+
+Coordinate revision alone permits reuse with unchanged feature definitions and
+retained original provenance. This does not waive runtime shape/rotation/axis
+checks or static-scene reinitialization when an object physically moves. Task
+context compatibility remains the bundle resolver's responsibility. ROS2
+activation (#1) must combine compatible bundle resolution with this authority's
+receipt/binding checks; the registry's `resolve_bundle` alone is insufficient.
+The optimizer (#14) consumes the validated binding and re-evaluates each candidate;
+archival/replay (#17) retains the exact reports and configuration.
+
+`residual_diagnostic(g, output_unit=..., normalization=...)` preserves raw `g`,
+scale, the unweighted `max(0, g/s)^2` penalty, weight and weighted penalty. A
+positive finite residual is valid execution. `relation_satisfied` uses the
+profile's raw `g <= 1e-9` tolerance and confers no command authority. Wrong units,
+nonfinite/Boolean inputs or overflowed costs raise. At scale `.01 m`, `.008 m`
+yields `.64` and `-.002 m` yields `0`.
+
+Run the evidence harness on Linux after installing the wheel:
+
+```sh
+python -B docs/reference/verify_program_validation.py \
+  --source-revision TESTED_GIT_SHA --wheel-sha256 TESTED_WHEEL_SHA256 \
+  --output program-validation-evidence.json
+```
+
+CI retains complete reports, reviewed fixture inputs, named poses, analytical
+oracles, replay outcomes, issued bindings and rejected hash/unit/review/domain/
+axis-invariance/crash/stall/memory cases alongside the wheel and pytest results.
+Trust-boundary unit tests stub numerical success explicitly; the Linux tests and
+this harness exercise real supervised workers. These evidence levels are distinct.
