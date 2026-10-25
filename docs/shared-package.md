@@ -404,8 +404,12 @@ under Python 3.12, including expression-context and operator nodes, with the
 module at depth 1. These are language limits; they do not bound memory or time.
 
 `InterpreterError` carries `stage`, `path`, `code` and `message` and is
-pickle-safe. Compile paths name an artifact field or a `$.source_code:LINE:COL`
-location; input paths name the element, such as `$.axis_dirs[1]`.
+pickle-safe. Compile paths name an artifact field or a one-based
+`$.source_code:LINE:COL` location; input paths name the element, such as
+`$.axis_dirs[1]`. Messages do not echo literal values. CPython may emit
+`SyntaxWarning`s while parsing (for example, invalid escapes in a string
+literal) under the host's warnings filter; such source is rejected either way,
+but an error filter turns the rejection code into `syntax_error`.
 
 | Stage | Codes |
 | --- | --- |

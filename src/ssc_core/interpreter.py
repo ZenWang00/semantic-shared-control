@@ -179,19 +179,22 @@ def _input_target(target: ast.AST) -> str | None:
 def _check_limits(tree: ast.Module, policy: ValidationPolicy) -> None:
     """Iteratively bound AST size, depth and assignments before any recursion."""
     nodes = assignments = 0
-    stack: list[tuple[ast.AST, int]] = [(tree, 1)]
+    # Each entry carries its nearest located node: context/operator nodes have none.
+    stack: list[tuple[ast.AST, int, Any]] = [(tree, 1, "$.source_code")]
     while stack:
-        node, depth = stack.pop()
+        node, depth, located = stack.pop()
+        if hasattr(node, "lineno"):
+            located = node
         nodes += 1
         if nodes > policy.max_ast_nodes:
-            _reject(node, "ast_limit", f"source exceeds {policy.max_ast_nodes} AST nodes")
+            _reject(located, "ast_limit", f"source exceeds {policy.max_ast_nodes} AST nodes")
         if depth > policy.max_ast_depth:
-            _reject(node, "ast_limit", f"source exceeds AST depth {policy.max_ast_depth}")
+            _reject(located, "ast_limit", f"source exceeds AST depth {policy.max_ast_depth}")
         if isinstance(node, ast.Assign):
             assignments += 1
             if assignments > policy.max_assignments:
                 _reject(node, "ast_limit", f"source exceeds {policy.max_assignments} assignments")
-        stack.extend((child, depth + 1) for child in ast.iter_child_nodes(node))
+        stack.extend((child, depth + 1, located) for child in ast.iter_child_nodes(node))
 
 
 def _check_signature(function: ast.FunctionDef, entrypoint: str) -> None:
@@ -333,8 +336,8 @@ class _Lowering:
                 spec.append(None)
             elif isinstance(item, ast.Constant) and type(item.value) is int:
                 if item.value >= shape[axis]:
-                    _reject(item, "index_out_of_bounds",
-                            f"index {item.value} is outside axis {axis} of length {shape[axis]}")
+                    # The literal is not formatted: its size is bounded only by the source.
+                    _reject(item, "index_out_of_bounds", f"index is outside axis {axis} of length {shape[axis]}")
                 spec.append(item.value)
             else:
                 _reject(item, "invalid_index", "indices must be literal nonnegative integers or ':'")
@@ -572,7 +575,7 @@ def compile_program(program: r.ConstraintProgram | dict, *, policy: ValidationPo
     try:
         tree = ast.parse(record.source_code, filename="<generated-program>", mode="exec")
     except SyntaxError as exc:
-        location = f"$.source_code:{exc.lineno}:{exc.offset or 0}" if exc.lineno else "$.source_code"
+        location = f"$.source_code:{exc.lineno}:{max(exc.offset or 1, 1)}" if exc.lineno else "$.source_code"
         _reject(location, "syntax_error", exc.msg)
     except (ValueError, RecursionError, MemoryError) as exc:
         _reject("$.source_code", "syntax_error", f"source cannot be parsed ({type(exc).__name__})")

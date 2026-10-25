@@ -450,6 +450,28 @@ def test_syntax_errors_are_rejected(source):
     assert error.path.startswith("$.source_code")
 
 
+def test_error_locations_are_one_based_and_bounded():
+    # A decimal literal beyond CPython's digit limit fails in the parser.
+    error = rejection(body("return " + "1" * 5000))
+    assert error.code == "syntax_error"
+    line, column = map(int, error.path.removeprefix("$.source_code:").split(":"))
+    assert line == 2 and column >= 1
+    # Limit violations at context/operator nodes report the nearest located node.
+    for lines in (["return p_tcp" + ".a" * 40], ["return " + "-" * 40 + "params[0]"]):
+        error = rejection(body(*lines))
+        assert error.code == "ast_limit" and error.path.startswith("$.source_code:2:"), error
+
+
+def test_huge_hex_index_is_a_stable_bounded_rejection():
+    # Hex literals avoid the parser's decimal digit limit, but the int is still too large to format.
+    for digits in (3500, 3600):
+        source = body("return params[0x" + "f" * digits + "]")
+        assert len(source.encode()) <= NUMERIC_OFFLINE_V1.max_source_bytes
+        error = rejection(source)
+        assert error.code == "index_out_of_bounds"
+        assert len(str(error)) < 200
+
+
 # Artifact and policy limits ---------------------------------------------------------
 
 def test_source_size_is_rejected_before_parsing():
