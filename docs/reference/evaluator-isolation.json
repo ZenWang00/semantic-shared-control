@@ -1,0 +1,7986 @@
+{
+  "source_revision": "dd028966c96fa52f7a477f9c55d81fc3937c1550",
+  "wheel_sha256": "c5f73746d39b5c88e194b9d8dae06508379bcdca8863c8b3de48cf51f3ee50fd",
+  "package_version": "0.5.0",
+  "environment": {
+    "platform": "Linux-6.17.0-35-generic-aarch64-with-glibc2.39",
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "os_release": "PRETTY_NAME=\"Ubuntu 24.04.4 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.4 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+    "numpy": "1.26.4",
+    "scipy": "1.11.4",
+    "pytest": "7.4.4"
+  },
+  "probes": [
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.019999999999999962,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "92b3121a645549abb5e9d260754f8f8c",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.019999999999999962,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671802084040,
+        "deadline_ns": 154671812084040,
+        "finished_ns": 154671802499619,
+        "worker_elapsed_s": 3.0166e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.019999999999999962,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "9d456a65b5fa4580ba295eee1fa02425",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.019999999999999962,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671802544244,
+        "deadline_ns": 154671812544244,
+        "finished_ns": 154671802736575,
+        "worker_elapsed_s": 1.925e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.019999999999999962,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "44c2fc58fe46423a9cbd04a8ffe647cb",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.019999999999999962,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671802771908,
+        "deadline_ns": 154671812771908,
+        "finished_ns": 154671802993615,
+        "worker_elapsed_s": 2.025e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.019999999999999962,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "be7ddf2191884896a1329cf4e10091be",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.019999999999999962,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671803041739,
+        "deadline_ns": 154671813041739,
+        "finished_ns": 154671803282654,
+        "worker_elapsed_s": 8.3208e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.019999999999999962,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "50e1e2c165f8409e91abcdcb50632aaa",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.019999999999999962,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671803316070,
+        "deadline_ns": 154671813316070,
+        "finished_ns": 154671803475152,
+        "worker_elapsed_s": 1.6708e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.019999999999999962,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "50d2bf08078a4a0cb1c541ad28126aba",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.019999999999999962,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671803509026,
+        "deadline_ns": 154671813509026,
+        "finished_ns": 154671803663442,
+        "worker_elapsed_s": 1.5375e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.019999999999999962,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "c4f5b0f3d2a44df29f9acf59ac7c8172",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.019999999999999962,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671803695025,
+        "deadline_ns": 154671813695025,
+        "finished_ns": 154671803845731,
+        "worker_elapsed_s": 1.4e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.009999999999999953,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "c4496cf879c44ce49636e3a634001964",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.009999999999999953,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671803878481,
+        "deadline_ns": 154671813878481,
+        "finished_ns": 154671804029813,
+        "worker_elapsed_s": 1.1167e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.009999999999999953,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "b94bebbe251a4752801025aecb853ca3",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.009999999999999953,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671804074729,
+        "deadline_ns": 154671814074729,
+        "finished_ns": 154671804279602,
+        "worker_elapsed_s": 1.9166e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.009999999999999953,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "c7da0167c88a4c1e93e9341913f1e3a8",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.009999999999999953,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671804314269,
+        "deadline_ns": 154671814314269,
+        "finished_ns": 154671804511933,
+        "worker_elapsed_s": 1.8e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.009999999999999953,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "9ade91a417a147d8ba54960b736c068d",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.009999999999999953,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671804545725,
+        "deadline_ns": 154671814545725,
+        "finished_ns": 154671804723181,
+        "worker_elapsed_s": 1.5083e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.009999999999999953,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "044e9793e2ee40a09793749f9dc7f7ed",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.009999999999999953,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671804758598,
+        "deadline_ns": 154671814758598,
+        "finished_ns": 154671804942929,
+        "worker_elapsed_s": 1.875e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.009999999999999953,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "14691be043184f77a44c2a82c7a08598",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.009999999999999953,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671804978304,
+        "deadline_ns": 154671814978304,
+        "finished_ns": 154671805161552,
+        "worker_elapsed_s": 1.9625e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.009999999999999953,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "fcacd1bccef44f9d85b97bdba516363b",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.009999999999999953,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671805199427,
+        "deadline_ns": 154671815199427,
+        "finished_ns": 154671805363383,
+        "worker_elapsed_s": 1.75e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.02999999999999997,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "26ace2c789c044c08b4fb871064923c6",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.02999999999999997,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671805395967,
+        "deadline_ns": 154671815395967,
+        "finished_ns": 154671805545840,
+        "worker_elapsed_s": 1.5875e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.02999999999999997,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "4ece6d024be64c56a3b4c3e0e39a0942",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.02999999999999997,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671805578465,
+        "deadline_ns": 154671815578465,
+        "finished_ns": 154671806811036,
+        "worker_elapsed_s": 1.5e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.02999999999999997,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "a4a5ffa5f66a455bb962685748a2744e",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.02999999999999997,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671806849119,
+        "deadline_ns": 154671816849119,
+        "finished_ns": 154671807043909,
+        "worker_elapsed_s": 1.1667e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.02999999999999997,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "143e0373496a456f924d33937abaadff",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.02999999999999997,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671807084242,
+        "deadline_ns": 154671817084242,
+        "finished_ns": 154671807264157,
+        "worker_elapsed_s": 1.4625e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.02999999999999997,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "a33039f3751c426f84607a86a7f4c52c",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.02999999999999997,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671807296490,
+        "deadline_ns": 154671817296490,
+        "finished_ns": 154671807445655,
+        "worker_elapsed_s": 1.3624e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.02999999999999997,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "e91ef1096a5b42f2bc86a129e4a30e1b",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.02999999999999997,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671807476446,
+        "deadline_ns": 154671817476446,
+        "finished_ns": 154671807623653,
+        "worker_elapsed_s": 1.375e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.02999999999999997,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "060bc78f66d743e18e8f11159d247f26",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.02999999999999997,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671807653903,
+        "deadline_ns": 154671817653903,
+        "finished_ns": 154671808257564,
+        "worker_elapsed_s": 1.9916e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "d541e40435be4d26a2ae732965e411dd",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671808308855,
+        "deadline_ns": 154671818308855,
+        "finished_ns": 154671808477395,
+        "worker_elapsed_s": 1.5583e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "7cb16b82037c456d820d35f572644372",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671808511478,
+        "deadline_ns": 154671818511478,
+        "finished_ns": 154671808664935,
+        "worker_elapsed_s": 1.4833e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "b40869af75304a79805b033f4742c2d6",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671808697351,
+        "deadline_ns": 154671818697351,
+        "finished_ns": 154671808854558,
+        "worker_elapsed_s": 1.4e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "e5dfbfab1cc141cfa82562661097eaff",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671808886183,
+        "deadline_ns": 154671818886183,
+        "finished_ns": 154671809440136,
+        "worker_elapsed_s": 1.3959e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "d16fdb19510540cf8731a6b551ca0380",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671809477760,
+        "deadline_ns": 154671819477760,
+        "finished_ns": 154671809642717,
+        "worker_elapsed_s": 1.375e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "d7f838cea88d47a09fe227afbc947bc0",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671809677509,
+        "deadline_ns": 154671819677509,
+        "finished_ns": 154671809840007,
+        "worker_elapsed_s": 1.9166e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "0b993865ea4f4b10916ceafd267871ee",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671809872465,
+        "deadline_ns": 154671819872465,
+        "finished_ns": 154671810033547,
+        "worker_elapsed_s": 1.2708e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "2fa076c73e4b4e11bf6b945e205384e7",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671810067338,
+        "deadline_ns": 154671820067338,
+        "finished_ns": 154671810232337,
+        "worker_elapsed_s": 1.3834e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "ef9c7435a227495b86c03d38757ce884",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671810266170,
+        "deadline_ns": 154671820266170,
+        "finished_ns": 154671810444793,
+        "worker_elapsed_s": 1.3875e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "544628bc09cd4eee9da5738f587f4304",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671810478251,
+        "deadline_ns": 154671820478251,
+        "finished_ns": 154671810625291,
+        "worker_elapsed_s": 1.3958e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "8c4ba593651f46cebf79ee316daadec0",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671810655957,
+        "deadline_ns": 154671820655957,
+        "finished_ns": 154671810814831,
+        "worker_elapsed_s": 1.4125e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "887d3998a3484f0b81b364e49f8c2857",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671810844747,
+        "deadline_ns": 154671820844747,
+        "finished_ns": 154671811016746,
+        "worker_elapsed_s": 1.425e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "2372f8c33acf4e03ac4386968aaf0e07",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671811054287,
+        "deadline_ns": 154671821054287,
+        "finished_ns": 154671811227452,
+        "worker_elapsed_s": 1.3875e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.022360679774997862,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "5f47ccfa570843c19a6dc5ee7c40e68c",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997862,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671811259118,
+        "deadline_ns": 154671821259118,
+        "finished_ns": 154671811470450,
+        "worker_elapsed_s": 1.3625e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "8d323985f3a94b65a1ef2ea5cd896861",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671811502616,
+        "deadline_ns": 154671821502616,
+        "finished_ns": 154671811665156,
+        "worker_elapsed_s": 1.3749e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "2b8d02ef45fd4dd184ba5b1e67737851",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671811696031,
+        "deadline_ns": 154671821696031,
+        "finished_ns": 154671811851488,
+        "worker_elapsed_s": 1.3584e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "49bb468443b348e0bb601d6560da9989",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671811882529,
+        "deadline_ns": 154671821882529,
+        "finished_ns": 154671812034694,
+        "worker_elapsed_s": 1.3584e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "ee38a47ae1d946fbb339ee06e22fd87b",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671812070485,
+        "deadline_ns": 154671822070485,
+        "finished_ns": 154671812262775,
+        "worker_elapsed_s": 1.65e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "97de4ed892b14240b6658cd4cf355082",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671812295733,
+        "deadline_ns": 154671822295733,
+        "finished_ns": 154671812455732,
+        "worker_elapsed_s": 1.3916e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "6cd2d192fec84597809262dbf9f87b6f",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671812486315,
+        "deadline_ns": 154671822486315,
+        "finished_ns": 154671812639605,
+        "worker_elapsed_s": 1.4583e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "d94377e309f74d5da9af3c773dd8fe94",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671812670980,
+        "deadline_ns": 154671822670980,
+        "finished_ns": 154671812833770,
+        "worker_elapsed_s": 1.4041e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "61ef5cb5e3514fdbb7b0c14cdb8ac85b",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671812864145,
+        "deadline_ns": 154671822864145,
+        "finished_ns": 154671813026560,
+        "worker_elapsed_s": 1.4125e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "f5ecd10cefe1495a978a7dcddda4809a",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671813061601,
+        "deadline_ns": 154671823061601,
+        "finished_ns": 154671813223141,
+        "worker_elapsed_s": 1.1458e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "205a448c1a414a38be17dd1a7e05cce1",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671813258141,
+        "deadline_ns": 154671823258141,
+        "finished_ns": 154671813420556,
+        "worker_elapsed_s": 1.3416e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "de51e8e0d2344196836d5892ccbccfec",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671813455430,
+        "deadline_ns": 154671823455430,
+        "finished_ns": 154671813625429,
+        "worker_elapsed_s": 1.4333e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "dec1311032d34945b6ff05f8f918ec02",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671813665762,
+        "deadline_ns": 154671823665762,
+        "finished_ns": 154671813831552,
+        "worker_elapsed_s": 1.3875e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "076bf8f8c5e24c86af01c83d7c57c395",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671813862510,
+        "deadline_ns": 154671823862510,
+        "finished_ns": 154671814067216,
+        "worker_elapsed_s": 2.9666e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "distance",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.022360679774997866,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "a7a737c4e74a45d6ab6c32b946b69e70",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.022360679774997866,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671814097758,
+        "deadline_ns": 154671824097758,
+        "finished_ns": 154671814264381,
+        "worker_elapsed_s": 1.45e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91736,
+        "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+        "program_id": "isolation-probe-distance",
+        "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "dee978eef5974bafb301c6b1ba86ba05",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671848766382,
+        "deadline_ns": 154671858766382,
+        "finished_ns": 154671849052337,
+        "worker_elapsed_s": 4.0166e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "abc5f22137e74764a3e979a5625bb5d4",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671849098087,
+        "deadline_ns": 154671859098087,
+        "finished_ns": 154671849304418,
+        "worker_elapsed_s": 2.2458e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "0457e8b038f444778745b3c21b1261d2",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671849339126,
+        "deadline_ns": 154671859339126,
+        "finished_ns": 154671849587790,
+        "worker_elapsed_s": 8.0666e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "fa07d56d2a704d899a668583ec126b89",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671849620540,
+        "deadline_ns": 154671859620540,
+        "finished_ns": 154671849819663,
+        "worker_elapsed_s": 2.0209e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "31627e6ce92143c197aa86fe8b89cecf",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671849852830,
+        "deadline_ns": 154671859852830,
+        "finished_ns": 154671850032786,
+        "worker_elapsed_s": 1.7333e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.0,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "7b451adb09c949cc8aaf0776db2389c0",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.0,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671850070577,
+        "deadline_ns": 154671860070577,
+        "finished_ns": 154671850244492,
+        "worker_elapsed_s": 1.6208e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.19999999999999946,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "af80f84486e74a3ab04a5cc6674e4b59",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.19999999999999946,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671850276784,
+        "deadline_ns": 154671860276784,
+        "finished_ns": 154671850458157,
+        "worker_elapsed_s": 1.5875e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "41cbbeb3d5d4412ebe375d86f94af085",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671850490157,
+        "deadline_ns": 154671860490157,
+        "finished_ns": 154671850657905,
+        "worker_elapsed_s": 1.5042e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "a5f48dfc43b34ce7bc218fb68e9d45b4",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671850690613,
+        "deadline_ns": 154671860690613,
+        "finished_ns": 154671850849653,
+        "worker_elapsed_s": 1.2333e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "1b479878a8e94121b3cb6ecf3a112efc",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671850890361,
+        "deadline_ns": 154671860890361,
+        "finished_ns": 154671851065068,
+        "worker_elapsed_s": 1.75e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "5776a76d3fdc49e3959ed3f60e329aed",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671851107776,
+        "deadline_ns": 154671861107776,
+        "finished_ns": 154671851276066,
+        "worker_elapsed_s": 1.5084e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "90c525f0cf7840f698ac7b994ed385ce",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671851309732,
+        "deadline_ns": 154671861309732,
+        "finished_ns": 154671851485022,
+        "worker_elapsed_s": 1.525e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.0,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "3e2bc1c5a47f43e582da65d43ab7ade7",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.0,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671851516980,
+        "deadline_ns": 154671861516980,
+        "finished_ns": 154671851663437,
+        "worker_elapsed_s": 1.6375e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.41000000000000003,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.19999999999999946,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "2014cf5818dd4ff984f1da3664f035ed",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.19999999999999946,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671851695353,
+        "deadline_ns": 154671861695353,
+        "finished_ns": 154671851842977,
+        "worker_elapsed_s": 1.5958e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "001b9d451a3b4e69a5cf2621cfd0981b",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671851874560,
+        "deadline_ns": 154671861874560,
+        "finished_ns": 154671852051183,
+        "worker_elapsed_s": 1.425e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "61c50a9d56e841d981bfd477831187c0",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671852091975,
+        "deadline_ns": 154671862091975,
+        "finished_ns": 154671852252848,
+        "worker_elapsed_s": 1.5166e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "e84b0333a5ae4b98999249db7d3ca903",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671852289681,
+        "deadline_ns": 154671862289681,
+        "finished_ns": 154671852472971,
+        "worker_elapsed_s": 2.125e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "d041fb99791c46e5b152624c944ea0dc",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671852504554,
+        "deadline_ns": 154671862504554,
+        "finished_ns": 154671852656136,
+        "worker_elapsed_s": 1.6208e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "343161641aff49b892dca707c40bb034",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671852687552,
+        "deadline_ns": 154671862687552,
+        "finished_ns": 154671852836009,
+        "worker_elapsed_s": 1.5208e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.0,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "70ea1fa8cd014e6eacb7f1cd3a2cc7cc",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.0,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671852866842,
+        "deadline_ns": 154671862866842,
+        "finished_ns": 154671853479878,
+        "worker_elapsed_s": 1.5708e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.39,
+        0.0,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.19999999999999946,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "0046799c1ef04acd89cf38b78760ae04",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.19999999999999946,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671853513961,
+        "deadline_ns": 154671863513961,
+        "finished_ns": 154671853962623,
+        "worker_elapsed_s": 1.2208e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "654d699234a3412f861e222e5cc8238a",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671853989165,
+        "deadline_ns": 154671863989165,
+        "finished_ns": 154671854115497,
+        "worker_elapsed_s": 1.0125e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "3afdb3499da64052b0561a5087c5afa3",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671854148955,
+        "deadline_ns": 154671864148955,
+        "finished_ns": 154671854547659,
+        "worker_elapsed_s": 1.5833e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "428df71b722b4db990ec9acbb6d5a9c6",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671854572742,
+        "deadline_ns": 154671864572742,
+        "finished_ns": 154671854674575,
+        "worker_elapsed_s": 1.0917e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "ea6553b7e7e541b4a71e6c2d49d0a2e6",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671854695616,
+        "deadline_ns": 154671864695616,
+        "finished_ns": 154671854792032,
+        "worker_elapsed_s": 1.05e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "dc19f0cde573440186456590db2edf42",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671854813198,
+        "deadline_ns": 154671864813198,
+        "finished_ns": 154671854911072,
+        "worker_elapsed_s": 1.0375e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.0,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "1674390905e54439b8ebe27ae1be99f4",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.0,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671854932406,
+        "deadline_ns": 154671864932406,
+        "finished_ns": 154671855066363,
+        "worker_elapsed_s": 1.1834e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.19999999999999946,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "156ba1728d8e4868b7659a7be73bde53",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.19999999999999946,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671855097987,
+        "deadline_ns": 154671865097987,
+        "finished_ns": 154671855200736,
+        "worker_elapsed_s": 1.0083e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "ac7232a9e9d1482e967ffea9eb367596",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671855222653,
+        "deadline_ns": 154671865222653,
+        "finished_ns": 154671855316902,
+        "worker_elapsed_s": 1.0375e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "c3a047f5b0b34b61b0153f2d74936b28",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671855337693,
+        "deadline_ns": 154671865337693,
+        "finished_ns": 154671855462817,
+        "worker_elapsed_s": 1.0333e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "f2aa18f6bcfe4c518e341a551dbc2ad8",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671855484317,
+        "deadline_ns": 154671865484317,
+        "finished_ns": 154671855607191,
+        "worker_elapsed_s": 1.1625e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "87768b4fc30347019b9f0c21ee68eafb",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671855631232,
+        "deadline_ns": 154671865631232,
+        "finished_ns": 154671855730773,
+        "worker_elapsed_s": 1.0416e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "1ba0db6b30e74523a762a724fcaa11c3",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671855751523,
+        "deadline_ns": 154671865751523,
+        "finished_ns": 154671855844355,
+        "worker_elapsed_s": 9.792e-06,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.0,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "3c087401a4e548a69058cb52aa7f88c4",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.0,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671855865563,
+        "deadline_ns": 154671865865563,
+        "finished_ns": 154671855958687,
+        "worker_elapsed_s": 9.709e-06,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        -0.01,
+        0.3
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.19999999999999946,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "180746258eb145658586a4c81eba8845",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.19999999999999946,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671855978645,
+        "deadline_ns": 154671865978645,
+        "finished_ns": 154671856081228,
+        "worker_elapsed_s": 9.792e-06,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "9287fb85bb4e40e2a4b37006767b6404",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671856101644,
+        "deadline_ns": 154671866101644,
+        "finished_ns": 154671856249935,
+        "worker_elapsed_s": 2.0583e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "d0db7ba0aa4840b4a84c6646c12d1047",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671856272893,
+        "deadline_ns": 154671866272893,
+        "finished_ns": 154671856409058,
+        "worker_elapsed_s": 1.2417e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "3d54b314ed5d4d85922c8659b38a1bb6",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671856429808,
+        "deadline_ns": 154671866429808,
+        "finished_ns": 154671856553557,
+        "worker_elapsed_s": 1.2709e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "fa2638bef0284ffcb43204c6d59a11bb",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671856578390,
+        "deadline_ns": 154671866578390,
+        "finished_ns": 154671856680222,
+        "worker_elapsed_s": 1.0625e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "cae31b5e80634cf19dcacaa72cebe1bd",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671856701305,
+        "deadline_ns": 154671866701305,
+        "finished_ns": 154671857203509,
+        "worker_elapsed_s": 1.9874e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.0,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "1bd5234cbf3d48f2967e755d34fc8335",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.0,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671857233467,
+        "deadline_ns": 154671867233467,
+        "finished_ns": 154671857800878,
+        "worker_elapsed_s": 1.4708e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.31
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.19999999999999946,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "bfe2b7bcd059466e8844f19c33103b91",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.19999999999999946,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671857828253,
+        "deadline_ns": 154671867828253,
+        "finished_ns": 154671857957626,
+        "worker_elapsed_s": 1.2416e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "aa06ac8ea1a64215ad53d1c6e917f884",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671857982543,
+        "deadline_ns": 154671867982543,
+        "finished_ns": 154671858126083,
+        "worker_elapsed_s": 1.2291e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "4b395b564e374586afb77a021a88accd",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671858151375,
+        "deadline_ns": 154671868151375,
+        "finished_ns": 154671858283540,
+        "worker_elapsed_s": 1.4375e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0.9950041652780258,
+          0.09983341664682815
+        ],
+        [
+          0,
+          -0.09983341664682815,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.09999999999999945,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "1549db5fd3cc487090e52934318e0337",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.09999999999999945,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671858308290,
+        "deadline_ns": 154671868308290,
+        "finished_ns": 154671858442705,
+        "worker_elapsed_s": 1.2291e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "e43369502484440c9ddb0821cddd63fc",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671858467247,
+        "deadline_ns": 154671868467247,
+        "finished_ns": 154671858599287,
+        "worker_elapsed_s": 1.4167e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0,
+          -0.09983341664682815
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0,
+          0.9950041652780258
+        ]
+      ],
+      "expected": 0.14130329869612343,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "e0ebed37926348c8800fb983e0010466",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.14130329869612343,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671858622995,
+        "deadline_ns": 154671868622995,
+        "finished_ns": 154671858752660,
+        "worker_elapsed_s": 1.1792e-05,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          -0.09983341664682815,
+          0
+        ],
+        [
+          0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.0,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "27518575f0904727b8b9b91c89d99fbf",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.0,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671858776160,
+        "deadline_ns": 154671868776160,
+        "finished_ns": 154671858879159,
+        "worker_elapsed_s": 9.625e-06,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "axis",
+      "position": [
+        0.4,
+        0.0,
+        0.29
+      ],
+      "rotation": [
+        [
+          0.9950041652780258,
+          0.09983341664682815,
+          0
+        ],
+        [
+          -0.09983341664682815,
+          0.9950041652780258,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "expected": 0.19999999999999946,
+      "matches": true,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "178a92f8cb9e45df99db1174c7673fee",
+        "ok": true,
+        "code": "ok",
+        "residual": 0.19999999999999946,
+        "stage": "supervision",
+        "diagnostic": "",
+        "started_ns": 154671858900034,
+        "deadline_ns": 154671868900034,
+        "finished_ns": 154671858991450,
+        "worker_elapsed_s": 9.875e-06,
+        "cleanup_s": 0.0,
+        "reaped": null,
+        "worker_pid": 91788,
+        "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+        "program_id": "isolation-probe-axis",
+        "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    }
+  ],
+  "faults": [
+    {
+      "mode": "stall",
+      "expected_code": "timeout",
+      "matches": true,
+      "submit_return_s": 0.000144874,
+      "heartbeats": 92,
+      "max_heartbeat_gap_s": 0.001278405,
+      "fd_before": 6,
+      "fd_after": 4,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "d1b6648b340546aeb3c3f20668523291",
+        "ok": false,
+        "code": "timeout",
+        "residual": null,
+        "stage": "supervision",
+        "diagnostic": "original monotonic deadline expired",
+        "started_ns": 154671894958561,
+        "deadline_ns": 154671904958561,
+        "finished_ns": 154672006456653,
+        "worker_elapsed_s": null,
+        "cleanup_s": 0.101242982,
+        "reaped": true,
+        "worker_pid": 91840,
+        "worker_generation": "1e3e5eaec3ad43bdb16031a1aca445e7",
+        "program_id": "worker-test",
+        "source_sha256": "f22d9255eb784d42df98c8bb823d897132476a7d582286f8b977c640de85213d",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "late",
+      "expected_code": "timeout",
+      "matches": true,
+      "submit_return_s": 0.000128582,
+      "heartbeats": 64,
+      "max_heartbeat_gap_s": 0.001235946,
+      "fd_before": 6,
+      "fd_after": 4,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "bebfc6a9f1e8458aa95fe6b130ba4918",
+        "ok": false,
+        "code": "timeout",
+        "residual": null,
+        "stage": "supervision",
+        "diagnostic": "original monotonic deadline expired",
+        "started_ns": 154672047861962,
+        "deadline_ns": 154672057861962,
+        "finished_ns": 154672121961414,
+        "worker_elapsed_s": null,
+        "cleanup_s": 0.063846551,
+        "reaped": true,
+        "worker_pid": 91845,
+        "worker_generation": "cc48486dcdfc4285b64a8fc1d865151d",
+        "program_id": "worker-test",
+        "source_sha256": "f22d9255eb784d42df98c8bb823d897132476a7d582286f8b977c640de85213d",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "memory",
+      "expected_code": "memory_limit",
+      "matches": true,
+      "submit_return_s": 0.000133207,
+      "heartbeats": 1,
+      "max_heartbeat_gap_s": 0,
+      "fd_before": 6,
+      "fd_after": 4,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "4b86bf6cc298423f968f0ef78f067c99",
+        "ok": false,
+        "code": "memory_limit",
+        "residual": null,
+        "stage": "worker",
+        "diagnostic": "allocation refused under RLIMIT_AS",
+        "started_ns": 154672155965670,
+        "deadline_ns": 154672165965670,
+        "finished_ns": 154672157299449,
+        "worker_elapsed_s": 5.708e-06,
+        "cleanup_s": 0.001101864,
+        "reaped": true,
+        "worker_pid": 91850,
+        "worker_generation": "27e5fb799a374027bc93de9b03646711",
+        "program_id": "worker-test",
+        "source_sha256": "f22d9255eb784d42df98c8bb823d897132476a7d582286f8b977c640de85213d",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "crash",
+      "expected_code": "worker_crash",
+      "matches": true,
+      "submit_return_s": 0.000108374,
+      "heartbeats": 0,
+      "max_heartbeat_gap_s": 0,
+      "fd_before": 6,
+      "fd_after": 4,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "6098490f3cf14640b2cbf3d7ae77b627",
+        "ok": false,
+        "code": "worker_crash",
+        "residual": null,
+        "stage": "supervision",
+        "diagnostic": "worker closed its reply stream",
+        "started_ns": 154672191650159,
+        "deadline_ns": 154672201650159,
+        "finished_ns": 154672192322111,
+        "worker_elapsed_s": null,
+        "cleanup_s": 1.6125e-05,
+        "reaped": true,
+        "worker_pid": 91855,
+        "worker_generation": "dcbc944ce6814ac6a913139cff6b35c3",
+        "program_id": "worker-test",
+        "source_sha256": "f22d9255eb784d42df98c8bb823d897132476a7d582286f8b977c640de85213d",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "exception",
+      "expected_code": "worker_exception",
+      "matches": true,
+      "submit_return_s": 0.000120416,
+      "heartbeats": 1,
+      "max_heartbeat_gap_s": 0,
+      "fd_before": 6,
+      "fd_after": 4,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "1cebf1b801b9414289be4a93f3e87e68",
+        "ok": false,
+        "code": "worker_exception",
+        "residual": null,
+        "stage": "worker",
+        "diagnostic": "RuntimeError",
+        "started_ns": 154672226108744,
+        "deadline_ns": 154672236108744,
+        "finished_ns": 154672227432564,
+        "worker_elapsed_s": 5e-06,
+        "cleanup_s": 0.001120073,
+        "reaped": true,
+        "worker_pid": 91860,
+        "worker_generation": "2bb7357c0b4a44889503685b5ab177c7",
+        "program_id": "worker-test",
+        "source_sha256": "f22d9255eb784d42df98c8bb823d897132476a7d582286f8b977c640de85213d",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "partial_reply",
+      "expected_code": "timeout",
+      "matches": true,
+      "submit_return_s": 0.00010854,
+      "heartbeats": 9,
+      "max_heartbeat_gap_s": 0.001275279,
+      "fd_before": 6,
+      "fd_after": 4,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "407cd124bf2b40eda0389f8b63fde2fb",
+        "ok": false,
+        "code": "timeout",
+        "residual": null,
+        "stage": "supervision",
+        "diagnostic": "original monotonic deadline expired",
+        "started_ns": 154672261046907,
+        "deadline_ns": 154672271046907,
+        "finished_ns": 154672272264340,
+        "worker_elapsed_s": null,
+        "cleanup_s": 0.001114739,
+        "reaped": true,
+        "worker_pid": 91865,
+        "worker_generation": "9a56f3c7b1b149adaf75606e5cdd8691",
+        "program_id": "worker-test",
+        "source_sha256": "f22d9255eb784d42df98c8bb823d897132476a7d582286f8b977c640de85213d",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    },
+    {
+      "mode": "wrong_id",
+      "expected_code": "malformed_response",
+      "matches": true,
+      "submit_return_s": 0.000119208,
+      "heartbeats": 1,
+      "max_heartbeat_gap_s": 0,
+      "fd_before": 6,
+      "fd_after": 4,
+      "outcome": {
+        "operation": "evaluate",
+        "request_id": "4952309bf1db49c18e1b827112639e60",
+        "ok": false,
+        "code": "malformed_response",
+        "residual": null,
+        "stage": "supervision",
+        "diagnostic": "reply identity mismatch",
+        "started_ns": 154672305830225,
+        "deadline_ns": 154672315830225,
+        "finished_ns": 154672307162837,
+        "worker_elapsed_s": null,
+        "cleanup_s": 0.001099573,
+        "reaped": true,
+        "worker_pid": 91870,
+        "worker_generation": "c745ddc7c3ed465588674ed7a92f6cff",
+        "program_id": "worker-test",
+        "source_sha256": "f22d9255eb784d42df98c8bb823d897132476a7d582286f8b977c640de85213d",
+        "policy_id": "numeric-offline-v1",
+        "limits": {
+          "address_space_bytes": 268435456,
+          "payload_bytes": 1048576,
+          "call_timeout_s": 0.01,
+          "preparation_timeout_s": 5.0,
+          "teardown_grace_s": 0.1
+        },
+        "environment": [
+          [
+            "implementation",
+            "CPython"
+          ],
+          [
+            "machine",
+            "aarch64"
+          ],
+          [
+            "python",
+            "3.12.3"
+          ],
+          [
+            "release",
+            "6.17.0-35-generic"
+          ],
+          [
+            "system",
+            "Linux"
+          ]
+        ]
+      }
+    }
+  ],
+  "preparations": [
+    {
+      "operation": "prepare",
+      "request_id": "11ab3a4e2c4d4240a1d7faf7140b89cc",
+      "ok": true,
+      "code": "ok",
+      "residual": null,
+      "stage": "supervision",
+      "diagnostic": "",
+      "started_ns": 154671768580071,
+      "deadline_ns": 154676768580071,
+      "finished_ns": 154671801989499,
+      "worker_elapsed_s": 0.000107541,
+      "cleanup_s": 0.0,
+      "reaped": null,
+      "worker_pid": 91736,
+      "worker_generation": "c996c730e1e542c3bb4811e9029ed3e7",
+      "program_id": "isolation-probe-distance",
+      "source_sha256": "90888a60d8e00510a268282717c6e45174953955f5fff2555e9d7e92a0adac39",
+      "policy_id": "numeric-offline-v1",
+      "limits": {
+        "address_space_bytes": 268435456,
+        "payload_bytes": 1048576,
+        "call_timeout_s": 0.01,
+        "preparation_timeout_s": 5.0,
+        "teardown_grace_s": 0.1
+      },
+      "environment": [
+        [
+          "implementation",
+          "CPython"
+        ],
+        [
+          "machine",
+          "aarch64"
+        ],
+        [
+          "python",
+          "3.12.3"
+        ],
+        [
+          "release",
+          "6.17.0-35-generic"
+        ],
+        [
+          "system",
+          "Linux"
+        ]
+      ]
+    },
+    {
+      "operation": "prepare",
+      "request_id": "027c719503db4b17aa2ad6ec5d559408",
+      "ok": true,
+      "code": "ok",
+      "residual": null,
+      "stage": "supervision",
+      "diagnostic": "",
+      "started_ns": 154671815547577,
+      "deadline_ns": 154676815547577,
+      "finished_ns": 154671848705216,
+      "worker_elapsed_s": 0.000136624,
+      "cleanup_s": 0.0,
+      "reaped": null,
+      "worker_pid": 91788,
+      "worker_generation": "175dcb1bc49b418f955a89fb2c917fcf",
+      "program_id": "isolation-probe-axis",
+      "source_sha256": "4c98486c25f069986f34a16051fe425326006b0dcf5abea438eef0fc20f35e92",
+      "policy_id": "numeric-offline-v1",
+      "limits": {
+        "address_space_bytes": 268435456,
+        "payload_bytes": 1048576,
+        "call_timeout_s": 0.01,
+        "preparation_timeout_s": 5.0,
+        "teardown_grace_s": 0.1
+      },
+      "environment": [
+        [
+          "implementation",
+          "CPython"
+        ],
+        [
+          "machine",
+          "aarch64"
+        ],
+        [
+          "python",
+          "3.12.3"
+        ],
+        [
+          "release",
+          "6.17.0-35-generic"
+        ],
+        [
+          "system",
+          "Linux"
+        ]
+      ]
+    }
+  ],
+  "ok": true,
+  "normal_latency_s": {
+    "count": 98,
+    "min": 9.1416e-05,
+    "median": 0.000162415,
+    "p95": 0.000553953,
+    "max": 0.001232571
+  }
+}
