@@ -78,14 +78,6 @@ def test_missing_duplicate_and_mutable_margin_reports_rejected():
         HostConstraintResult((margin,))
 
 
-def test_callback_error_is_not_replaced_by_feasibility():
-    def broken_checker(**kwargs):
-        raise RuntimeError("unavailable model")
-
-    with pytest.raises(RuntimeError, match="unavailable model"):
-        broken_checker()
-
-
 @pytest.mark.parametrize("value", [float("nan"), float("inf"), True, -1, 10**400])
 def test_invalid_host_policy_cannot_relax_margin_comparison(value):
     with pytest.raises(ValueError):
