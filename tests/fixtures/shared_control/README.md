@@ -1,12 +1,14 @@
-# Scene and artifact test inputs
+# Scene, artifact and live/control test inputs
 
 `bottle_cup_illustrative.json` preserves the complete JSON catalog from section 8
 of `docs/wiki/Data-Model-and-Message-Contracts.md` without altering its values.
-The catalog includes future live/control messages so its original worked chain
-remains intact. Issue #4 tests only its scene, configuration and artifact records;
-it does not claim that every message in the catalog is implemented. Its accepted
-receipts describe the documentation's **illustrative** state, not host-issued
-validation or permission to execute a program.
+The complete worked chain is preserved, including live/control messages, nested
+constraint evaluations and separate command-acceptance records. The `ssc-core`
+0.2.0 tests parse these records alongside the scene, configuration and artifact
+records introduced in Issue #4. Its accepted receipts describe the documentation's
+**illustrative** state, not host-issued validation or permission to execute a
+program. Parsing its robot state or acceptance log does not verify measured
+feedback or actual command application.
 
 `bottle_cup_offline_v1.json` is a separate **synthetic** structural fixture based
 on `offline-reference-v1`, with fresh scene, geometry, feature, program, task and
@@ -24,6 +26,11 @@ preserved for the exact example source bytes; these tests validate hash format
 only. Trusted receipt issuance, hash verification, cross-artifact resolution and
 runtime execution remain later stages.
 
-The tests demonstrate only the scene/artifact portions of S01–S05 and selected
-local consistency and numeric-policy boundaries. They do not establish the
-remaining live-input, optimizer, process-isolation or robot acceptance scenarios.
+The tests demonstrate the structural portions of S01–S08 and selected local
+consistency and numeric-policy boundaries. Live/control cases exercise optional
+velocity absence, explicit nullable fields, strict move/hold branches, weight
+normalization tolerance and numeric rejection. They do not establish reference
+resolution, candidate/program coverage, penalty-formula consistency, freshness,
+measurement provenance, command authority or any runtime hold/stop behavior.
+Optimizer, process-isolation, complete-loop and robot acceptance scenarios remain
+separate work.

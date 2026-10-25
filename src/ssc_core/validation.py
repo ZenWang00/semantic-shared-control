@@ -35,7 +35,9 @@ def _policy(policy: Any) -> None:
         _fail("$", "type", "policy must be an explicit ValidationPolicy")
 
 
-def _object(value: Any, path: str, expected: tuple[str, ...]) -> dict[str, Any]:
+def _object(
+    value: Any, path: str, expected: tuple[str, ...], *, optional: tuple[str, ...] = (),
+) -> dict[str, Any]:
     if type(value) is not dict:
         _fail(path, "type", "expected a JSON object")
     for key in value:
@@ -44,7 +46,7 @@ def _object(value: Any, path: str, expected: tuple[str, ...]) -> dict[str, Any]:
         if key not in expected:
             _fail(_child(path, key), "unknown_field", "field is not defined by this record")
     for key in expected:
-        if key not in value:
+        if key not in value and key not in optional:
             _fail(_child(path, key), "missing_field", "required field is missing")
     return value
 
@@ -169,6 +171,10 @@ def _nested(cls: type[_R]) -> _Validator:
     return lambda value, path, policy: _parse(cls, value, path, policy)
 
 
+def _nullable(validate: _Validator) -> _Validator:
+    return lambda value, path, policy: None if value is None else validate(value, path, policy)
+
+
 def _source(value: Any, path: str, policy: ValidationPolicy) -> str:
     value = _string(value, path, policy)
     try:
@@ -194,6 +200,7 @@ _SCHEMAS: dict[type[r.Record], dict[str, _Validator]] = {
     },
     r.ProgramRef: {"program_id": _identifier, "source_sha256": _hash},
     r.GeometryRef: {"geometry_id": _identifier, "revision": _revision},
+    r.TaskRef: {"task_id": _identifier, "revision": _revision},
     r.MessageMeta: {
         "schema_version": _enum("1.0"), "session_id": _identifier,
         "message_id": _identifier, "source_id": _identifier,
@@ -269,13 +276,66 @@ _SCHEMAS: dict[type[r.Record], dict[str, _Validator]] = {
         "validation_geometry_revision": _revision, "validator_policy_version": _identifier,
         "status": _enum("accepted", "rejected"), "diagnostics": _array(_explanation),
     },
+    r.JoystickSample: {
+        "sampled_at": _nested(r.TimePoint), "mapping_id": _identifier,
+        "u_xy": _array(_number, length=2), "enabled": _boolean,
+    },
+    r.RobotState: {
+        "sampled_at": _nested(r.TimePoint), "frame_id": _identifier,
+        "tcp_frame": _identifier, "tcp_pose": _nested(r.Pose),
+        "joint_names": _array(_identifier), "joint_positions_rad": _array(_number),
+        "joint_velocities_radps": _array(_number),
+        "state_source": _enum("measured_feedback", "fk_from_measured_joints"),
+    },
+    r.ControlSnapshot: {
+        "snapshot_id": _identifier, "snapshot_seq": _counter, "control_epoch": _counter,
+        "config_id": _identifier, "task_ref": _nested(r.TaskRef), "dt_s": _positive,
+        "joystick_ref": _identifier, "robot_state_ref": _identifier,
+        "joystick_history_refs": _array(_identifier), "geometry_ref": _nested(r.GeometryRef),
+        "semantic_id": _identifier, "program_refs": _array(_nested(r.ProgramRef)),
+        "execution_binding_refs": _array(_identifier),
+        "previous_applied_command_id": _nullable(_identifier),
+    },
+    r.ObjectWeight: {"object_id": _identifier, "weight": _nonnegative},
+    r.ObjectWeights: {
+        "weights_id": _identifier, "snapshot_id": _identifier,
+        "estimator_config_id": _identifier,
+        "weights": _array(_nested(r.ObjectWeight), minimum=1, limit="max_candidate_objects"),
+        "assistance_strength": _score,
+    },
+    r.ConstraintEvaluation: {
+        "program_id": _identifier, "raw_g": _number,
+        "normalization_scale": _positive, "penalty": _nonnegative,
+    },
+    r.ControlResult: {
+        "result_id": _identifier, "snapshot_id": _nullable(_identifier),
+        "weights_id": _nullable(_identifier), "control_epoch": _counter,
+        "command_seq": _counter, "source_joystick_seq": _nullable(_counter),
+        "source_robot_state_seq": _nullable(_counter), "status": _enum("move", "hold"),
+        "evaluation_valid": _boolean,
+        "solver_status": _enum("solved", "infeasible", "timeout", "error", "not_run"),
+        "constraints_satisfied": _nullable(_boolean), "solve_time_s": _nonnegative,
+        "constraint_evaluations": _array(_nested(r.ConstraintEvaluation)),
+        "next_tcp_pose": _nested(r.Pose), "horizon_s": _positive, "reason": _explanation,
+    },
+    r.CommandAcceptanceRecord: {
+        "result_id": _identifier, "command_accepted": _boolean, "reason": _explanation,
+        "checked_at": _nested(r.TimePoint), "applied_command_id": _nullable(_identifier),
+    },
 }
+_OPTIONAL_FIELDS: dict[type[r.Record], tuple[str, ...]] = {
+    r.RobotState: ("joint_velocities_radps",),
+}
+_RESULT_BRANCH_FIELDS = ("next_tcp_pose", "horizon_s", "reason")
+# Only declared absent fields are omitted. Required nullable fields retain null.
+_OMIT_ABSENT_FIELDS = {**_OPTIONAL_FIELDS, r.ControlResult: _RESULT_BRANCH_FIELDS}
 _TYPES = {cls.__name__: cls for cls in _SCHEMAS}
 _MESSAGE_TYPES = {
     cls.__name__: cls for cls in (
         r.SessionConfig, r.TaskContext, r.SceneObservation, r.SceneGeometry,
         r.SemanticContext, r.ConstraintProgram, r.Parameter,
         r.ProgramExecutionBinding, r.ProgramValidationReceipt,
+        r.JoystickSample, r.RobotState, r.ControlSnapshot, r.ObjectWeights, r.ControlResult,
     )
 }
 
@@ -339,11 +399,50 @@ def _geometry(record: r.SceneGeometry, path: str) -> None:
             _fail(f"{path}.axes[{i}].origin_keypoint_id", "reference", "axis origin belongs to another object")
 
 
+def _robot_state(record: r.RobotState, path: str) -> None:
+    _unique(record.joint_names, f"{path}.joint_names")
+    for field in ("joint_positions_rad", "joint_velocities_radps"):
+        values = getattr(record, field)
+        if values is not None and len(values) != len(record.joint_names):
+            _fail(f"{path}.{field}", "dimension", "length must match joint_names")
+
+
+def _weights(record: r.ObjectWeights, path: str, policy: ValidationPolicy) -> None:
+    _unique(record.weights, f"{path}.weights", "object_id")
+    try:
+        total = math.fsum(item.weight for item in record.weights)
+    except OverflowError:
+        _fail(f"{path}.weights", "range", "weight sum exceeds finite numeric range")
+    if abs(total - 1) > policy.weight_sum_tolerance:
+        _fail(f"{path}.weights", "range", f"weights must sum to one within {policy.weight_sum_tolerance}")
+
+
+def _control_result(record: r.ControlResult, path: str) -> None:
+    if record.solver_status == "not_run" and record.solve_time_s != 0:
+        _fail(f"{path}.solve_time_s", "value", "not_run requires zero solve time")
+    if record.status == "move":
+        for field in ("snapshot_id", "weights_id", "source_joystick_seq", "source_robot_state_seq"):
+            if getattr(record, field) is None:
+                _fail(f"{path}.{field}", "value", "move requires a nonnull input reference")
+        if not record.evaluation_valid:
+            _fail(f"{path}.evaluation_valid", "value", "move requires valid evaluation")
+        if record.solver_status != "solved":
+            _fail(f"{path}.solver_status", "value", "move requires a solved result")
+        if record.constraints_satisfied is None:
+            _fail(f"{path}.constraints_satisfied", "value", "move requires an evaluated satisfaction flag")
+
+
 def _parse(cls: type[_R], data: Any, path: str, policy: ValidationPolicy) -> _R:
     schema = _SCHEMAS[cls]
-    data = _object(data, path, tuple(schema))
+    if cls is r.ControlResult:
+        data = _object(data, path, tuple(schema), optional=_RESULT_BRANCH_FIELDS)
+        status = schema["status"](data["status"], f"{path}.status", policy)
+        branch = ("next_tcp_pose", "horizon_s") if status == "move" else ("reason",)
+        schema = {key: validate for key, validate in schema.items()
+                  if key not in _RESULT_BRANCH_FIELDS or key in branch}
+    data = _object(data, path, tuple(schema), optional=_OPTIONAL_FIELDS.get(cls, ()))
     record = cls(**{key: validate(data[key], _child(path, key), policy)
-                    for key, validate in schema.items()})
+                    for key, validate in schema.items() if key in data})
     if isinstance(record, r.Pose):
         _unit_norm(record.quaternion_xyzw, f"{path}.quaternion_xyzw", policy)
     elif isinstance(record, r.Axis):
@@ -362,6 +461,15 @@ def _parse(cls: type[_R], data: Any, path: str, policy: ValidationPolicy) -> _R:
     elif isinstance(record, r.ProgramValidationReceipt):
         if record.status == "rejected" and not record.diagnostics:
             _fail(f"{path}.diagnostics", "value", "a rejected receipt needs an explanation")
+    elif isinstance(record, r.JoystickSample):
+        if math.hypot(*record.u_xy) > 1:
+            _fail(f"{path}.u_xy", "range", "joystick vector must lie in the unit disk")
+    elif isinstance(record, r.RobotState):
+        _robot_state(record, path)
+    elif isinstance(record, r.ObjectWeights):
+        _weights(record, path, policy)
+    elif isinstance(record, r.ControlResult):
+        _control_result(record, path)
     return record
 
 
@@ -395,7 +503,7 @@ def parse_record(
 
 
 def parse_message(data: dict[str, Any], *, policy: ValidationPolicy) -> r.Message:
-    """Validate an envelope and supported scene/artifact payload atomically."""
+    """Validate an envelope and supported payload atomically."""
     _policy(policy)
     data = _object(data, "$", ("message_type", "meta", "payload"))
     message_type = _string(data["message_type"], "$.message_type", policy)
@@ -449,7 +557,9 @@ def loads_message(text: str, *, policy: ValidationPolicy) -> r.Message:
 def _serialize(value: Any, path: str) -> Any:
     if type(value) in _SCHEMAS or type(value) is r.Message:
         return {field.name: _serialize(getattr(value, field.name), _child(path, field.name))
-                for field in fields(value)}
+                for field in fields(value)
+                if not (field.name in _OMIT_ABSENT_FIELDS.get(type(value), ())
+                        and getattr(value, field.name) is None)}
     if type(value) is tuple:
         return [_serialize(item, f"{path}[{i}]") for i, item in enumerate(value)]
     if type(value) in (str, int, bool) or value is None:

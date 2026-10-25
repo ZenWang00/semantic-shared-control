@@ -1,4 +1,4 @@
-"""Immutable values for schema 1.0 scene and artifact records.
+"""Immutable values for schema 1.0 scene, artifact and control records.
 
 Direct dataclass construction is a value-container API, not validation. Use
 ``parse_record`` or ``parse_message`` at trust boundaries; those functions check
@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import Literal, TypeAlias
 
 Number: TypeAlias = int | float
+Vector2: TypeAlias = tuple[Number, Number]
 Vector3: TypeAlias = tuple[Number, Number, Number]
 Quaternion: TypeAlias = tuple[Number, Number, Number, Number]
 Matrix3: TypeAlias = tuple[Vector3, Vector3, Vector3]
@@ -59,6 +60,12 @@ class ProgramRef(Record):
 @dataclass(frozen=True, slots=True)
 class GeometryRef(Record):
     geometry_id: str
+    revision: int
+
+
+@dataclass(frozen=True, slots=True)
+class TaskRef(Record):
+    task_id: str
     revision: int
 
 
@@ -215,10 +222,104 @@ class ProgramValidationReceipt(Record):
     diagnostics: tuple[str, ...]
 
 
+@dataclass(frozen=True, slots=True)
+class JoystickSample(Record):
+    sampled_at: TimePoint
+    mapping_id: str
+    u_xy: Vector2
+    enabled: bool
+
+
+@dataclass(frozen=True, slots=True)
+class RobotState(Record):
+    sampled_at: TimePoint
+    frame_id: str
+    tcp_frame: str
+    tcp_pose: Pose
+    joint_names: tuple[str, ...]
+    joint_positions_rad: tuple[Number, ...]
+    state_source: Literal["measured_feedback", "fk_from_measured_joints"]
+    # None represents an absent wire field, never measured zero velocity.
+    joint_velocities_radps: tuple[Number, ...] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ControlSnapshot(Record):
+    snapshot_id: str
+    snapshot_seq: int
+    control_epoch: int
+    config_id: str
+    task_ref: TaskRef
+    dt_s: Number
+    joystick_ref: str
+    robot_state_ref: str
+    joystick_history_refs: tuple[str, ...]
+    geometry_ref: GeometryRef
+    semantic_id: str
+    program_refs: tuple[ProgramRef, ...]
+    execution_binding_refs: tuple[str, ...]
+    previous_applied_command_id: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class ObjectWeight(Record):
+    object_id: str
+    weight: Number
+
+
+@dataclass(frozen=True, slots=True)
+class ObjectWeights(Record):
+    weights_id: str
+    snapshot_id: str
+    estimator_config_id: str
+    weights: tuple[ObjectWeight, ...]
+    assistance_strength: Number
+
+
+@dataclass(frozen=True, slots=True)
+class ConstraintEvaluation(Record):
+    program_id: str
+    raw_g: Number
+    normalization_scale: Number
+    penalty: Number
+
+
+@dataclass(frozen=True, slots=True)
+class ControlResult(Record):
+    """Candidate proposal; parsers enforce the move/hold field branches."""
+
+    result_id: str
+    snapshot_id: str | None
+    weights_id: str | None
+    control_epoch: int
+    command_seq: int
+    source_joystick_seq: int | None
+    source_robot_state_seq: int | None
+    status: Literal["move", "hold"]
+    evaluation_valid: bool
+    solver_status: Literal["solved", "infeasible", "timeout", "error", "not_run"]
+    constraints_satisfied: bool | None
+    solve_time_s: Number
+    constraint_evaluations: tuple[ConstraintEvaluation, ...]
+    next_tcp_pose: Pose | None = None
+    horizon_s: Number | None = None
+    reason: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class CommandAcceptanceRecord(Record):
+    result_id: str
+    command_accepted: bool
+    reason: str
+    checked_at: TimePoint
+    applied_command_id: str | None
+
+
 Payload: TypeAlias = (
     SessionConfig | TaskContext | SceneObservation | SceneGeometry
     | SemanticContext | ConstraintProgram | Parameter | ProgramExecutionBinding
-    | ProgramValidationReceipt
+    | ProgramValidationReceipt | JoystickSample | RobotState | ControlSnapshot
+    | ObjectWeights | ControlResult
 )
 
 

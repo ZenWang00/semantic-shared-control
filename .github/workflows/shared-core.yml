@@ -28,8 +28,20 @@ jobs:
       - name: Install wheel into a clean environment
         run: |
           python -m venv .venv-acceptance
-          .venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.1.0-py3-none-any.whl[test]'
+          .venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.2.0-py3-none-any.whl[test]'
       - name: Verify installed package
         run: |
-          .venv-acceptance/bin/python -m pytest tests/shared_control
+          .venv-acceptance/bin/python -m pytest tests/shared_control --junitxml=test-results.xml
           .venv-acceptance/bin/python -m pip check
+          .venv-acceptance/bin/python -m pip freeze > dependencies.txt
+          sha256sum dist/*.whl > wheel-sha256.txt
+      - name: Retain wheel and verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ssc-core-validation
+          path: |
+            dist/*.whl
+            test-results.xml
+            dependencies.txt
+            wheel-sha256.txt
