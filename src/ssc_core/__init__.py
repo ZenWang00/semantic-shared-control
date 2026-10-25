@@ -26,9 +26,12 @@ from .registry import (
     SessionRegistry,
 )
 
-__version__ = "0.4.0"
+from .supervision import EVALUATOR_LIMITS, EvaluationOutcome, EvaluatorLimits, SupervisedEvaluator
+
+__version__ = "0.5.0"
 
 __all__ = [
+    "EVALUATOR_LIMITS", "EvaluationOutcome", "EvaluatorLimits", "SupervisedEvaluator",
     "AssetRef", "Axis", "CommandAcceptanceRecord", "CompiledProgram",
     "ConstraintEvaluation", "ConstraintMargin", "ConstraintProgram", "ControlResult",
     "ControlSnapshot", "GeometryRef", "HostConstraintChecker", "HostConstraintResult",

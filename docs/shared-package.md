@@ -1,12 +1,12 @@
 # Shared validation, resolution and residual-evaluation package
 
-`ssc-core==0.4.0` implements scene/artifact and live/control record validation,
+`ssc-core==0.5.0` implements scene/artifact and live/control record validation,
 immutable session registries, deterministic reference resolution and a restricted
 `geometry-residual-v1` numerical interpreter for schema `1.0`, using an explicit
-host policy. The parsing, registry and schema APIs remain source compatible with
-0.3.0. The inherited grasp service is separate. Resolution checks typed-record
-compatibility and the interpreter evaluates accepted source; process isolation,
-receipt issuance, an active bundle, live control loop, command gate and robot
+host policy. Version 0.5.0 adds asynchronous evaluator supervision; existing
+parsing, registry and interpreter APIs remain source compatible with 0.4.0. The inherited grasp service is separate. Resolution checks typed-record
+compatibility; the interpreter and Linux supervisor evaluate source under enforced
+process budgets. Receipt issuance, an active bundle, live control loop, command gate and robot
 integration remain separate responsibilities.
 
 ## Install and test
@@ -28,7 +28,7 @@ To test the actual wheel in a second clean environment:
 ```sh
 .venv-ssc/bin/python -m pip wheel --no-deps --wheel-dir dist .
 python3.12 -m venv .venv-acceptance
-.venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.4.0-py3-none-any.whl[test]'
+.venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.5.0-py3-none-any.whl[test]'
 .venv-acceptance/bin/python -m pytest tests/shared_control
 .venv-acceptance/bin/python -m pip check
 ```
@@ -63,7 +63,7 @@ wire_value = to_dict(pose)
 - `ValidationError` exposes `path`, `code`, and `message`, identifying the invalid
   field. Validation fails at the first diagnosed violation.
 
-The parsing API is unchanged in 0.4.0. Supported message payloads are
+The parsing API is unchanged in 0.5.0. Supported message payloads are
 SessionConfig, TaskContext, SceneObservation, SceneGeometry, SemanticContext,
 ConstraintProgram, ProgramExecutionBinding, ProgramValidationReceipt, Parameter,
 JoystickSample, RobotState, ControlSnapshot, ObjectWeights and ControlResult.
@@ -425,6 +425,115 @@ run numerical probes or activate a program. Acceptance is a grammar check, not
 a sandbox: the evaluator must still run in the supervised worker with the
 profile's memory and wall-time budgets.
 
+## Supervised evaluator (Linux)
+
+`SupervisedEvaluator` owns one isolated standard-library worker and accepts one
+in-flight operation. There is no request queue. Install the wheel first: the
+worker launches the same Python with `-I -m ssc_core._worker`, so a checkout or
+`PYTHONPATH` cannot substitute its package. The fixed policy is
+`numeric-offline-v1` with the immutable `EVALUATOR_LIMITS`: 256 MiB **address
+space** (`RLIMIT_AS`, equal soft/hard), core dumps disabled, 1 MiB per JSON
+payload, 5 s preparation, and 10 ms per evaluation. BLAS thread environment
+variables are set to one before worker imports. Non-Linux preparation fails
+explicitly; macOS development tests do not establish resource isolation.
+
+```python
+from ssc_core import SupervisedEvaluator
+
+worker = SupervisedEvaluator()
+# Initialization/recovery code only, while motion is disabled:
+prepared = worker.prepare(program, motion_disabled=True).result(timeout=6)
+assert prepared.ok, prepared
+# Supply arrays already resolved in artifact binding order. Convert NumPy
+# arrays with .tolist(); this API accepts plain lists/tuples of numbers.
+pending = worker.submit(p_tcp, R_control_tcp, keypoints, axis_dirs, params,
+                        deadline_ns=original_real_monotonic_deadline_ns)
+# Return to input/release/gate processing. Poll pending.done() later.
+# From a coordinator task that may wait (never a command/input callback):
+result = pending.result(timeout=1)
+if result.ok:
+    g = result.residual  # positive g is valid; acceptance remains separate
+else:
+    reason = (result.code, result.stage, result.diagnostic)
+# Shutdown/recovery code must await cleanup; close is also asynchronous.
+assert worker.close().result(timeout=1).reaped
+```
+
+`prepare` validates/compiles the artifact in the bounded worker. No lowered AST,
+Python object or callable crosses into the interpreter. `submit` sends only
+resolved numerical arguments and unique request/generation identities; it does
+not perform reference resolution or issue a validation receipt. The worker
+rechecks ABI inputs on every evaluation. Source, AST count/depth, assignments,
+fixed shapes and finite intermediates retain the interpreter's existing checks.
+The supervisor verifies the resource-limit handshake before marking ready.
+
+Returned Futures are already running: `Future.cancel()` does not cancel work;
+use `close()` to withdraw computation and retire the process. `close()` is final
+for that object. A failed operation alone permits explicit `prepare(...,
+motion_disabled=True)` recovery with fresh process and IPC. `busy` rejects a
+second operation without disturbing the admitted one. The integration owner
+must call `close()` and await cleanup; there is no destructor-based shutdown.
+Do not mutate submitted artifacts/arrays until their Future completes. Prefer
+the registry's immutable records and tuples. Do not block Future callbacks.
+
+The absolute `deadline_ns`, when supplied, is in **time.monotonic_ns()**'s domain;
+synthetic clock timestamps cannot be used here. Admission fixes the earlier of
+that deadline and start + 10 ms; serialization, transmission, worker work,
+reply validation and completion decision consume the same budget. No wait,
+reply, preparation or recovery extends it. A separate supervisor thread performs
+bounded nonblocking writes/reads, including incomplete JSON replies. Failed or
+late replies are discarded; no scalar is retained. All worker/IPC/evaluation
+failures retire that worker, and the next request fails `not_prepared` until
+recovery. Admission errors (`busy`, `invalid_deadline`, `motion_not_disabled`)
+do not invalidate another operation or an already prepared worker.
+
+On retirement the supervisor closes both pipes, sends SIGTERM, waits at most
+0.1 s, then sends SIGKILL if necessary. It allows a further bounded 0.1 s to
+observe/reap the killed process. These waits are cleanup, never additional
+evaluation authority. OS scheduling can delay observation; this is not a
+real-time or physical stopping guarantee. If reaping fails, `cleanup_failed`
+retains the sole handle, and preparation cannot create another worker until it
+has been reaped. Host thread-allocation failure returns `supervisor_error`
+without an active Future; if a worker exists, its handle is retained for explicit
+`close()`/preparation cleanup retry. No unbounded join is performed in the caller.
+
+`EvaluationOutcome` is immutable and serializable with `dataclasses.asdict`.
+It carries operation/request/generation/program/source identity, policy/limits,
+OS/Python/architecture, start/deadline/decision timestamps, worker duration,
+cleanup duration, PID, failure stage/reason and an optional scalar. `elapsed_s`
+includes cleanup; `worker_elapsed_s` is worker-reported diagnostic time and never
+controls eligibility. `reaped` is `None` when no retirement was attempted (including admission
+rejections) and a Boolean after cleanup. Rejected requests without a worker
+need no reaping. Preparation success has no residual and is not an evaluation success.
+
+Supervisor reasons include `timeout`, `cancelled`, `worker_crash`,
+`malformed_response`, `memory_limit`, `worker_exception`, `payload_limit`,
+`invalid_request`, `unsupported_platform`, `cleanup_failed`, and
+`supervisor_error`, alongside admission and interpreter reason codes. Every
+failure has `residual=None`. A process killed externally is `worker_crash`;
+`memory_limit` specifically records a caught allocation failure under RLIMIT_AS,
+not an inferred cause for every signal. Timing/resource results and numerical
+validation are separate from relation satisfaction and motion acceptance.
+
+This is process/resource isolation for the controlled interpreter, **not a
+sandbox for arbitrary hostile Python**: no seccomp, filesystem namespace,
+network namespace, cgroup/RSS cap or protection against a kernel/interpreter
+exploit is claimed. The generated grammar provides no file/network/process
+capabilities. Future solver supervision (1 GiB/150 ms), robot-side watchdog,
+command gate and receipt issuance remain separate tasks.
+
+Run the reference-platform benchmark from a checkout with its wheel installed:
+
+```sh
+python -B docs/reference/verify_evaluator_isolation.py --output evaluator-evidence.json \
+  --source-revision TESTED_GIT_SHA --wheel-sha256 TESTED_WHEEL_SHA256
+```
+
+It retains the 49-pose distance and axis probes, injected fault outcomes,
+heartbeat and cleanup measurements, environment and limits. It does not certify
+all possible formulas meet 10 ms. See `docs/reference/evaluator-isolation.md`
+for measured evidence and its limits.
+
 ## Pure host-constraint interface
 
 `ssc_core.host_constraints.HostConstraintChecker` is a callable protocol taking
@@ -472,6 +581,7 @@ isolation, memory or time bounds, receipt trust or physical safety.
 
 PR evidence records the tested commit, wheel hash, exact environment and package
 versions, commands, test result and independent final-diff review. Component
-checks do not establish two-repository compatibility, worker isolation, complete
-loop behavior, control performance or physical safety. Subsequent cards consume
+checks do not establish two-repository compatibility, complete-loop behavior,
+control performance or physical safety. Worker process enforcement has separate
+Linux evidence as described above. Subsequent cards consume
 this parsing API and fixtures without importing the inherited pipeline.
