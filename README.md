@@ -16,6 +16,7 @@ The first prototype is scoped to a static scene and a fixed robot base. The oper
 - [Runtime lifecycle and timing](docs/wiki/Runtime-Lifecycle-and-Timing.md)
 - [Validation and legacy integration](docs/wiki/Validation-and-Legacy-Integration.md)
 - [Repository ownership and cross-repository workflow](docs/wiki/Repository-Ownership-and-Cross-Repository-Workflow.md)
+- [Offline reference profile and numerical design checks](docs/wiki/Offline-Reference-Profile.md)
 
 The Wiki is a publication copy of `docs/wiki/`. Change the source on a project branch, review it, and synchronize the same Markdown files into the separate Wiki Git repository. The Wiki publication commit records the source project commit.
 

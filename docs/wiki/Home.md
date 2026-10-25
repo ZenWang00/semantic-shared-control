@@ -30,6 +30,7 @@ Use the [shared development board](https://github.com/users/ZenWang00/projects/3
 | [Generated Constraint Program Contract](https://github.com/ZenWang00/semantic-shared-control/wiki/Generated-Constraint-Program-Contract) | Interpret generated numerical functions, bindings, normalization, and validation. |
 | [Runtime Lifecycle and Timing](https://github.com/ZenWang00/semantic-shared-control/wiki/Runtime-Lifecycle-and-Timing) | Follow initialization, control cycles, invalidation, and command acceptance. |
 | [Validation and Legacy Integration](https://github.com/ZenWang00/semantic-shared-control/wiki/Validation-and-Legacy-Integration) | Review expected acceptance cases and inherited-interface pitfalls. |
+| [Offline Reference Profile](https://github.com/ZenWang00/semantic-shared-control/wiki/Offline-Reference-Profile) | Implement the selected Phase 1 CPU baseline, synthetic model, limits and worked design oracles. |
 
 ## First-prototype assumptions
 
@@ -63,4 +64,4 @@ The project preserves the Git history of [vla-grasp-server at 2390315](https://g
 
 The single authoritative authoring source for both repositories' shared policy and contracts is [`semantic-shared-control/docs/wiki/`](https://github.com/ZenWang00/semantic-shared-control/tree/main/docs/wiki). The separate Wiki repository publishes the reviewed source files; ROS2 documentation links here. Readers should treat Design Draft v0.1 as a coherent set; updates to shared fields or behavior must update examples and diagrams together. The [cross-repository workflow](https://github.com/ZenWang00/semantic-shared-control/wiki/Repository-Ownership-and-Cross-Repository-Workflow) defines dependency pins and integration evidence.
 
-Implementation still requires selecting and measuring solver budgets, control rates, device calibration, and robot-side stop behavior. Those are recorded as open implementation parameters rather than invented experimental results.
+The Offline Reference Profile selects synthetic solver, timing and numerical settings for Phase 1. Implementations must still verify resource limits and runtime behavior; device calibration and real robot-side stopping require separate validation. Numerical design checks do not establish control performance.
