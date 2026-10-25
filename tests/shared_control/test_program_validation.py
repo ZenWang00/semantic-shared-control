@@ -17,6 +17,10 @@ def setup_program(catalog, *, axis=False, directed=False, invariant=True, body=N
     geometry = next(m["payload"] for m in catalog["messages"] if m["message_type"] == "SceneGeometry")
     program = catalog["constraint_programs"][0]
     if axis:
+        if not geometry["axes"]:
+            geometry["axes"] = [{"axis_id": "axis-test", "object_id": program["object_id"],
+                "origin_keypoint_id": program["keypoint_bindings"][0],
+                "unit_direction_xyz": [1, 0, 0], "directed": directed}]
         feature = geometry["axes"][0]
         feature["directed"] = directed
         program["axis_bindings"] = [feature["axis_id"]]

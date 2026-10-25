@@ -1,6 +1,6 @@
 # Semantic Shared Control
 
-**Status: schema 1.0 record validation, immutable session registries, deterministic reference resolution and the restricted geometry-residual-v1 interpreter implemented; the complete shared-control runtime remains planned.**
+**Status: schema 1.0 record validation, immutable session registries, deterministic reference resolution, the restricted geometry-residual-v1 interpreter, Linux evaluator isolation and host validation receipts implemented; the complete shared-control runtime remains planned.**
 
 This project investigates continuous shared control of a robot end effector from a two-dimensional joystick, task semantics from a vision-language model (VLM), and geometric information represented by keypoints and axes. The proposed optimizer combines these inputs with measured robot state to propose the next short-horizon TCP pose.
 
@@ -8,7 +8,7 @@ The first prototype is scoped to a static scene and a fixed robot base. The oper
 
 ## Documentation
 
-- [Install and use the shared package](docs/shared-package.md) — `ssc-core==0.4.0`, strict schema 1.0 records, session registries, reference resolution, the restricted residual interpreter and the pure host-constraint interface.
+- [Install and use the shared package](docs/shared-package.md) — `ssc-core==0.6.0`, strict schema 1.0 records, session registries, reference resolution, the restricted residual interpreter, supervised evaluation, host-reviewed validation receipts and the pure host-constraint interface.
 
 - [Technical documentation on GitHub Wiki](https://github.com/ZenWang00/semantic-shared-control/wiki)
 - [Version-controlled documentation source](docs/wiki/Home.md)
