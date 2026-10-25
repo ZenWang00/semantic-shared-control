@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools==75.8.0", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ssc-core"
+version = "0.1.0"
+description = "Transport-independent Semantic Shared Control contracts"
+readme = "docs/shared-package.md"
+requires-python = ">=3.12,<3.13"
+dependencies = ["numpy==1.26.4", "scipy==1.11.4"]
+
+[project.optional-dependencies]
+test = ["pytest==7.4.4"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["ssc_core*"]
+
+[tool.setuptools.package-data]
+ssc_core = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/shared_control"]
+addopts = "--import-mode=importlib"

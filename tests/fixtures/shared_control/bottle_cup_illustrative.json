@@ -1,0 +1,668 @@
+{
+  "fixture_kind": "illustrative_contract_catalog",
+  "constraint_programs": [
+    {
+      "program_id": "program-bottle-distance-v1",
+      "source_sha256": "a686a0b43a1e5e8dd24b8cab1f8015bb81c89975e4d42fd253dee29bcd40cea2",
+      "function_api_version": "geometry-residual-v1",
+      "object_id": "object-bottle",
+      "description": "Approach the grounded bottle TCP target within the declared distance tolerance.",
+      "entrypoint": "evaluate",
+      "source_code": "def evaluate(p_tcp, R_control_tcp, keypoints, axis_dirs, params):\n    distance = norm(p_tcp - keypoints[0])\n    return distance - params[0]\n",
+      "keypoint_bindings": [
+        "kp-bottle-approach"
+      ],
+      "axis_bindings": [],
+      "parameters": [
+        {
+          "name": "distance_tolerance",
+          "value": 0.02,
+          "unit": "m"
+        }
+      ],
+      "output_unit": "m"
+    },
+    {
+      "program_id": "program-cup-distance-v1",
+      "source_sha256": "a686a0b43a1e5e8dd24b8cab1f8015bb81c89975e4d42fd253dee29bcd40cea2",
+      "function_api_version": "geometry-residual-v1",
+      "object_id": "object-cup",
+      "description": "Approach the grounded cup TCP target within the declared distance tolerance.",
+      "entrypoint": "evaluate",
+      "source_code": "def evaluate(p_tcp, R_control_tcp, keypoints, axis_dirs, params):\n    distance = norm(p_tcp - keypoints[0])\n    return distance - params[0]\n",
+      "keypoint_bindings": [
+        "kp-cup-approach"
+      ],
+      "axis_bindings": [],
+      "parameters": [
+        {
+          "name": "distance_tolerance",
+          "value": 0.02,
+          "unit": "m"
+        }
+      ],
+      "output_unit": "m"
+    }
+  ],
+  "validation_receipts": [
+    {
+      "receipt_id": "receipt-bottle-v1",
+      "program_id": "program-bottle-distance-v1",
+      "source_sha256": "a686a0b43a1e5e8dd24b8cab1f8015bb81c89975e4d42fd253dee29bcd40cea2",
+      "function_api_version": "geometry-residual-v1",
+      "scene_id": "scene-demo-001",
+      "feature_set_id": "features-demo-001",
+      "validation_geometry_id": "geometry-demo-001",
+      "validation_geometry_revision": 1,
+      "validator_policy_version": "numeric-policy-demo-v1",
+      "status": "accepted",
+      "diagnostics": []
+    },
+    {
+      "receipt_id": "receipt-cup-v1",
+      "program_id": "program-cup-distance-v1",
+      "source_sha256": "a686a0b43a1e5e8dd24b8cab1f8015bb81c89975e4d42fd253dee29bcd40cea2",
+      "function_api_version": "geometry-residual-v1",
+      "scene_id": "scene-demo-001",
+      "feature_set_id": "features-demo-001",
+      "validation_geometry_id": "geometry-demo-001",
+      "validation_geometry_revision": 1,
+      "validator_policy_version": "numeric-policy-demo-v1",
+      "status": "accepted",
+      "diagnostics": []
+    }
+  ],
+  "execution_bindings": [
+    {
+      "binding_id": "binding-bottle-v1",
+      "program_id": "program-bottle-distance-v1",
+      "config_id": "config-demo-001",
+      "normalization_scale": 0.1,
+      "weight": 1.0,
+      "validation_receipt_id": "receipt-bottle-v1"
+    },
+    {
+      "binding_id": "binding-cup-v1",
+      "program_id": "program-cup-distance-v1",
+      "config_id": "config-demo-001",
+      "normalization_scale": 0.1,
+      "weight": 1.0,
+      "validation_receipt_id": "receipt-cup-v1"
+    }
+  ],
+  "messages": [
+    {
+      "message_type": "SessionConfig",
+      "meta": {
+        "schema_version": "1.0",
+        "session_id": "session-demo-001",
+        "message_id": "message-config-001",
+        "source_id": "robot-demo",
+        "sequence": 1,
+        "produced_at": {
+          "clock_id": "robot-clock-demo",
+          "sec": 11,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "config_id": "config-demo-001",
+        "control_frame": "LIO_base_link",
+        "tcp_frame": "lio_tcp_link",
+        "robot_model_id": "lio-model-demo",
+        "validation_policy_id": "numeric-policy-demo-v1",
+        "motion_constraint_set_id": "host-limits-demo-v1",
+        "control_period_s": 0.02,
+        "max_xy_speed_mps": 0.1,
+        "max_linear_speed_mps": 0.1,
+        "max_angular_speed_radps": 0.2,
+        "joystick_timeout_s": 0.2,
+        "robot_state_timeout_s": 0.1,
+        "solve_budget_s": 0.01,
+        "max_command_age_s": 0.02,
+        "history_window_s": 0.5,
+        "max_capture_skew_s": 0.01
+      }
+    },
+    {
+      "message_type": "TaskContext",
+      "meta": {
+        "schema_version": "1.0",
+        "session_id": "session-demo-001",
+        "message_id": "message-task-001",
+        "source_id": "robot-demo",
+        "sequence": 2,
+        "produced_at": {
+          "clock_id": "robot-clock-demo",
+          "sec": 11,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "task_id": "task-demo-001",
+        "revision": 1,
+        "instruction": "Help me approach the bottle or cup while I guide the arm."
+      }
+    },
+    {
+      "message_type": "SceneObservation",
+      "meta": {
+        "schema_version": "1.0",
+        "session_id": "session-demo-001",
+        "message_id": "message-observation-001",
+        "source_id": "robot-demo",
+        "sequence": 0,
+        "produced_at": {
+          "clock_id": "robot-clock-demo",
+          "sec": 11,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "observation_id": "observation-demo-001",
+        "scene_id": "scene-demo-001",
+        "rgb_stamp": {
+          "clock_id": "robot-clock-demo",
+          "sec": 10,
+          "nanosec": 0
+        },
+        "depth_stamp": {
+          "clock_id": "robot-clock-demo",
+          "sec": 10,
+          "nanosec": 1000000
+        },
+        "camera_frame": "camera_color_optical_frame",
+        "rgb_ref": {
+          "asset_id": "rgb-demo-001",
+          "media_type": "image/png",
+          "encoding": "uint8_rgb",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "depth_ref": {
+          "asset_id": "depth-demo-001",
+          "media_type": "application/octet-stream",
+          "encoding": "float32_m",
+          "shape": [
+            480,
+            640
+          ]
+        },
+        "K": [
+          [
+            600,
+            0,
+            319.5
+          ],
+          [
+            0,
+            600,
+            239.5
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        "projection_model": "pinhole_rectified",
+        "calibration_id": "calibration-demo-001",
+        "T_control_camera": {
+          "parent_frame": "LIO_base_link",
+          "child_frame": "camera_color_optical_frame",
+          "sampled_at": {
+            "clock_id": "robot-clock-demo",
+            "sec": 10,
+            "nanosec": 0
+          },
+          "pose": {
+            "position_xyz": [
+              0,
+              0,
+              0
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ]
+          }
+        }
+      }
+    },
+    {
+      "message_type": "SceneGeometry",
+      "meta": {
+        "schema_version": "1.0",
+        "session_id": "session-demo-001",
+        "message_id": "message-geometry-001",
+        "source_id": "workstation-demo",
+        "sequence": 1,
+        "produced_at": {
+          "clock_id": "workstation-clock-demo",
+          "sec": 900,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "geometry_id": "geometry-demo-001",
+        "scene_id": "scene-demo-001",
+        "feature_set_id": "features-demo-001",
+        "revision": 1,
+        "observation_id": "observation-demo-001",
+        "frame_id": "LIO_base_link",
+        "mode": "static",
+        "objects": [
+          {
+            "object_id": "object-bottle",
+            "label": "bottle"
+          },
+          {
+            "object_id": "object-cup",
+            "label": "cup"
+          }
+        ],
+        "keypoints": [
+          {
+            "keypoint_id": "kp-bottle-approach",
+            "object_id": "object-bottle",
+            "position_xyz": [
+              0.5,
+              0.1,
+              0.2
+            ]
+          },
+          {
+            "keypoint_id": "kp-bottle-origin",
+            "object_id": "object-bottle",
+            "position_xyz": [
+              0.5,
+              0.1,
+              0.1
+            ]
+          },
+          {
+            "keypoint_id": "kp-cup-approach",
+            "object_id": "object-cup",
+            "position_xyz": [
+              0.5,
+              -0.15,
+              0.15
+            ]
+          },
+          {
+            "keypoint_id": "kp-cup-origin",
+            "object_id": "object-cup",
+            "position_xyz": [
+              0.5,
+              -0.15,
+              0.1
+            ]
+          }
+        ],
+        "axes": [
+          {
+            "axis_id": "axis-bottle-body",
+            "object_id": "object-bottle",
+            "origin_keypoint_id": "kp-bottle-origin",
+            "unit_direction_xyz": [
+              0,
+              0,
+              1
+            ],
+            "directed": false
+          },
+          {
+            "axis_id": "axis-cup-body",
+            "object_id": "object-cup",
+            "origin_keypoint_id": "kp-cup-origin",
+            "unit_direction_xyz": [
+              0,
+              0,
+              1
+            ],
+            "directed": false
+          }
+        ]
+      }
+    },
+    {
+      "message_type": "SemanticContext",
+      "meta": {
+        "schema_version": "1.0",
+        "session_id": "session-demo-001",
+        "message_id": "message-semantic-001",
+        "source_id": "workstation-demo",
+        "sequence": 2,
+        "produced_at": {
+          "clock_id": "workstation-clock-demo",
+          "sec": 900,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "semantic_id": "semantic-demo-001",
+        "task_id": "task-demo-001",
+        "task_revision": 1,
+        "scene_id": "scene-demo-001",
+        "feature_set_id": "features-demo-001",
+        "observation_id": "observation-demo-001",
+        "object_relevance": [
+          {
+            "object_id": "object-bottle",
+            "task_relevance": 0.8
+          },
+          {
+            "object_id": "object-cup",
+            "task_relevance": 0.6
+          }
+        ],
+        "program_refs": [
+          {
+            "program_id": "program-bottle-distance-v1",
+            "source_sha256": "a686a0b43a1e5e8dd24b8cab1f8015bb81c89975e4d42fd253dee29bcd40cea2"
+          },
+          {
+            "program_id": "program-cup-distance-v1",
+            "source_sha256": "a686a0b43a1e5e8dd24b8cab1f8015bb81c89975e4d42fd253dee29bcd40cea2"
+          }
+        ]
+      }
+    },
+    {
+      "message_type": "JoystickSample",
+      "meta": {
+        "schema_version": "1.0",
+        "session_id": "session-demo-001",
+        "message_id": "message-joystick-001",
+        "source_id": "robot-demo",
+        "sequence": 3,
+        "produced_at": {
+          "clock_id": "robot-clock-demo",
+          "sec": 11,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "sampled_at": {
+          "clock_id": "robot-clock-demo",
+          "sec": 10,
+          "nanosec": 995000000
+        },
+        "mapping_id": "base-xy-device-map-demo",
+        "u_xy": [
+          0.4,
+          0
+        ],
+        "enabled": true
+      }
+    },
+    {
+      "message_type": "RobotState",
+      "meta": {
+        "schema_version": "1.0",
+        "session_id": "session-demo-001",
+        "message_id": "message-state-001",
+        "source_id": "robot-demo",
+        "sequence": 4,
+        "produced_at": {
+          "clock_id": "robot-clock-demo",
+          "sec": 11,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "sampled_at": {
+          "clock_id": "robot-clock-demo",
+          "sec": 10,
+          "nanosec": 998000000
+        },
+        "frame_id": "LIO_base_link",
+        "tcp_frame": "lio_tcp_link",
+        "tcp_pose": {
+          "position_xyz": [
+            0.4,
+            0,
+            0.35
+          ],
+          "quaternion_xyzw": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "joint_names": [
+          "illustrative_joint_1",
+          "illustrative_joint_2",
+          "illustrative_joint_3",
+          "illustrative_joint_4",
+          "illustrative_joint_5",
+          "illustrative_joint_6"
+        ],
+        "joint_positions_rad": [
+          0,
+          0.2,
+          -0.4,
+          0.1,
+          0.3,
+          0
+        ],
+        "state_source": "measured_feedback"
+      }
+    },
+    {
+      "message_type": "ControlSnapshot",
+      "meta": {
+        "schema_version": "1.0",
+        "session_id": "session-demo-001",
+        "message_id": "message-snapshot-001",
+        "source_id": "robot-demo",
+        "sequence": 5,
+        "produced_at": {
+          "clock_id": "robot-clock-demo",
+          "sec": 11,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "snapshot_id": "snapshot-demo-001",
+        "snapshot_seq": 1,
+        "control_epoch": 1,
+        "config_id": "config-demo-001",
+        "task_ref": {
+          "task_id": "task-demo-001",
+          "revision": 1
+        },
+        "dt_s": 0.02,
+        "joystick_ref": "message-joystick-001",
+        "robot_state_ref": "message-state-001",
+        "joystick_history_refs": [],
+        "geometry_ref": {
+          "geometry_id": "geometry-demo-001",
+          "revision": 1
+        },
+        "semantic_id": "semantic-demo-001",
+        "program_refs": [
+          {
+            "program_id": "program-bottle-distance-v1",
+            "source_sha256": "a686a0b43a1e5e8dd24b8cab1f8015bb81c89975e4d42fd253dee29bcd40cea2"
+          },
+          {
+            "program_id": "program-cup-distance-v1",
+            "source_sha256": "a686a0b43a1e5e8dd24b8cab1f8015bb81c89975e4d42fd253dee29bcd40cea2"
+          }
+        ],
+        "execution_binding_refs": [
+          "binding-bottle-v1",
+          "binding-cup-v1"
+        ],
+        "previous_applied_command_id": null
+      }
+    },
+    {
+      "message_type": "ObjectWeights",
+      "meta": {
+        "schema_version": "1.0",
+        "session_id": "session-demo-001",
+        "message_id": "message-weights-001",
+        "source_id": "robot-demo",
+        "sequence": 6,
+        "produced_at": {
+          "clock_id": "robot-clock-demo",
+          "sec": 11,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "weights_id": "weights-demo-001",
+        "snapshot_id": "snapshot-demo-001",
+        "estimator_config_id": "estimator-demo-v1",
+        "weights": [
+          {
+            "object_id": "object-bottle",
+            "weight": 0.7
+          },
+          {
+            "object_id": "object-cup",
+            "weight": 0.3
+          }
+        ],
+        "assistance_strength": 0.5
+      }
+    },
+    {
+      "message_type": "ControlResult",
+      "meta": {
+        "schema_version": "1.0",
+        "session_id": "session-demo-001",
+        "message_id": "message-result-001",
+        "source_id": "robot-demo",
+        "sequence": 7,
+        "produced_at": {
+          "clock_id": "robot-clock-demo",
+          "sec": 11,
+          "nanosec": 6000000
+        }
+      },
+      "payload": {
+        "result_id": "result-demo-001",
+        "snapshot_id": "snapshot-demo-001",
+        "weights_id": "weights-demo-001",
+        "control_epoch": 1,
+        "command_seq": 1,
+        "source_joystick_seq": 3,
+        "source_robot_state_seq": 4,
+        "status": "move",
+        "evaluation_valid": true,
+        "solver_status": "solved",
+        "constraints_satisfied": false,
+        "solve_time_s": 0.006,
+        "constraint_evaluations": [
+          {
+            "program_id": "program-bottle-distance-v1",
+            "raw_g": 0.18581593718660372,
+            "normalization_scale": 0.1,
+            "penalty": 3.452756251253586
+          },
+          {
+            "program_id": "program-cup-distance-v1",
+            "raw_g": 0.24896133551125896,
+            "normalization_scale": 0.1,
+            "penalty": 6.198174657954964
+          }
+        ],
+        "next_tcp_pose": {
+          "position_xyz": [
+            0.4004,
+            0,
+            0.3498
+          ],
+          "quaternion_xyzw": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        "horizon_s": 0.02
+      }
+    },
+    {
+      "message_type": "JoystickSample",
+      "meta": {
+        "schema_version": "1.0",
+        "session_id": "session-demo-001",
+        "message_id": "message-joystick-002",
+        "source_id": "robot-demo",
+        "sequence": 8,
+        "produced_at": {
+          "clock_id": "robot-clock-demo",
+          "sec": 11,
+          "nanosec": 20000000
+        }
+      },
+      "payload": {
+        "sampled_at": {
+          "clock_id": "robot-clock-demo",
+          "sec": 11,
+          "nanosec": 20000000
+        },
+        "mapping_id": "base-xy-device-map-demo",
+        "u_xy": [
+          0,
+          0
+        ],
+        "enabled": true
+      }
+    },
+    {
+      "message_type": "ControlResult",
+      "meta": {
+        "schema_version": "1.0",
+        "session_id": "session-demo-001",
+        "message_id": "message-hold-002",
+        "source_id": "robot-demo",
+        "sequence": 9,
+        "produced_at": {
+          "clock_id": "robot-clock-demo",
+          "sec": 11,
+          "nanosec": 20100000
+        }
+      },
+      "payload": {
+        "result_id": "result-hold-demo-002",
+        "snapshot_id": null,
+        "weights_id": null,
+        "control_epoch": 2,
+        "command_seq": 2,
+        "source_joystick_seq": 8,
+        "source_robot_state_seq": 4,
+        "status": "hold",
+        "evaluation_valid": false,
+        "solver_status": "not_run",
+        "constraints_satisfied": null,
+        "solve_time_s": 0,
+        "constraint_evaluations": [],
+        "reason": "joystick_released"
+      }
+    }
+  ],
+  "command_acceptance_records": [
+    {
+      "result_id": "result-demo-001",
+      "command_accepted": false,
+      "reason": "earlier_control_epoch_after_local_release",
+      "checked_at": {
+        "clock_id": "robot-clock-demo",
+        "sec": 11,
+        "nanosec": 21000000
+      },
+      "applied_command_id": null
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+name: Shared core validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - 'src/ssc_core/**'
+      - 'tests/shared_control/**'
+      - 'tests/fixtures/shared_control/**'
+      - 'pyproject.toml'
+      - 'docs/shared-package.md'
+      - '.github/workflows/shared-core.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  wheel-and-contracts:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the shared package only
+        run: python -m pip wheel --no-deps --wheel-dir dist .
+      - name: Install wheel into a clean environment
+        run: |
+          python -m venv .venv-acceptance
+          .venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.1.0-py3-none-any.whl[test]'
+      - name: Verify installed package
+        run: |
+          .venv-acceptance/bin/python -m pytest tests/shared_control
+          .venv-acceptance/bin/python -m pip check
