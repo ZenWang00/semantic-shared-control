@@ -1,7 +1,7 @@
-"""Dependency-free structural contracts for semantic shared control.
+"""Standard-library contracts and reference resolution for shared control.
 
-Parsing validates structure and local invariants only. It does not authorize
-source execution, accept a semantic bundle, or certify a robot command.
+Parsing validates local invariants; registries enforce immutable identities and
+typed-record compatibility. Neither authorizes execution, activation or motion.
 """
 
 from .errors import ValidationError
@@ -18,8 +18,12 @@ from .validation import loads_message, parse_message, parse_record, to_dict
 from .host_constraints import (
     ConstraintMargin, HostConstraintChecker, HostConstraintResult, MeasuredStateView,
 )
+from .registry import (
+    RegistryError, ResolvedBundle, ResolvedProgram, ResolvedSnapshot, ResolvedWeights,
+    SessionRegistry,
+)
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "AssetRef", "Axis", "CommandAcceptanceRecord", "ConstraintEvaluation",
@@ -28,8 +32,10 @@ __all__ = [
     "MeasuredStateView", "Message", "MessageMeta", "NUMERIC_OFFLINE_V1", "Number",
     "Object", "ObjectRelevance", "ObjectWeight", "ObjectWeights", "Parameter", "Payload", "Pose",
     "ProgramExecutionBinding", "ProgramRef", "ProgramValidationReceipt",
-    "Quaternion", "Record", "RobotState", "SceneGeometry", "SceneObservation", "SemanticContext",
-    "SessionConfig", "StampedTransform", "TaskContext", "TaskRef", "TimePoint", "Unit",
+    "Quaternion", "Record", "RegistryError", "ResolvedBundle", "ResolvedProgram",
+    "ResolvedSnapshot", "ResolvedWeights", "RobotState", "SceneGeometry", "SceneObservation",
+    "SemanticContext", "SessionConfig", "SessionRegistry", "StampedTransform", "TaskContext",
+    "TaskRef", "TimePoint", "Unit",
     "ValidationError", "ValidationPolicy", "Vector2", "Vector3", "loads_message",
     "parse_message", "parse_record", "to_dict",
 ]

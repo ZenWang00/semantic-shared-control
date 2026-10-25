@@ -1,9 +1,11 @@
-# Shared structural-validation package
+# Shared validation and reference-resolution package
 
-`ssc-core==0.2.0` implements scene/artifact and live/control record validation
-for schema `1.0`, using explicit policy `numeric-offline-v1`. The inherited grasp
-service is separate. Parsing live/control records does not implement an active
-bundle, live control loop, program execution, a command gate, or a robot.
+`ssc-core==0.3.0` implements scene/artifact and live/control record validation,
+immutable session registries and deterministic reference resolution for schema
+`1.0`, using an explicit host policy. The parsing API and schema remain source
+compatible with 0.2.0. The inherited grasp service is separate. Resolution checks
+typed-record compatibility; an active bundle, live control loop, program
+execution, command gate and robot integration remain separate responsibilities.
 
 ## Install and test
 
@@ -24,7 +26,7 @@ To test the actual wheel in a second clean environment:
 ```sh
 .venv-ssc/bin/python -m pip wheel --no-deps --wheel-dir dist .
 python3.12 -m venv .venv-acceptance
-.venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.2.0-py3-none-any.whl[test]'
+.venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.3.0-py3-none-any.whl[test]'
 .venv-acceptance/bin/python -m pytest tests/shared_control
 .venv-acceptance/bin/python -m pip check
 ```
@@ -59,7 +61,7 @@ wire_value = to_dict(pose)
 - `ValidationError` exposes `path`, `code`, and `message`, identifying the invalid
   field. Validation fails at the first diagnosed violation.
 
-The parsing API is unchanged in 0.2.0. Supported message payloads are
+The parsing API is unchanged in 0.3.0. Supported message payloads are
 SessionConfig, TaskContext, SceneObservation, SceneGeometry, SemanticContext,
 ConstraintProgram, ProgramExecutionBinding, ProgramValidationReceipt, Parameter,
 JoystickSample, RobotState, ControlSnapshot, ObjectWeights and ControlResult.
@@ -124,9 +126,9 @@ are explanatory strings, not identities or proof of physical feature meaning.
 Observation checks cover image encoding, dimensions and aligned size, finite
 3x3 intrinsics with positive focal lengths, matching capture clock domains,
 transform sampling at the RGB timestamp, and the transform's camera child frame.
-Comparing the parent frame or capture skew against SessionConfig requires
-cross-record resolution and is deferred. No image bytes, calibration, actual
-capture synchronization or capture-time transform availability are verified.
+The resolver additionally checks the parent frame and capture skew against
+SessionConfig. No image bytes, calibration, actual capture synchronization or
+capture-time transform availability are verified.
 
 Programs permit empty feature bindings and parameters. Local uniqueness, units,
 finite scalar domains, UTF-8 source size and binding counts are checked. Parameter
@@ -134,13 +136,14 @@ values may be zero or negative unless a later program-specific semantic rule
 prohibits them. Normalization scale is positive in the referenced program's
 implicit output unit; structural checks cannot prove dimensional compatibility.
 Relevance scores do not need to sum to one. Empty program references can parse;
-the later resolver must establish compatible program coverage before activation.
+bundle resolution requires compatible program coverage for every candidate.
 
-SHA-256 is checked for lowercase 64-digit format only. A well-formed but wrong
-hash is intentionally not detected here. Source syntax, source/hash agreement,
-immutable-ID reuse, referenced record existence, task/scene/frame/policy
-compatibility, receipt trust, and numerical probes remain #6–#9 responsibilities.
-Parsing an `accepted` receipt neither issues it nor establishes host trust.
+Parsing checks SHA-256 for lowercase 64-digit format only. Registry registration
+also recomputes the exact UTF-8 source hash and rejects immutable-ID reuse with
+changed content. Resolution checks typed reference existence and
+task/scene/frame/policy compatibility. Source syntax, numerical probes, execution
+isolation and receipt trust remain later validation responsibilities. Parsing or
+resolving an `accepted` receipt neither issues it nor establishes host trust.
 
 JoystickSample requires a finite two-component vector within the unit disk and
 a Boolean enable flag. RobotState checks its pose, unique joint names, matching
@@ -154,7 +157,7 @@ ObjectWeights requires a nonempty set of unique object IDs, finite nonnegative
 weights and assistance strength in [0, 1]. The selected policy bounds the
 candidate count and weight-sum error; `numeric-offline-v1` allows at most eight
 candidates and absolute sum-to-one error of 1e-12. Weights are not renormalized.
-Exact coverage of the semantic candidate set requires the later resolver.
+Weight resolution checks exact coverage of the semantic candidate set.
 
 ControlResult uses mutually exclusive move/hold shapes. A move requires nonnull
 snapshot/weight references and source sequences, valid evaluation, a solved
@@ -173,10 +176,175 @@ CommandAcceptanceRecord validates its decision flag, reason, timestamp and
 required nullable applied-command ID independently of the proposed result.
 It does not certify that a command was accepted or physically executed.
 
-Cross-record compatibility, snapshot program coverage/count limits, equality of
-result horizon and snapshot `dt_s`, input freshness, command ordering and control
-authority remain later-layer checks. Structural acceptance does not authorize
-motion or establish the complete offline profile's runtime requirements.
+The registry supplies the cross-record compatibility and program coverage checks
+described below. Snapshot program-count limits, equality of result horizon and
+snapshot `dt_s`, input freshness, command ordering and control authority remain
+later-layer checks. Structural acceptance or successful resolution does not
+authorize motion or establish the complete offline profile's runtime requirements.
+
+## Session registry and resolution
+
+`SessionRegistry(session_id, *, policy)` owns one in-memory session. Callers
+serialize access; there is no persistence, network lookup or cross-registry
+fallback. Dependencies may arrive in any order. Registration checks each record
+and identity; resolution fails until every required typed reference is present
+and compatible. It does not create, activate or dispatch snapshots.
+
+| Method | Input and result |
+| --- | --- |
+| `register_record(record_type, data, *, session_id)` | A supported class or type name, and a JSON-shaped dict or matching record; returns a detached validated record. |
+| `register_message(data)` | A JSON-shaped envelope or Message; checks its session and atomically registers the message ID and identifiable payload; returns a detached Message. |
+| `get_record(record_type, identity, *, session_id)` | Exact typed lookup; TaskContext requires a TaskRef or `{task_id, revision}` dict, while other supported records use their artifact ID. |
+| `get_message(message_id, *, session_id)` | Exact envelope lookup, including live inputs whose identity is their message ID. |
+| `resolve_program(program_ref, *, geometry_ref, config_id)` | Resolves a ProgramRef and exact GeometryRef to a ResolvedProgram, without requiring a receipt. Useful before validation probes. |
+| `resolve_bundle(*, config_id, task_ref, geometry_ref, semantic_id, program_refs, execution_binding_refs)` | Resolves the complete compatible typed bundle and accepted-status receipts. Reference sequences accept lists or tuples. |
+| `resolve_snapshot(snapshot_id)` | Resolves a registered snapshot, its bundle, current input/state messages and referenced joystick history. |
+| `resolve_weights(weights_id)` | Resolves registered weights and their causal snapshot, enforcing exact candidate coverage. |
+
+Standalone registration supports SessionConfig, TaskContext, SceneObservation,
+SceneGeometry, SemanticContext, ConstraintProgram, ProgramExecutionBinding,
+ProgramValidationReceipt, ControlSnapshot, ObjectWeights and ControlResult.
+JoystickSample and RobotState use envelopes because their immutable references
+are message IDs. Nested values and Parameter have no standalone artifact identity.
+The explicit session argument on standalone registration/lookup must equal the
+registry session; envelopes retain their own checked session IDs. Resolver calls
+use only the registry's session.
+
+Every input, stored value and public return is detached through the parsing
+boundary, including inputs already constructed as dataclasses. Ordinary writes
+are prevented by frozen records and tuple fields. Registering identical content
+again is idempotent. Changed content under the same identity is rejected, using
+complete canonical JSON-shaped values: object-key order is ignored, array
+order, numeric types and signed zero are preserved, so `1` and `1.0` differ.
+Identity comparison does not decimal-encode unbounded TimePoint seconds or
+change global Python integer conversion limits.
+TaskContext identities include both task ID and revision. Geometry IDs cannot be
+reused for a different revision; exact GeometryRef resolution checks both fields.
+A matching source hash never substitutes for the full program content check.
+
+For each `(scene_id, feature_set_id)`, the registry also retains the observable
+feature-definition signature: object membership, keypoint IDs and ownership,
+and axis IDs, ownership, origin keypoint and directedness. These must remain
+unchanged across registered geometry versions. Changed coordinates or frame
+require both a new geometry ID and a new revision within the scene/feature set.
+An existing revision pins those values independently of scene storage order;
+changed definitions require a new feature-set ID. Labels do not establish
+physical feature meaning, which still requires producer validation.
+
+For each `(config_id, program_id)`, execution normalization scale and weight are
+fixed. Changing either requires a new binding ID and configuration ID. A new
+receipt reference with unchanged settings may use the existing configuration.
+
+The host supplies the validation policy; wire IDs cannot select it. Bundle and
+program resolution require the configuration's policy ID to agree with that
+policy. Geometry and observation scenes, capture skew and configured frames are
+checked. Semantic task ID/revision, scene and feature-set dependencies must agree;
+its source observation must resolve within the same scene. Semantic provenance
+may refer to an earlier observation of that static scene.
+
+The selected program references exactly cover the semantic programs. Every
+candidate, including one with zero relevance, has at least one program, and every
+selected program belongs to a candidate. Feature IDs must exist; programs may
+bind features from other objects. Each program has exactly one execution binding
+for the selected configuration. Its receipt must have accepted status and match
+the program ID, source hash, ABI, scene, feature set and host policy. The receipt's
+exact validation geometry also resolves; it may be an earlier geometry version
+with the same scene and feature definitions. These checks establish consistency,
+not the origin or trustworthiness of a receipt.
+
+Resolved values are frozen containers with the following fields:
+
+| Value | Fields and ordering |
+| --- | --- |
+| `ResolvedProgram` | `program`, `geometry`, `candidate`, `keypoints`, `axis_dirs`, `params`; numeric-source tuples follow the program's binding and parameter order. |
+| `ResolvedBundle` | `session_id`, `configuration`, `task`, `geometry`, `semantic`, `candidates`, `programs`, `execution_bindings`, `receipts`; candidates follow semantic relevance order, programs follow requested reference order, bindings and receipts follow programs. |
+| `ResolvedSnapshot` | `snapshot`, `bundle`, `joystick`, `robot_state`, `joystick_history`; live inputs retain their Message envelopes and history retains reference order. |
+| `ResolvedWeights` | `weights`, `snapshot`, `candidate_weights`; candidate weights follow the resolved semantic candidate order. |
+
+Resolution uses only the standard library and preserves source numeric values.
+It does not create NumPy arrays or run generated code. Empty numeric-source
+bindings are empty tuples. A later evaluator must construct read-only float64
+arrays with the ABI shapes `(K, 3)`, `(A, 3)` and `(P,)`, including explicit
+`(0, 3)` feature-array shapes for empty bindings.
+
+RobotState control/TCP frames must match configuration. History entries must be
+JoystickSample messages with the current input's mapping ID and clock domain.
+History ordering, count, age/window bounds, source freshness and liveness remain
+assembler/runtime checks. `previous_applied_command_id` remains opaque here:
+accepted-command provenance and result checks belong to the adapter/solver/gate.
+There is no applied-command lookup or inference of motion authority.
+
+Resources without a supported record schema remain opaque dependencies: asset
+bytes, calibration and robot-model resources, motion-constraint sets, joystick
+mappings and estimator configurations. Their existence or contents are not
+verified. The supplied ValidationPolicy is checked by ID but is not loaded from
+a registry resource. No external-resource exception or another-session fallback
+is implemented. Missing typed records fail even when another registry contains
+an identically named record.
+
+Structural failures retain ValidationError. RegistryError also exposes `path`,
+`code` and `message`, distinguishing missing references, session mismatches,
+immutable conflicts, source-hash mismatches, feature-definition changes,
+geometry revision conflicts, binding/configuration conflicts and incompatible
+references or coverage. Neither failure class repairs inputs.
+
+From the repository root, this example loads the synthetic catalog and resolves
+the bottle program's numerical inputs without inventing validation receipts:
+
+```python
+import json
+from pathlib import Path
+
+from ssc_core import GeometryRef, NUMERIC_OFFLINE_V1, SessionRegistry, TaskRef
+
+catalog = json.loads(
+    Path("tests/fixtures/shared_control/bottle_cup_offline_v1.json").read_text()
+)
+session = catalog["messages"][0]["meta"]["session_id"]
+registry = SessionRegistry(session, policy=NUMERIC_OFFLINE_V1)
+for message in catalog["messages"]:
+    registry.register_message(message)
+for key, record_type in (
+    ("constraint_programs", "ConstraintProgram"),
+    ("execution_bindings", "ProgramExecutionBinding"),
+    ("validation_receipts", "ProgramValidationReceipt"),
+):
+    for data in catalog[key]:
+        registry.register_record(record_type, data, session_id=session)
+
+task = registry.get_record(
+    "TaskContext", TaskRef("task-bottle-cup-offline-v1", 1), session_id=session,
+)
+semantic = registry.get_record(
+    "SemanticContext", "semantic-bottle-cup-offline-v1", session_id=session,
+)
+geometry_ref = GeometryRef("geometry-bottle-cup-offline-v1", 1)
+program = registry.resolve_program(
+    semantic.program_refs[0], geometry_ref=geometry_ref,
+    config_id="config-offline-v1",
+)
+assert program.keypoints == ((0.41, 0, 0.3),)
+assert program.axis_dirs == () and program.params == (0,)
+```
+
+The catalog deliberately has no issued validation receipts. Once a separate
+trusted validator has registered compatible receipts for its bindings, the
+corresponding bundle call is:
+
+```python
+bundle = registry.resolve_bundle(
+    config_id="config-offline-v1",
+    task_ref=TaskRef(task.task_id, task.revision),
+    geometry_ref=geometry_ref,
+    semantic_id=semantic.semantic_id,
+    program_refs=semantic.program_refs,
+    execution_binding_refs=[item["binding_id"] for item in catalog["execution_bindings"]],
+)
+```
+
+With the unchanged fixture this call raises RegistryError with
+`code="missing_reference"` for an unissued receipt. Registering a structurally
+valid accepted-status receipt alone would not establish trusted validation.
 
 ## Pure host-constraint interface
 
@@ -209,6 +377,11 @@ The original bottle/cup catalog remains unchanged; its complete scene/artifact
 and live/control chain is parsed, including separate acceptance bookkeeping.
 A separate synthetic offline fixture uses fresh identities and is not a
 runtime-approved active bundle. See the fixture README for origin.
+
+Registry checks additionally cover defensive copying, immutable-content conflicts,
+exact task/geometry references, cross-session rejection, source integrity,
+feature definitions, ordered bindings and compatible bundle/snapshot/weight
+resolution. They do not exercise a generated-code validator or a live controller.
 
 PR evidence records the tested commit, wheel hash, exact environment and package
 versions, commands, test result and independent final-diff review. Component
