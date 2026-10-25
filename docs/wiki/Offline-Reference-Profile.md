@@ -100,7 +100,7 @@ Every term is dimensionless. Translation in all three axes and rotation particip
 
 Basic hard margins are m^2 - norm(x)^2, m^2 - norm(r)^2 and u_hat dot x_xy, plus the host margins in section 5. Thus input magnitude bounds both translational and angular assistance. Neutral/disabled input bypasses the solver and cancels motion through the existing local path.
 
-Use scipy.optimize.minimize with method SLSQP, zero initial x,r, jac=None, eps=1e-6, ftol=1e-9, maxiter=100, disp=False and no parallel finite differences. [SciPy documents these parameters](https://docs.scipy.org/doc/scipy-1.11.4/reference/optimize.minimize-slsqp.html). Use zero initialization for every snapshot, not hidden warm-start state.
+Use scipy.optimize.minimize with method SLSQP, zero initial x,r, componentwise bounds [-1,1] for all six variables, jac=None, eps=1e-6, ftol=1e-9, maxiter=100, disp=False and no parallel finite differences. The input-scaled norm margins remain required in addition to these box bounds. [SciPy documents these parameters](https://docs.scipy.org/doc/scipy-1.11.4/reference/optimize.minimize-slsqp.html). Use zero initialization for every snapshot, not hidden warm-start state.
 
 The non-opposition rule applies to each next proposal using pinned input and again to acceptance using current input/state. Plant interpolation preserves the rule relative to the input accepted for that bounded target. A later ordinary nonzero direction update affects the next gate check; it does not change epoch or require neutral re-engagement. This is not an instantaneous physical-reversal guarantee between control cycles. Current release/disable always overrides the remaining target immediately.
 
@@ -112,7 +112,7 @@ Success requires solver success, finite pose/objective/evaluations, completion b
 
 The shared library accepts a pure checker of candidate pose, supplied measured state, u, dt and immutable constraint configuration. It returns named finite dimensionless margins, violation reasons and a feasible flag computed from those margins. It does not read clocks, current devices, mutable globals or network state. Solver calls use pinned data. The robot gate calls the same mathematical contract independently with fresh local data and rechecks authority, deadline, ordering and controller state outside the callback.
 
-The algorithm supplies basic step margins from section 4; the injected checker supplies model, workspace and path margins. Configuration identities must agree, and a callback error/nonfinite margin is rejection. Each margin must be >= -1e-8; this is a numerical comparison tolerance, not a hardware safety margin. The consumer owns the implementation. Server unit checks use local doubles, without importing ROS2 source.
+The algorithm supplies basic step margins from section 4; the injected checker supplies model, workspace and path margins. The gate independently recomputes both sets: derive x=(p_target-p_current)/L and r=Log(R_target R_current^T)/A using the current measured pose and the unchanged candidate horizon, then use current input magnitude/direction for all three basic margins. It also checks the six componentwise bounds. Do not trust margins reported by the worker. Configuration identities must agree, and a callback error/nonfinite margin is rejection. Each margin must be >= -1e-8; this is a numerical comparison tolerance, not a hardware safety margin. The consumer owns the implementation. Server unit checks use local doubles, without importing ROS2 source.
 
 ### Synthetic model and constraints
 
