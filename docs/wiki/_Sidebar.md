@@ -13,5 +13,6 @@
 - [Lifecycle and Timing](https://github.com/ZenWang00/semantic-shared-control/wiki/Runtime-Lifecycle-and-Timing)
 - [Validation and Legacy Integration](https://github.com/ZenWang00/semantic-shared-control/wiki/Validation-and-Legacy-Integration)
 - [Offline Reference Profile](https://github.com/ZenWang00/semantic-shared-control/wiki/Offline-Reference-Profile)
+- [Offline Batch Profile](https://github.com/ZenWang00/semantic-shared-control/wiki/Offline-Batch-Profile)
 
 [Server repository](https://github.com/ZenWang00/semantic-shared-control) · [ROS2 repository](https://github.com/ZenWang00/Grasp-Pose-Generation) · [Shared documentation source](https://github.com/ZenWang00/semantic-shared-control/tree/main/docs/wiki)

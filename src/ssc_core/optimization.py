@@ -62,10 +62,10 @@ class SolverConfig:
 
 
 def get_solver_config(solver_config_id: str = "solver-slsqp-v1") -> SolverConfig:
-    """Return a fresh copy of the only approved configuration; others are rejected."""
-    if solver_config_id != "solver-slsqp-v1":
+    """Return immutable v1 or candidate-batch v2 content; default stays v1."""
+    if solver_config_id not in ("solver-slsqp-v1", "solver-slsqp-batch-v2"):
         raise ValueError(f"unsupported solver configuration: {solver_config_id!r}")
-    return SolverConfig("solver-slsqp-v1", "SLSQP", 0.1, 1e-6, 1e-9, 100, 1.0, 0.15, 16,
+    return SolverConfig(solver_config_id, "SLSQP", 0.1, 1e-6, 1e-9, 100, 1.0, 0.15, 16,
                         1024 * 1024 * 1024, 1024 * 1024, 5.0, 0.1)
 
 

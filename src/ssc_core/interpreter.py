@@ -520,19 +520,26 @@ class CompiledProgram:
         ``tolist()``). Shapes are (3,), (3, 3), (K, 3), (A, 3) and (P,), with K, A
         and P fixed by the artifact's bindings. Raises InterpreterError.
         """
-        env: list[Any] = [None] * self._slots
-        env[0] = _vector(p_tcp, 3, "$.p_tcp")
+        position = _vector(p_tcp, 3, "$.p_tcp")
         rotation = _matrix(R_control_tcp, 3, "$.R_control_tcp")
         _check_rotation(rotation, self.policy.rotation_tolerance)
-        env[1] = rotation
-        env[2] = _matrix(keypoints, len(self.program.keypoint_bindings), "$.keypoints")
+        return self._evaluate_checked(position, rotation, self._checked_bindings(keypoints, axis_dirs, params))
+
+    def _checked_bindings(self, keypoints, axis_dirs, params):
+        """Private immutable input copy; shared only within the isolated batch worker."""
+        points = _matrix(keypoints, len(self.program.keypoint_bindings), "$.keypoints")
         axes = _matrix(axis_dirs, len(self.program.axis_bindings), "$.axis_dirs")
         for i, axis in enumerate(axes):
             if not abs(math.hypot(*axis) - 1.0) <= self.policy.unit_norm_tolerance:
                 _invalid_input(f"$.axis_dirs[{i}]", "non_unit_axis",
                                f"axis must have unit norm within {self.policy.unit_norm_tolerance}")
-        env[3] = axes
-        env[4] = _vector(params, len(self.program.parameters), "$.params")
+        parameters = _vector(params, len(self.program.parameters), "$.params")
+        return points, axes, parameters
+
+    def _evaluate_checked(self, position, rotation, bindings):
+        """Evaluate already checked immutable float tuples; never a public input boundary."""
+        env: list[Any] = [None] * self._slots
+        env[:5] = (position, rotation, *bindings)
         for slot, node in self._steps:
             env[slot] = _run(node, env)
         residual = _run(self._result, env)

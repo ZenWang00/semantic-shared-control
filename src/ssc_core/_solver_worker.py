@@ -1,10 +1,11 @@
-"""Private solver process: SLSQP plus one supervised evaluator per bound program.
+"""Private solver process: SLSQP plus separately supervised residual evaluation.
 
 The host launches ``python -I -m ssc_core._solver_worker`` in a new process group.
 This process limits its own address space to 1 GiB, then imports NumPy/SciPy.
 Generated programs never execute here: each candidate residual comes from a
-separately spawned 256 MiB / 10 ms ``SupervisedEvaluator`` child, which this
-process prepares once while motion is disabled. The host checker is created from
+separately spawned 256 MiB / 10 ms child: one per program in v1, one complete
+candidate batch in v2. Preparation happens while motion is disabled.
+The host checker is created from
 a trusted ``module:attribute`` factory named in the preparation request.
 """
 import importlib
@@ -58,9 +59,10 @@ class _Worker:
         self.evaluators = {}
         self.checker = None
         self.environment = {}
+        self.batch = None
 
     def close_evaluators(self):
-        for evaluator in self.evaluators.values():
+        for evaluator in dict.fromkeys(self.evaluators.values()):
             try:
                 evaluator.close().result(1)
             except Exception:
@@ -69,7 +71,7 @@ class _Worker:
     def prepare(self, request):
         if self.generation is not None:
             raise ValueError("invalid worker lifecycle")
-        if request["solver_config_id"] != SOLVER_CONFIG_ID:
+        if request["solver_config_id"] not in (SOLVER_CONFIG_ID, "solver-slsqp-batch-v2"):
             raise ValueError("unsupported solver configuration")
         deadline = request["deadline_ns"]
         import numpy
@@ -79,7 +81,18 @@ class _Worker:
         self.checker = _load_checker(request["checker"])
         evaluators = {}
         try:
-            for program in request["programs"]:
+            programs = request["programs"]
+            if request["solver_config_id"] == "solver-slsqp-batch-v2":
+                from ._batch_evaluator import BatchEvaluator
+                self.batch = BatchEvaluator()
+                evaluators = {p["program_id"]: self.batch for p in programs}
+                remaining = max(0., (deadline - time.monotonic_ns()) / 1e9)
+                outcome = self.batch.prepare(programs, motion_disabled=True).result(remaining + 1)
+                if not outcome.ok:
+                    raise _Failed("error", f"evaluator_{outcome.code}", outcome.diagnostic)
+                if time.monotonic_ns() >= deadline:
+                    raise _Failed("timeout", "preparation_deadline", "batch preparation exceeded its budget")
+            for program in (() if self.batch is not None else programs):
                 evaluator = _new_evaluator()
                 evaluators[program["program_id"]] = evaluator
                 remaining = max(0., (deadline - time.monotonic_ns()) / 1e9)
@@ -117,6 +130,24 @@ class _Worker:
         config = parse_record(SessionConfig, problem["configuration"], policy=NUMERIC_OFFLINE_V1)
         u_xy, dt = tuple(problem["u_xy"]), problem["dt_s"]
         stats = {"calls": 0, "max_elapsed_s": 0., "total_elapsed_s": 0.}
+        first_batch = True
+
+        def evaluate_batch(terms, p_tcp, rotation):
+            nonlocal first_batch
+            outcome = self.batch.submit_batch(p_tcp, rotation, terms if first_batch else None,
+                deadline_ns=deadline, _inline=True, _scope=request["request_id"]).result(1)
+            stats["calls"] += len(terms)
+            stats["batch_calls"] = stats.get("batch_calls", 0) + 1
+            stats["max_elapsed_s"] = max(stats["max_elapsed_s"], outcome.elapsed_s)
+            stats["total_elapsed_s"] += outcome.elapsed_s
+            if outcome.ok:
+                first_batch = False
+                return list(outcome.residual)
+            status = "timeout" if outcome.code in ("timeout", "memory_limit", "cancelled") else "error"
+            raise SolveFailure(status, f"evaluator_{outcome.code}", outcome.diagnostic[:300],
+                               evaluation_valid=False, evaluator={"code": outcome.code,
+                               "stage": outcome.stage, "diagnostic": outcome.diagnostic[:200],
+                               "elapsed_s": outcome.elapsed_s, "scope": "complete candidate batch"})
 
         def evaluate(term, p_tcp, rotation):
             outcome = self.evaluators[term["program_id"]].submit(
@@ -149,7 +180,12 @@ class _Worker:
             return [m.name for m in result.margins], [float(m.value) for m in result.margins]
 
         try:
-            report = _solve(problem, evaluate, host_margins, deadline)
+            if self.batch is None:
+                report = _solve(problem, evaluate, host_margins, deadline)
+            else:
+                from ._solver_math import solve_problem
+                report = solve_problem(problem, evaluate, host_margins, deadline_ns=deadline,
+                                       evaluate_batch=evaluate_batch)
             return {"status": "solved", "code": "solved", "evaluation_valid": True, "report": report,
                     "evaluator_stats": stats}
         except SolveFailure as failure:

@@ -48,7 +48,7 @@ class EvaluationOutcome:
     request_id: str
     ok: bool
     code: str
-    residual: float | None
+    residual: float | tuple[float, ...] | None
     stage: str
     diagnostic: str
     started_ns: int
@@ -144,6 +144,8 @@ class SupervisedEvaluator:
     optional absolute deadline_ns (time.monotonic_ns domain) can shorten, never
     extend, the 10 ms call budget. close cancels in-flight work asynchronously.
     """
+    _worker_module = "ssc_core._worker"
+
     def __init__(self):
         self._lock = threading.Lock()
         self._cancel = threading.Event()
@@ -195,7 +197,7 @@ class SupervisedEvaluator:
                                  self._program_id, self._source_sha256,
                                  NUMERIC_OFFLINE_V1.policy_id, EVALUATOR_LIMITS, self._environment)
 
-    def _start(self, operation, payload, *, motion_disabled=False, deadline_ns=None):
+    def _start(self, operation, payload, *, motion_disabled=False, deadline_ns=None, _inline=False):
         started = time.monotonic_ns()
         budget = (EVALUATOR_LIMITS.preparation_timeout_s if operation == "prepare"
                   else EVALUATOR_LIMITS.call_timeout_s)
@@ -226,6 +228,12 @@ class SupervisedEvaluator:
             self._ready = False
             if operation != "close":
                 self._cancel.clear()
+        if _inline:
+            # Private solver-process path: the host already supervises this
+            # process. Keep the identical bounded exchange and retirement, but
+            # avoid starting/joining a thread for every serial SLSQP candidate.
+            self._operate(future, operation, payload, request_id, started, deadline)
+            return future
         thread = threading.Thread(target=self._operate,
                                   args=(future, operation, payload, request_id, started, deadline),
                                   name="ssc-evaluator-supervisor", daemon=True)
@@ -251,7 +259,7 @@ class SupervisedEvaluator:
                     "VECLIB_MAXIMUM_THREADS", "NUMEXPR_NUM_THREADS", "BLIS_NUM_THREADS"):
             environment[key] = "1"
         self._process = subprocess.Popen(
-            [sys.executable, "-I", "-m", "ssc_core._worker"],
+            [sys.executable, "-I", "-m", self._worker_module],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
             bufsize=0, close_fds=True, env=environment,
         )
@@ -263,6 +271,11 @@ class SupervisedEvaluator:
             raise _Failure("cancelled", "worker withdrawn by close")
         if time.monotonic_ns() >= deadline:
             raise _Failure("timeout", "original monotonic deadline expired")
+
+    def _normalize_residual(self, residual):
+        if type(residual) not in (int, float) or not math.isfinite(residual):
+            raise _Failure("malformed_response", "success requires a finite scalar")
+        return residual
 
     def _exchange(self, frame, request_id, deadline):
         process = self._process
@@ -384,11 +397,10 @@ class SupervisedEvaluator:
                         raise _Failure("malformed_response", "failure contains a residual or success code")
                     raise _Failure(response["code"], response["diagnostic"], response["stage"])
                 residual = response["residual"]
-                if (response["code"] != "ok" or
-                    (operation == "prepare" and residual is not None) or
-                    (operation == "evaluate" and (type(residual) not in (int, float)
-                     or not math.isfinite(residual)))):
-                    raise _Failure("malformed_response", "success requires the expected finite scalar")
+                if response["code"] != "ok" or (operation == "prepare" and residual is not None):
+                    raise _Failure("malformed_response", "unexpected successful response")
+                if operation == "evaluate":
+                    residual = self._normalize_residual(residual)
                 self._check_deadline(deadline)
         except _Failure as exc:
             code, stage, diagnostic = exc.code, exc.stage, exc.diagnostic
