@@ -31,6 +31,7 @@ Use the [shared development board](https://github.com/users/ZenWang00/projects/3
 | [Runtime Lifecycle and Timing](https://github.com/ZenWang00/semantic-shared-control/wiki/Runtime-Lifecycle-and-Timing) | Follow initialization, control cycles, invalidation, and command acceptance. |
 | [Validation and Legacy Integration](https://github.com/ZenWang00/semantic-shared-control/wiki/Validation-and-Legacy-Integration) | Review expected acceptance cases and inherited-interface pitfalls. |
 | [Offline Reference Profile](https://github.com/ZenWang00/semantic-shared-control/wiki/Offline-Reference-Profile) | Implement the selected Phase 1 CPU baseline, synthetic model, limits and worked design oracles. |
+| [Offline Batch Profile](https://github.com/ZenWang00/semantic-shared-control/wiki/Offline-Batch-Profile) | Select the versioned candidate-batch solver and verify the full 1–16 program range. |
 
 ## First-prototype assumptions
 

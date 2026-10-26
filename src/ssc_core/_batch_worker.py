@@ -6,6 +6,7 @@ same 256 MiB address-space and bounded JSON transport as scalar evaluation.
 """
 import sys
 import time
+import json
 
 from ._worker import _limits
 from .supervision import EVALUATOR_LIMITS, _decode, _encode
@@ -20,28 +21,48 @@ def _compile(payload):
     compiled = [compile_program(p, policy=NUMERIC_OFFLINE_V1) for p in programs]
     if len({p.program.program_id for p in compiled}) != len(compiled):
         raise ValueError("duplicate batch program identity")
-    return compiled
+    return _Batch(compiled)
 
 
-def _evaluate(compiled, inputs):
-    from .interpreter import InterpreterError
-    position, rotation, bindings = inputs
-    if type(bindings) is not list or len(bindings) != len(compiled):
-        raise ValueError("incomplete batch bindings")
-    values = []
-    for program, binding in zip(compiled, bindings):
-        if (type(binding) is not dict
-                or set(binding) != {"program_id", "keypoints", "axis_dirs", "params"}
-                or binding["program_id"] != program.program.program_id):
-            raise ValueError("batch program identity/order mismatch")
-        try:
-            values.append(program.evaluate(position, rotation, binding["keypoints"],
-                                           binding["axis_dirs"], binding["params"]))
-        except InterpreterError as exc:
-            # Keep the responsible program while returning no partial values.
-            exc.message = f"{program.program.program_id}: {exc.message}"
-            raise
-    return values
+class _Batch:
+    def __init__(self, compiled):
+        self.compiled = compiled
+        self.binding_key = None
+        self.checked_bindings = ()
+
+    def evaluate(self, inputs):
+        from .interpreter import InterpreterError, _vector, _matrix, _check_rotation
+        position, rotation, bindings = inputs
+        # Every program has the same frozen numeric policy. Check the common pose
+        # once, with exactly the scalar interpreter's conversion and tolerances.
+        position = _vector(position, 3, "$.p_tcp")
+        rotation = _matrix(rotation, 3, "$.R_control_tcp")
+        _check_rotation(rotation, self.compiled[0].policy.rotation_tolerance)
+        if type(bindings) is not list or len(bindings) != len(self.compiled):
+            raise ValueError("incomplete batch bindings")
+        # Exact JSON bytes distinguish Boolean/number and all content changes.
+        # Retain only the latest fully validated immutable binding tuple. This
+        # avoids re-copying fixed snapshot geometry for every SLSQP candidate.
+        # The outer request already passed the bounded JSON transport checks.
+        key = json.dumps(bindings, allow_nan=False, separators=(",", ":"))
+        if key != self.binding_key:
+            checked = []
+            for program, binding in zip(self.compiled, bindings):
+                if (type(binding) is not dict
+                        or set(binding) != {"program_id", "keypoints", "axis_dirs", "params"}
+                        or binding["program_id"] != program.program.program_id):
+                    raise ValueError("batch program identity/order mismatch")
+                checked.append(program._checked_bindings(binding["keypoints"], binding["axis_dirs"], binding["params"]))
+            self.checked_bindings, self.binding_key = tuple(checked), key
+        values = []
+        for program, binding in zip(self.compiled, self.checked_bindings):
+            try:
+                values.append(program._evaluate_checked(position, rotation, binding))
+            except InterpreterError as exc:
+                # Keep the responsible program while returning no partial values.
+                exc.message = f"{program.program.program_id}: {exc.message}"
+                raise
+        return values
 
 
 def main():
@@ -62,7 +83,7 @@ def main():
                 compiled = _compile(request["program"])
                 generation = request["generation"]
             elif request["operation"] == "evaluate" and compiled is not None and generation == request["generation"]:
-                reply["residual"] = _evaluate(compiled, request["inputs"])
+                reply["residual"] = compiled.evaluate(request["inputs"])
             else:
                 raise ValueError("invalid batch lifecycle")
             reply["ok"], reply["code"] = True, "ok"

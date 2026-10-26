@@ -240,7 +240,7 @@ These are observations, not real-time guarantees.
   start reports about 177 total calls. Measured in CI: 2 programs ≈ 28 ms; 4 ≈ 80 ms;
   8 ≈ 90 ms; every 16-program solve timed out. On a slower, loaded 2-vCPU host
   some 4- and 8-program solves already timed out. Over-budget solves fail closed
-  as `timeout` holds and retire the worker. Until
+  as `timeout` holds and retire the worker. Follow-up
   [#30](https://github.com/ZenWang00/semantic-shared-control/issues/30)
   introduces the opt-in batch v2 topology and full-count measurement. Consumers
   still using v1 should keep to 2–4 programs per snapshot; a library upgrade

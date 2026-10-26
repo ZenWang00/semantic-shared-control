@@ -50,6 +50,13 @@ program failure invalidates the complete candidate; partial results never
 enter the objective or a move proposal. Programs are evaluated even at zero
 assistance. Final residuals are recomputed from the emitted target.
 
+The common pose is checked once per batch using the scalar interpreter's exact
+conversion and rotation checks. The evaluator may retain only the latest set
+of validated immutable binding inputs, keyed by exact JSON bytes (including
+program identities/order). Any changed binding content is fully checked again;
+Boolean values cannot alias numeric inputs. Every program expression still runs
+for every candidate batch, including the final emitted-target recomputation.
+
 **The complete batch has a 10 ms real-monotonic deadline**, including host
 serialization, all program evaluations and reply publication. It is further
 shortened by the remaining solve deadline. The budget is not multiplied by

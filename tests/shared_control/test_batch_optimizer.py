@@ -9,6 +9,7 @@ import runpy
 import signal
 import sys
 import time
+from copy import deepcopy
 
 import pytest
 
@@ -42,6 +43,37 @@ def test_partial_or_nonfinite_batch_replies_are_rejected(value):
     batch._count = 2
     with pytest.raises(_Failure):
         batch._normalize_residual(value)
+
+
+def test_batch_checked_inputs_match_scalar_and_refresh_changed_bindings():
+    from ssc_core._batch_worker import _compile
+    from ssc_core.interpreter import InterpreterError
+    case = F["scenario"]()
+    problem = inputs(case)
+    programs = [to_dict(p.program) for p in sorted(case["resolved"].bundle.programs,
+                                                 key=lambda p: p.program.program_id)]
+    batch = _compile({"programs": programs})
+    bindings = [{key: t[key] for key in ("program_id", "keypoints", "axis_dirs", "params")}
+                for t in problem["terms"]]
+    for x in (.4, .401, .41):
+        position = [x, 0., .3]
+        expected = [p.evaluate(position, IDENTITY, b["keypoints"], b["axis_dirs"], b["params"])
+                    for p, b in zip(batch.compiled, bindings)]
+        assert batch.evaluate((position, IDENTITY, bindings)) == expected
+    old = batch.evaluate((problem["p_tcp"], IDENTITY, bindings))
+    changed = deepcopy(bindings)
+    changed[0]["keypoints"][0][0] += .01
+    assert batch.evaluate((problem["p_tcp"], IDENTITY, changed)) != old
+    assert batch.evaluate((problem["p_tcp"], IDENTITY, bindings)) == old
+    # bool equals 0/1 in Python, but must never alias an accepted numeric cache.
+    malformed = deepcopy(bindings)
+    malformed[0]["keypoints"][0][1] = False
+    with pytest.raises(InterpreterError, match="input_type"):
+        batch.evaluate((problem["p_tcp"], IDENTITY, malformed))
+    with pytest.raises(InterpreterError, match="invalid_rotation"):
+        batch.evaluate((problem["p_tcp"], [[0., 0., 0.]] * 3, bindings))
+    with pytest.raises(ValueError, match="identity/order"):
+        batch.evaluate((problem["p_tcp"], IDENTITY, list(reversed(bindings))))
 
 
 @linux
@@ -136,5 +168,41 @@ def test_batch_solver_keeps_oracles_and_infeasible_hold(variant):
             assert out.result.next_tcp_pose.position_xyz[0] - .4 == pytest.approx(expected, abs=1e-6)
             stats = json.loads(out.evaluator_json)["stats"]
             assert stats["calls"] == stats["batch_calls"] * len(case["resolved"].bundle.programs)
+    finally:
+        assert solver.close().result(3).reaped
+
+
+@linux
+@pytest.mark.parametrize("mode", ["solver-stall", "batch-stall", "short-deadline", "domain", "alpha0-domain"])
+def test_batch_solver_failure_has_no_target_retires_and_requires_prepare(mode):
+    kwargs = {}
+    if "domain" in mode:
+        kwargs = dict(tcp=(.405, 0., .3), alpha_zero=mode == "alpha0-domain",
+                      programs=(F["division_program"]("program-bottle-division", F["BOTTLE"]),
+                                F["distance_program"]("program-cup-distance", F["CUP"], F["KP_CUP"])))
+    case = F["scenario"](**kwargs)
+    solver = SupervisedOptimizer(CHECKER, solver_config=CONFIG)
+    try:
+        prep = solver.prepare(case["resolved"].bundle, motion_disabled=True).result(6)
+        assert prep.ok
+        if mode == "solver-stall":
+            os.kill(prep.worker_pid, signal.SIGSTOP)
+        elif mode == "batch-stall":
+            os.kill(prep.evaluator_pids[0][1], signal.SIGSTOP)
+        deadline = time.monotonic_ns() + (1_000_000 if mode == "short-deadline" else 200_000_000)
+        out = solver.solve(case["resolved"], case["weights"], intent_config=case["intent_config"],
+                           command_seq=1, previous_applied=case["previous"], deadline_ns=deadline).result(3)
+        expected = "error" if "domain" in mode else "timeout"
+        assert out.result.solver_status == expected, out.diagnostic
+        assert out.result.status == "hold" and out.result.next_tcp_pose is None and out.result.horizon_s is None
+        assert not out.result.constraint_evaluations and not out.result.evaluation_valid
+        assert out.reaped and not solver.ready
+        assert solver.solve(case["resolved"], case["weights"], intent_config=case["intent_config"],
+                            command_seq=2).result(1).result.solver_status == "not_run"
+        recovered = F["scenario"]()
+        assert solver.prepare(recovered["resolved"].bundle, motion_disabled=True).result(6).ok
+        good = solver.solve(recovered["resolved"], recovered["weights"], intent_config=recovered["intent_config"],
+                            command_seq=3).result(3)
+        assert good.result.status == "move", good.diagnostic
     finally:
         assert solver.close().result(3).reaped
