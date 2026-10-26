@@ -12,6 +12,8 @@ on:
       - 'docs/shared-package.md'
       - 'docs/reference/verify_evaluator_isolation.py'
       - 'docs/reference/verify_program_validation.py'
+      - 'docs/reference/verify_intent_fusion.py'
+      - 'docs/reference/intent_fixtures.py'
       - 'docs/wiki/Generated-Constraint-Program-Contract.md'
       - '.github/workflows/shared-core.yml'
 
@@ -31,7 +33,7 @@ jobs:
       - name: Install wheel into a clean environment
         run: |
           python -m venv .venv-acceptance
-          .venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.6.0-py3-none-any.whl[test]'
+          .venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.7.0-py3-none-any.whl[test]'
       - name: Verify installed package
         run: |
           .venv-acceptance/bin/python -m pytest tests/shared_control --junitxml=test-results.xml
@@ -50,6 +52,12 @@ jobs:
             --source-revision "$(git rev-parse HEAD)" \
             --wheel-sha256 "$(sha256sum dist/*.whl | cut -d ' ' -f 1)" \
             --output program-validation-evidence.json
+      - name: Verify deterministic intent support and fresh-process replay
+        run: |
+          .venv-acceptance/bin/python -B docs/reference/verify_intent_fusion.py \
+            --source-revision "$(git rev-parse HEAD)" \
+            --wheel-sha256 "$(sha256sum dist/*.whl | cut -d ' ' -f 1)" \
+            --output intent-fusion-evidence.json
       - name: Retain wheel and verification evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -62,3 +70,4 @@ jobs:
             wheel-sha256.txt
             evaluator-evidence.json
             program-validation-evidence.json
+            intent-fusion-evidence.json

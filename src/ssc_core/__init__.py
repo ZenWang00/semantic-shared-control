@@ -33,9 +33,12 @@ from .receipts import (
     UnitReview, feature_definition_digest, program_content_digest,
 )
 
-__version__ = "0.6.0"
+from .fusion import IntentConfig, IntentOutcome, estimate_intent, get_intent_config
+
+__version__ = "0.7.0"
 
 __all__ = [
+    "IntentConfig", "IntentOutcome", "estimate_intent", "get_intent_config",
     "AcceptanceError", "HostBindingPolicy", "HostNormalization", "HostProgramValidator",
     "ProgramValidationReport", "ResidualDiagnostic", "UnitReview", "feature_definition_digest",
     "program_content_digest", "residual_diagnostic",
