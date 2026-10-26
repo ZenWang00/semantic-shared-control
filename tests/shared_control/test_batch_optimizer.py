@@ -37,6 +37,16 @@ def test_batch_is_opt_in_and_v1_configuration_content_is_unchanged():
     assert CONFIG.max_programs == 16 and CONFIG.solve_budget_s == .15
 
 
+@pytest.mark.parametrize("old_id,new_id,session_id", [
+    ("intent-linear-v1", "intent-linear-batch-v2", "config-offline-batch-v2"),
+    ("intent-linear-alpha0-v1", "intent-linear-batch-alpha0-v2", "config-offline-batch-alpha0-v2"),
+])
+def test_batch_intent_configuration_only_rebinds_immutable_identities(old_id, new_id, session_id):
+    from ssc_core import get_intent_config
+    assert asdict(get_intent_config(new_id)) == dict(asdict(get_intent_config(old_id)),
+        estimator_config_id=new_id, session_config_id=session_id)
+
+
 @pytest.mark.parametrize("value", [None, [], [0.], [0., 1., 2.], [0., True], [0., math.nan]])
 def test_partial_or_nonfinite_batch_replies_are_rejected(value):
     batch = BatchEvaluator()

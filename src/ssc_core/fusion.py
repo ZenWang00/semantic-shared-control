@@ -30,7 +30,7 @@ class IntentConfig:
 
 
 def get_intent_config(estimator_config_id: str) -> IntentConfig:
-    """Return a fresh immutable copy of one of the two approved configurations.
+    """Return a fresh immutable copy of an approved configuration.
 
     Archive the complete dataclass content as well as its ID. Unknown IDs and
     altered definitions are rejected; adding a profile requires a code revision.
@@ -39,6 +39,10 @@ def get_intent_config(estimator_config_id: str) -> IntentConfig:
         session_id, alpha = "config-offline-v1", 0.5
     elif estimator_config_id == "intent-linear-alpha0-v1":
         session_id, alpha = "config-offline-alpha0-v1", 0.0
+    elif estimator_config_id == "intent-linear-batch-v2":
+        session_id, alpha = "config-offline-batch-v2", 0.5
+    elif estimator_config_id == "intent-linear-batch-alpha0-v2":
+        session_id, alpha = "config-offline-batch-alpha0-v2", 0.0
     else:
         raise ValueError(f"unsupported estimator configuration: {estimator_config_id!r}")
     return IntentConfig(estimator_config_id, session_id, alpha, (

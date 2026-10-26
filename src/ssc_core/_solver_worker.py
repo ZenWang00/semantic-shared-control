@@ -131,7 +131,7 @@ class _Worker:
         stats = {"calls": 0, "max_elapsed_s": 0., "total_elapsed_s": 0.}
 
         def evaluate_batch(terms, p_tcp, rotation):
-            outcome = self.batch.submit_batch(p_tcp, rotation, terms, deadline_ns=deadline).result(1)
+            outcome = self.batch.submit_batch(p_tcp, rotation, terms, deadline_ns=deadline, _inline=True).result(1)
             stats["calls"] += len(terms)
             stats["batch_calls"] = stats.get("batch_calls", 0) + 1
             stats["max_elapsed_s"] = max(stats["max_elapsed_s"], outcome.elapsed_s)

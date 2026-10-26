@@ -197,7 +197,7 @@ class SupervisedEvaluator:
                                  self._program_id, self._source_sha256,
                                  NUMERIC_OFFLINE_V1.policy_id, EVALUATOR_LIMITS, self._environment)
 
-    def _start(self, operation, payload, *, motion_disabled=False, deadline_ns=None):
+    def _start(self, operation, payload, *, motion_disabled=False, deadline_ns=None, _inline=False):
         started = time.monotonic_ns()
         budget = (EVALUATOR_LIMITS.preparation_timeout_s if operation == "prepare"
                   else EVALUATOR_LIMITS.call_timeout_s)
@@ -228,6 +228,12 @@ class SupervisedEvaluator:
             self._ready = False
             if operation != "close":
                 self._cancel.clear()
+        if _inline:
+            # Private solver-process path: the host already supervises this
+            # process. Keep the identical bounded exchange and retirement, but
+            # avoid starting/joining a thread for every serial SLSQP candidate.
+            self._operate(future, operation, payload, request_id, started, deadline)
+            return future
         thread = threading.Thread(target=self._operate,
                                   args=(future, operation, payload, request_id, started, deadline),
                                   name="ssc-evaluator-supervisor", daemon=True)
