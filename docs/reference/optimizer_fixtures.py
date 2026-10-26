@@ -6,6 +6,8 @@ intent-linear-v1 estimator for the exact snapshot. Each call builds a fresh
 session registry; this is a test/evidence fixture, not an archive.
 """
 
+from contextlib import contextmanager
+from dataclasses import replace
 from hashlib import sha256
 import json
 import os
@@ -50,6 +52,40 @@ def division_program(name, obj, numerator=.01, pole=.405):
 
 DEFAULT_PROGRAMS = (distance_program("program-bottle-distance-offline-v1", BOTTLE, KP_BOTTLE),
                     distance_program("program-cup-distance-offline-v1", CUP, KP_CUP))
+
+
+# Test-only total solve budget (PR #29 review F1, owner decision 26 October 2026).
+# The infeasible-start fixture needs ~177 evaluator calls, close to the profile's
+# 150 ms budget, so its *classification* check runs with the same solver-slsqp-v1
+# content and a longer real-wall budget. This is never a profile configuration;
+# the per-call 10 ms evaluator budget is unchanged, and profile-budget behaviour
+# of the same fixture is checked separately (a hold without target).
+CLASSIFICATION_BUDGET_S = 1.0
+
+
+@contextmanager
+def relaxed_solve_budget(seconds=CLASSIFICATION_BUDGET_S):
+    """Yield a test-only SolverConfig accepted while the context is active."""
+    import ssc_core.optimization as optimization
+
+    original = optimization.get_solver_config
+    profile = original()
+    relaxed = replace(profile, solve_budget_s=seconds)
+
+    def lookup(solver_config_id="solver-slsqp-v1"):
+        return relaxed if solver_config_id == profile.solver_config_id else original(solver_config_id)
+
+    optimization.get_solver_config = lookup
+    try:
+        yield relaxed
+    finally:
+        optimization.get_solver_config = original
+
+
+def infeasible_start():
+    """TCP outside the workspace face; every step is hard-infeasible."""
+    return {"tcp": (.505, 0., .3), "keypoints": ((.51, 0., .3),), "candidates": (BOTTLE,),
+            "programs": (distance_program("program-bottle", BOTTLE, KP_BOTTLE),)}
 
 
 def _stamp(ns):

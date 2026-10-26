@@ -32,6 +32,8 @@ F = runpy.run_path(str(HELPER))
 scenario, BOTTLE, CUP = F["scenario"], F["BOTTLE"], F["CUP"]
 KP_BOTTLE, KP_CUP = F["KP_BOTTLE"], F["KP_CUP"]
 distance_program, axis_program, division_program = F["distance_program"], F["axis_program"], F["division_program"]
+relaxed_solve_budget, infeasible_start = F["relaxed_solve_budget"], F["infeasible_start"]
+CLASSIFICATION_BUDGET_S = F["CLASSIFICATION_BUDGET_S"]
 L, A, ORIGIN = F["L"], F["A"], F["ORIGIN"]
 DOUBLE = HostCheckerSpec("ssc_core._test_doubles:WorkspaceSphereDouble")
 linux = pytest.mark.skipif(sys.platform != "linux", reason="solver isolation acceptance is Linux-only")
@@ -332,16 +334,37 @@ def test_soft_relation_cannot_weaken_host_constraints():
 
 @linux
 def test_infeasible_hold_keeps_solver_ready():
-    case = scenario(tcp=(.505, 0., .3), keypoints=((.51, 0., .3),), candidates=(BOTTLE,),
-                    programs=(distance_program("program-bottle", BOTTLE, KP_BOTTLE),))
+    """Classification under the test-only relaxed total budget, so it does not
+    depend on host speed (the fixture needs ~177 evaluator calls)."""
+    case = scenario(**infeasible_start())
+    with relaxed_solve_budget() as config:
+        solver = SupervisedOptimizer(DOUBLE, solver_config=config)
+        try:
+            assert solver.prepare(case["resolved"].bundle, motion_disabled=True).result(10).ok
+            outcome = run(solver, case)
+            assert outcome.deadline_ns - outcome.started_ns == int(CLASSIFICATION_BUDGET_S * 1e9)
+            result = outcome.result
+            assert (result.status, result.solver_status) == ("hold", "infeasible"), outcome
+            assert result.next_tcp_pose is None and result.horizon_s is None and result.reason
+            assert "next_tcp_pose" not in to_dict(result) and "horizon_s" not in to_dict(result)
+            assert solver.ready
+        finally:
+            solver.close().result(3)
+
+
+@linux
+def test_infeasible_start_under_profile_budget_is_a_hold_without_target():
+    """Same fixture at the profile's 150 ms budget: infeasible or, on a slower
+    host, timeout; either way a hold without target and the matching readiness."""
+    case = scenario(**infeasible_start())
     solver = prepared(case)
     try:
         outcome = run(solver, case)
+        assert outcome.deadline_ns - outcome.started_ns == 150_000_000
         result = outcome.result
-        assert (result.status, result.solver_status) == ("hold", "infeasible"), outcome
+        assert result.status == "hold" and result.solver_status in ("infeasible", "timeout"), outcome
         assert result.next_tcp_pose is None and result.horizon_s is None and result.reason
-        assert "next_tcp_pose" not in to_dict(result) and "horizon_s" not in to_dict(result)
-        assert solver.ready
+        assert solver.ready is (result.solver_status == "infeasible")
     finally:
         solver.close().result(3)
 

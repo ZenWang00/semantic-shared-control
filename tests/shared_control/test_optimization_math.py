@@ -81,6 +81,15 @@ def test_axis_alignment_rotates_about_control_z_and_keeps_user_translation():
     assert report["evaluations"][0]["raw_g"] == pytest.approx(A / 6, abs=1e-5)
 
 
+def test_rotation_increment_is_left_multiplied_in_the_control_frame():
+    """A measured R != I separates Exp([A r]x) R from R Exp([A r]x) (PR #29 review F3)."""
+    measured = Rotation.from_rotvec((1., 0., 0.))
+    report = solve(problem(alpha=0., prev=(0., 0., 0., 0., 0., .5), q_tcp=measured.as_quat().tolist()))
+    increment = (Rotation.from_quat(report["quaternion_xyzw"]) * measured.inv()).as_rotvec()
+    assert np.linalg.norm(increment - (0., 0., .5 * A)) <= 1e-5  # right-multiplying gives (0, -.042, .027)
+    assert np.linalg.norm(delta(report) - (10 * L / 11, 0., 0.)) <= 1e-6
+
+
 def test_reversal_with_previous_reference_responds_immediately():
     terms = [distance("bottle", (ORIGIN[0] + L, 0, .3), weight=5 / 16),
              distance("cup", (ORIGIN[0] - L, 0, .3), weight=11 / 16)]

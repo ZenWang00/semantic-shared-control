@@ -12,6 +12,7 @@ real-time guarantee or research-benefit claim.
         --source-revision TESTED_GIT_SHA --wheel-sha256 TESTED_WHEEL_SHA256
 """
 import argparse
+import contextlib
 from dataclasses import asdict
 import importlib.metadata
 import json
@@ -35,6 +36,8 @@ from ssc_core.host_constraints import MeasuredStateView
 F = runpy.run_path(str(Path(__file__).with_name("optimizer_fixtures.py")))
 scenario, BOTTLE, CUP, KP_BOTTLE, KP_CUP = F["scenario"], F["BOTTLE"], F["CUP"], F["KP_BOTTLE"], F["KP_CUP"]
 distance_program, axis_program, division_program = F["distance_program"], F["axis_program"], F["division_program"]
+relaxed_solve_budget, infeasible_start = F["relaxed_solve_budget"], F["infeasible_start"]
+CLASSIFICATION_BUDGET_S = F["CLASSIFICATION_BUDGET_S"]
 L, A, ORIGIN = F["L"], F["A"], F["ORIGIN"]
 CHECKER = HostCheckerSpec("ssc_core._test_doubles:WorkspaceSphereDouble")
 POSITION_ATOL_M, ANGLE_ATOL_RAD, REPLAY_TOL = 1e-6, 1e-5, 1e-9
@@ -65,9 +68,12 @@ CASES = (
                                   "candidates": (BOTTLE,),
                                   "programs": (distance_program("program-bottle-sphere", BOTTLE, KP_BOTTLE),)},
      {"status": "move", "sphere_clearance": .0201, "satisfied": False}, ["C08"]),
-    ("infeasible-host", {"tcp": (.505, 0., .3), "keypoints": ((.51, 0., .3),), "candidates": (BOTTLE,),
-                         "programs": (distance_program("program-bottle", BOTTLE, KP_BOTTLE),)},
-     {"status": "hold", "solver_status": "infeasible"}, ["G07"]),
+    # Classification under the test-only relaxed total budget (PR #29 review F1);
+    # the same fixture at the profile budget follows and may also time out.
+    ("infeasible-host", infeasible_start(),
+     {"status": "hold", "solver_status": "infeasible", "test_solve_budget_s": CLASSIFICATION_BUDGET_S}, ["G07"]),
+    ("infeasible-host-profile-budget", infeasible_start(),
+     {"status": "hold", "solver_status_in": ["infeasible", "timeout"]}, ["G07"]),
     ("division-error", {"tcp": (.405, 0., .3), "previous": {"kind": "move"},
                         "programs": (division_program("program-bottle-division", BOTTLE),
                                      distance_program("program-cup-distance", CUP, KP_CUP))},
@@ -115,6 +121,8 @@ def judge(case, outcome, expect):
     checks["status"] = result.status == expect["status"]
     if "solver_status" in expect:
         checks["solver_status"] = result.solver_status == expect["solver_status"]
+    if "solver_status_in" in expect:
+        checks["solver_status_in"] = result.solver_status in expect["solver_status_in"]
     if "code" in expect:
         checks["code"] = outcome.code == expect["code"]
     if "evaluation_valid" in expect:
@@ -152,16 +160,20 @@ def run_cases():
     records = []
     for name, kwargs, expect, rows in CASES:
         case = scenario(**kwargs)
-        solver = SupervisedOptimizer(CHECKER)
-        try:
-            preparation = solver.prepare(case["resolved"].bundle, motion_disabled=True).result(10)
-            outcome = solver.solve(case["resolved"], case["weights"], intent_config=case["intent_config"],
-                                   command_seq=7, previous_applied=case["previous"],
-                                   result_id=f"result-{name}").result(5)
-        finally:
-            closed = solver.close().result(3)
+        budget = expect.get("test_solve_budget_s")
+        with relaxed_solve_budget(budget) if budget else contextlib.nullcontext(get_solver_config()) as config:
+            solver = SupervisedOptimizer(CHECKER, solver_config=config)
+            try:
+                preparation = solver.prepare(case["resolved"].bundle, motion_disabled=True).result(10)
+                outcome = solver.solve(case["resolved"], case["weights"], intent_config=case["intent_config"],
+                                       command_seq=7, previous_applied=case["previous"],
+                                       result_id=f"result-{name}").result(5)
+            finally:
+                closed = solver.close().result(3)
         checks = judge(case, outcome, expect)
         records.append({"name": name, "matrix_rows": rows, "scenario": {k: repr(v) for k, v in kwargs.items()},
+                        "solve_budget_s": config.solve_budget_s,
+                        "budget_kind": "test-only relaxed total budget" if budget else "profile solver-slsqp-v1",
                         "expected": {k: list(v) if isinstance(v, tuple) else v for k, v in expect.items()},
                         "preparation": {"ok": preparation.ok, "code": preparation.code,
                                         "evaluator_pids": len(preparation.evaluator_pids),

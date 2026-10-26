@@ -23,10 +23,15 @@ if intent.disposition == "active":
     future = optimizer.solve(resolved, intent.weights, intent_config=config,
                              command_seq=dispatch.command_seq,          # host-allocated
                              previous_applied=applied_reference,        # or None
-                             deadline_ns=expiry_in_monotonic_ns)        # optional, only shortens
+                             deadline_ns=expiry_in_monotonic_ns)        # required for coordinators
     outcome = future.result()   # never in input, release or gate callbacks
     message_payload = outcome.result  # ControlResult: move proposal or hold
 ```
+
+Coordinators must pass `deadline_ns`: the snapshot's original expiry mapped to
+`time.monotonic_ns`. It can only shorten the 150 ms budget. The parameter is
+optional for tests and harnesses only; without it, a delayed dispatch could
+finish after the snapshot expired (the gate would still reject that result).
 
 `resolved` is the snapshot producer's `ResolvedSnapshot` (`FrozenSnapshot.resolved`).
 The worker echoes the dispatch `command_seq`; it never allocates command order.
@@ -139,7 +144,13 @@ exit first, and closes and reaps its own evaluators. The Future therefore
 completes after a bounded teardown of roughly budget plus two grace periods.
 That teardown grants no motion time: the coordinator's own deadline and hold
 path are authoritative. Evaluators orphaned by a killed or crashed worker are
-killed with the group and reaped by the system init process.
+killed with the group and reaped by the system init process. In a container
+where the host process itself runs as PID 1, use an init (`docker run --init`)
+or a subreaper so those evaluators do not remain as zombies.
+
+`close()` is final. If a solve or preparation is in flight, it returns that
+operation's Future, so the result may be an `OptimizationOutcome` or a
+`PreparationOutcome`; otherwise it returns a new retirement Future.
 
 ## Evidence
 
@@ -155,11 +166,24 @@ CI runs both and uploads `optimizer-evidence.json` with the wheel and JUnit.
 The harness drives real solver and evaluator processes with the local checker
 double:
 
-- **11 profile cases.** Joystick-only/α=0, positive approach, axis alignment,
+- **12 profile cases.** Joystick-only/α=0, positive approach, axis alignment,
   reversal with an applied rightward reference, within tolerance, workspace face
-  and excluded sphere favoured by a soft relation, infeasible, division error,
-  neutral input and disabled input. Each case checks the oracle within 1e‑6 m
-  and 1e‑5 rad, identity echo, and a gate-equivalent margin recheck.
+  and excluded sphere favoured by a soft relation, infeasible start (twice, see
+  below), division error, neutral input and disabled input. Each case checks the
+  oracle within 1e‑6 m and 1e‑5 rad, identity echo, and a gate-equivalent margin
+  recheck.
+- **Infeasible start and the budget.** This fixture needs about 177 evaluator
+  calls. That took about 129 ms in CI but more than 150 ms on a slower 2-vCPU host,
+  where the result becomes a `timeout` hold instead of `infeasible`. The owner
+  decided (26 October 2026) to relax the time limit for this check only:
+  `infeasible-host` and `test_infeasible_hold_keeps_solver_ready` run the same
+  `solver-slsqp-v1` content with a test-only 1 s total budget
+  (`relaxed_solve_budget` in `optimizer_fixtures.py`; the 10 ms per-call evaluator
+  budget is unchanged), and the evidence records `solve_budget_s` and
+  `budget_kind` per case. `infeasible-host-profile-budget` and
+  `test_infeasible_start_under_profile_budget_is_a_hold_without_target` run it at
+  the profile's 150 ms and accept `infeasible` or `timeout`, always as a hold
+  without target. The profile configuration itself is unchanged.
 - **5 boundary faults.** Solver stall ignoring SIGTERM, late reply, evaluator
   stall, solver crash, and a worker that misreports its pose.
 - **Fresh-process replay.** Every emitted residual is replayed in a fresh
@@ -190,10 +214,17 @@ These are observations, not real-time guarantees.
 
 ## Limitations and handoff
 
-- **Program budget.** The profile allows 16 programs per snapshot, but on the
-  measured machine the per-candidate IPC design exceeds the 150 ms budget above
-  about 8 programs. Changing the budget, program limit or topology would need a
-  new profile/configuration identity and owner approval.
+- **Program budget (accepted limitation, owner decision 26 October 2026).**
+  The profile allows 16 programs per snapshot, but each objective evaluation
+  calls every program's evaluator once. Solve cost therefore scales with
+  programs × evaluator calls per program: 44 calls for the reversal fixture, 177
+  for the infeasible start. Measured in CI: 2 programs ≈ 28 ms; 4 ≈ 80 ms;
+  8 ≈ 90 ms; every 16-program solve timed out. On a slower, loaded 2-vCPU host
+  some 4- and 8-program solves already timed out. Over-budget solves fail closed
+  as `timeout` holds and retire the worker. Until
+  [#30](https://github.com/ZenWang00/semantic-shared-control/issues/30)
+  resolves it with a new configuration identity or topology, consumers
+  (Grasp-Pose-Generation#6) should keep to 2–4 programs per snapshot.
 - **Integration evidence.** This is component software evidence with a local
   checker double. It does not cover the consumer's `SyntheticHostChecker`, the
   real gate, the plant or the coordinator. The installed version pair and the
