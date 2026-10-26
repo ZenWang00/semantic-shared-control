@@ -1,9 +1,9 @@
 # Shared validation, resolution and residual-evaluation package
 
-`ssc-core==0.8.0` implements scene/artifact and live/control record validation,
+`ssc-core==0.9.0` implements scene/artifact and live/control record validation,
 immutable session registries, deterministic reference resolution and a restricted
 `geometry-residual-v1` numerical interpreter for schema `1.0`, using an explicit
-host policy. Version 0.8.0 adds the [bounded short-horizon optimizer](optimizer.md)
+host policy. Version 0.9.0 adds [immutable run archives and offline replay](archive-replay.md). Version 0.8.0 added the [bounded short-horizon optimizer](optimizer.md)
 (`solver-slsqp-v1` in a supervised solver process that hosts one evaluator per
 program). Version 0.7.0 added the [deterministic intent-fusion baseline](intent-fusion.md),
 immutable estimator configuration and explicit active/disabled/error outcomes.
@@ -34,7 +34,7 @@ To test the actual wheel in a second clean environment:
 ```sh
 .venv-ssc/bin/python -m pip wheel --no-deps --wheel-dir dist .
 python3.12 -m venv .venv-acceptance
-.venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.8.0-py3-none-any.whl[test]'
+.venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.9.0-py3-none-any.whl[test]'
 .venv-acceptance/bin/python -m pytest tests/shared_control
 .venv-acceptance/bin/python -m pip check
 ```

@@ -22,6 +22,8 @@ class RejectHeavyImport(importlib.abc.MetaPathFinder):
             raise AssertionError("unexpected dependency import: " + fullname)
 sys.meta_path.insert(0, RejectHeavyImport())
 import ssc_core
+import ssc_core.archive
+import ssc_core.replay
 from ssc_core import parse_record, NUMERIC_OFFLINE_V1, SessionRegistry, compile_program
 parse_record("Pose", {"position_xyz": [0, 0, 0], "quaternion_xyzw": [0, 0, 0, 1]}, policy=NUMERIC_OFFLINE_V1)
 registry = SessionRegistry("package-check", policy=NUMERIC_OFFLINE_V1)
@@ -41,5 +43,5 @@ print(json.dumps({"version": importlib.metadata.version("ssc-core"), "origin": s
 '''
     completed = subprocess.run([sys.executable, "-I", "-c", program], cwd=tmp_path, text=True, capture_output=True, check=True)
     result = json.loads(completed.stdout)
-    assert result["version"] == ssc_core.__version__ == "0.8.0"
+    assert result["version"] == ssc_core.__version__ == "0.9.0"
     assert "site-packages" in result["origin"]
