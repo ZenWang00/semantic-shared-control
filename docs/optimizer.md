@@ -10,6 +10,16 @@ profile identities are unchanged.
 
 ## Use
 
+P1-17 adds opt-in `solver-slsqp-batch-v2` in `ssc-core==0.10.0`.
+Pass `solver_config=get_solver_config("solver-slsqp-batch-v2")` to
+`SupervisedOptimizer`. It evaluates a complete candidate in one isolated
+256 MiB worker and one supervised IPC call, with **10 ms for the whole batch**,
+not per program. The 16-program maximum, 150 ms total budget and all SLSQP
+numerics are unchanged. Default lookup still selects the original v1 below.
+See the versioned [batch profile](wiki/Offline-Batch-Profile.md) for identities,
+failure rules, full-count verification and consumer handoff. Old archives and
+scalar receipt/replay evaluation retain their original behavior.
+
 ```python
 from ssc_core import HostCheckerSpec, SupervisedOptimizer, estimate_intent, get_intent_config
 
@@ -225,14 +235,17 @@ These are observations, not real-time guarantees.
 - **Program budget (accepted limitation, owner decision 26 October 2026).**
   The profile allows 16 programs per snapshot, but each objective evaluation
   calls every program's evaluator once. Solve cost therefore scales with
-  programs × evaluator calls per program: 44 calls for the reversal fixture, 177
-  for the infeasible start. Measured in CI: 2 programs ≈ 28 ms; 4 ≈ 80 ms;
+  programs × evaluated candidate poses. The original two-program reversal
+  fixture reports 44 total evaluator calls, while the one-program infeasible
+  start reports about 177 total calls. Measured in CI: 2 programs ≈ 28 ms; 4 ≈ 80 ms;
   8 ≈ 90 ms; every 16-program solve timed out. On a slower, loaded 2-vCPU host
   some 4- and 8-program solves already timed out. Over-budget solves fail closed
   as `timeout` holds and retire the worker. Until
   [#30](https://github.com/ZenWang00/semantic-shared-control/issues/30)
-  resolves it with a new configuration identity or topology, consumers
-  (Grasp-Pose-Generation#6) should keep to 2–4 programs per snapshot.
+  introduces the opt-in batch v2 topology and full-count measurement. Consumers
+  still using v1 should keep to 2–4 programs per snapshot; a library upgrade
+  alone does not select the new topology. V2 consumers must select its solver
+  and configuration identities and verify their pinned installed version pair.
 - **Integration evidence.** This is component software evidence with a local
   checker double. It does not cover the consumer's `SyntheticHostChecker`, the
   real gate, the plant or the coordinator. The installed version pair and the

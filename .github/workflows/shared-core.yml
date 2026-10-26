@@ -15,10 +15,12 @@ on:
       - 'docs/reference/verify_intent_fusion.py'
       - 'docs/reference/intent_fixtures.py'
       - 'docs/reference/verify_optimizer.py'
+      - 'docs/reference/verify_program_budget.py'
       - 'docs/reference/optimizer_fixtures.py'
       - 'docs/reference/archive_fixture.py'
       - 'docs/archive-replay.md'
       - 'docs/wiki/Generated-Constraint-Program-Contract.md'
+      - 'docs/wiki/Offline-Batch-Profile.md'
       - '.github/workflows/shared-core.yml'
 
 permissions:
@@ -37,7 +39,7 @@ jobs:
       - name: Install wheel into a clean environment
         run: |
           python -m venv .venv-acceptance
-          .venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.9.0-py3-none-any.whl[test]'
+          .venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.10.0-py3-none-any.whl[test]'
       - name: Build a complete control-run archive on Linux
         run: |
           .venv-acceptance/bin/python -B docs/reference/archive_fixture.py \
@@ -78,6 +80,13 @@ jobs:
             --source-revision "$(git rev-parse HEAD)" \
             --wheel-sha256 "$(sha256sum dist/*.whl | cut -d ' ' -f 1)" \
             --output optimizer-evidence.json
+      - name: Verify every allowed batch program count under the real solve budget
+        if: ${{ !cancelled() }}
+        run: |
+          .venv-acceptance/bin/python -B docs/reference/verify_program_budget.py \
+            --source-revision "$(git rev-parse HEAD)" \
+            --wheel-sha256 "$(sha256sum dist/*.whl | cut -d ' ' -f 1)" \
+            --output program-budget-evidence.json
       - name: Retain wheel and verification evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -92,6 +101,7 @@ jobs:
             program-validation-evidence.json
             intent-fusion-evidence.json
             optimizer-evidence.json
+            program-budget-evidence.json
             archive-fixture.json
             archive-checksum.json
             archive-replay-evidence.json

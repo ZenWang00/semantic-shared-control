@@ -80,7 +80,8 @@ def objective_terms(problem, z, residuals):
     return tracking, smoothing, assistance
 
 
-def solve_problem(problem, evaluate, host_margins, *, deadline_ns, clock_ns=time.monotonic_ns):
+def solve_problem(problem, evaluate, host_margins, *, deadline_ns, clock_ns=time.monotonic_ns,
+                  evaluate_batch=None):
     """Run one bounded SLSQP solve; return a plain report or raise SolveFailure.
 
     The evaluate callback must raise SolveFailure for every evaluator failure;
@@ -99,6 +100,10 @@ def solve_problem(problem, evaluate, host_margins, *, deadline_ns, clock_ns=time
 
     def residuals_at(position, rotation):
         matrix = rotation.as_matrix().tolist()
+        if evaluate_batch is not None:
+            check_deadline()
+            counters["evaluations"] += len(problem["terms"])
+            return evaluate_batch(problem["terms"], position.tolist(), matrix)
         values = []
         for term in problem["terms"]:
             check_deadline()
