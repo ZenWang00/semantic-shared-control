@@ -1,16 +1,19 @@
 # Shared validation, resolution and residual-evaluation package
 
-`ssc-core==0.7.0` implements scene/artifact and live/control record validation,
+`ssc-core==0.8.0` implements scene/artifact and live/control record validation,
 immutable session registries, deterministic reference resolution and a restricted
 `geometry-residual-v1` numerical interpreter for schema `1.0`, using an explicit
-host policy. Version 0.7.0 adds the [deterministic intent-fusion baseline](intent-fusion.md),
+host policy. Version 0.8.0 adds the [bounded short-horizon optimizer](optimizer.md)
+(`solver-slsqp-v1` in a supervised solver process that hosts one evaluator per
+program). Version 0.7.0 added the [deterministic intent-fusion baseline](intent-fusion.md),
 immutable estimator configuration and explicit active/disabled/error outcomes.
 Version 0.6.0 introduced host-reviewed unit declarations, bounded numerical
 probes, locally trusted receipts and execution bindings. Existing parsing, registry,
 interpreter and evaluator APIs remain source compatible with 0.6.0. The inherited grasp service is separate. Resolution checks typed-record
 compatibility; the interpreter and Linux supervisor evaluate source under enforced
-process budgets. HostProgramValidator owns receipt issuance; active-bundle activation,
-the live control loop, command gate and robot integration remain separate responsibilities.
+process budgets. HostProgramValidator owns receipt issuance; SupervisedOptimizer
+proposes targets only. Active-bundle activation, the live control loop, command gate
+and robot integration remain separate responsibilities.
 
 ## Install and test
 
@@ -31,7 +34,7 @@ To test the actual wheel in a second clean environment:
 ```sh
 .venv-ssc/bin/python -m pip wheel --no-deps --wheel-dir dist .
 python3.12 -m venv .venv-acceptance
-.venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.7.0-py3-none-any.whl[test]'
+.venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.8.0-py3-none-any.whl[test]'
 .venv-acceptance/bin/python -m pytest tests/shared_control
 .venv-acceptance/bin/python -m pip check
 ```
@@ -522,8 +525,8 @@ This is process/resource isolation for the controlled interpreter, **not a
 sandbox for arbitrary hostile Python**: no seccomp, filesystem namespace,
 network namespace, cgroup/RSS cap or protection against a kernel/interpreter
 exploit is claimed. The generated grammar provides no file/network/process
-capabilities. Future solver supervision (1 GiB/150 ms), robot-side watchdog,
-and command gate remain separate tasks. Host receipt issuance is described below.
+capabilities. Solver supervision (1 GiB/150 ms) is described in
+[optimizer.md](optimizer.md); the robot-side watchdog and command gate remain separate tasks. Host receipt issuance is described below.
 
 Run the reference-platform benchmark from a checkout with its wheel installed:
 

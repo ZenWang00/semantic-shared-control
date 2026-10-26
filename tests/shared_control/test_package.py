@@ -41,5 +41,5 @@ print(json.dumps({"version": importlib.metadata.version("ssc-core"), "origin": s
 '''
     completed = subprocess.run([sys.executable, "-I", "-c", program], cwd=tmp_path, text=True, capture_output=True, check=True)
     result = json.loads(completed.stdout)
-    assert result["version"] == ssc_core.__version__ == "0.7.0"
+    assert result["version"] == ssc_core.__version__ == "0.8.0"
     assert "site-packages" in result["origin"]

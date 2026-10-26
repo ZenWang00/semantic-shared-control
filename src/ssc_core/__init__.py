@@ -3,7 +3,8 @@
 Parsing validates local invariants; registries enforce immutable identities and
 typed-record compatibility; the restricted interpreter evaluates accepted
 geometry-residual-v1 source. HostProgramValidator composes trusted host reviews
-and bounded probes to issue receipts. No API activates programs or authorizes motion.
+and bounded probes to issue receipts. SupervisedOptimizer proposes bounded
+targets in a supervised solver process. No API activates programs or authorizes motion.
 """
 
 from .errors import ValidationError
@@ -34,10 +35,18 @@ from .receipts import (
 )
 
 from .fusion import IntentConfig, IntentOutcome, estimate_intent, get_intent_config
+from .optimization import (
+    AppliedCommandReference, HostCheckerSpec, OptimizationInputError, OptimizationOutcome,
+    OptimizationRequest, PreparationOutcome, SolverConfig, SupervisedOptimizer,
+    basic_step_margins, build_request, get_solver_config,
+)
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 
 __all__ = [
+    "AppliedCommandReference", "HostCheckerSpec", "OptimizationInputError", "OptimizationOutcome",
+    "OptimizationRequest", "PreparationOutcome", "SolverConfig", "SupervisedOptimizer",
+    "basic_step_margins", "build_request", "get_solver_config",
     "IntentConfig", "IntentOutcome", "estimate_intent", "get_intent_config",
     "AcceptanceError", "HostBindingPolicy", "HostNormalization", "HostProgramValidator",
     "ProgramValidationReport", "ResidualDiagnostic", "UnitReview", "feature_definition_digest",
