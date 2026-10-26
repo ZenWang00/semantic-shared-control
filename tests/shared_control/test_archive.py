@@ -32,6 +32,21 @@ def archive():
     return RunArchive.read(FIXTURE)
 
 
+def test_committed_fixture_checksum_and_dependency_closure():
+    path = Path(__file__).resolve().parents[1] / "fixtures/shared_control/control_run_v1.json"
+    digest = path.with_suffix(".sha256").read_text().split()[0]
+    saved = RunArchive.read(path, expected_sha256=digest)
+    assert saved.manifest["environment"]["system"] == "Linux"
+    assert saved.registry().resolve_snapshot("snapshot-2").snapshot.previous_applied_command_id == "applied-0"
+
+
+@linux
+def test_committed_fixture_replays_on_current_reader():
+    path = Path(__file__).resolve().parents[1] / "fixtures/shared_control/control_run_v1.json"
+    report = replay_archive(RunArchive.read(path))
+    assert report["ok"] and report["evaluation_count"] == 4
+
+
 def builder_from(archive):
     payload = archive.to_dict()
     builder = ArchiveBuilder(payload["manifest"])

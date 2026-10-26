@@ -137,6 +137,16 @@ installation manifest. Keep state/controller observations distinct from requests
 The runtime can call this shared API; the archive implementation has no reverse
 dependency. Full runner and accepted version-pair compatibility remain #6 work.
 
+Also retain the original runtime records as JSON resource bytes keyed by
+snapshot/event identity, for example a `snapshot-runtime-evidence-v1` resource
+mapping snapshot IDs to complete dataclass exports. In particular preserve
+`DispatchRecord.transport_allowance_ns` (not always derivable from the minimum
+deadline), `FrozenSnapshot.motion_eligible`, arrival deadline flags and all
+GateDecision fields, including disposition, actions, lifecycle request and
+adapter error. The typed event table provides common inspection fields; it is
+not permission for the exporter to discard supplied runtime detail. The archive
+keeps such resources opaque and does not execute their contents.
+
 ## Fixture and verification
 
 `docs/reference/archive_fixture.py` builds a three-snapshot fixture containing
@@ -165,3 +175,15 @@ identity reuse, missing dependencies/resources, corrupt bytes/source/binding/rec
 unknown versions, timing and diagnostic incompleteness, numerical mismatch and
 an import guard against ROS2/runtime access. Numerical tests run only on Linux;
 a non-Linux test verifies explicit refusal rather than an unbounded fallback.
+
+The committed fixture was produced by [Linux run 40386894073](https://github.com/ZenWang00/semantic-shared-control/actions/runs/40386894073)
+from PR test merge revision `556ce591cbf9c855e5872a0fc65ded7377d01525`
+(implementation head `2b6d5ae940e1e339366852d7bfe960887789906e`). Its server wheel
+SHA-256 is `2fc7bfe0715472a9ca73d4232cc206a876ff33c4949b839bfa5eb58a762e5bc9`.
+The original file checksum is retained in `control_run_v1.sha256` beside the
+fixture; reproduction creates a new archive because issuance IDs, environment
+and real-wall probe timings are new evidence. That run passed 1174 tests with
+three non-Linux-only checks skipped, and reproduced all four recorded residuals
+and penalties. The retained artifact includes the complete replay report and
+real Linux probe evidence. Later revisions revalidate this fixed archive as well
+as generating and replaying their own fresh archive.
