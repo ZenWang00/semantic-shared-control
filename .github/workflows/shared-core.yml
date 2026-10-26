@@ -16,6 +16,8 @@ on:
       - 'docs/reference/intent_fixtures.py'
       - 'docs/reference/verify_optimizer.py'
       - 'docs/reference/optimizer_fixtures.py'
+      - 'docs/reference/archive_fixture.py'
+      - 'docs/archive-replay.md'
       - 'docs/wiki/Generated-Constraint-Program-Contract.md'
       - '.github/workflows/shared-core.yml'
 
@@ -35,13 +37,23 @@ jobs:
       - name: Install wheel into a clean environment
         run: |
           python -m venv .venv-acceptance
-          .venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.8.0-py3-none-any.whl[test]'
+          .venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.9.0-py3-none-any.whl[test]'
+      - name: Build a complete control-run archive on Linux
+        run: |
+          .venv-acceptance/bin/python -B docs/reference/archive_fixture.py \
+            --source-revision "$(git rev-parse HEAD)" \
+            --wheel-sha256 "$(sha256sum dist/*.whl | cut -d ' ' -f 1)" \
+            --output archive-fixture.json > archive-checksum.json
       - name: Verify installed package
         run: |
-          .venv-acceptance/bin/python -m pytest tests/shared_control --junitxml=test-results.xml
+          SSC_ARCHIVE_FIXTURE="$GITHUB_WORKSPACE/archive-fixture.json" \
+            .venv-acceptance/bin/python -m pytest tests/shared_control --junitxml=test-results.xml
           .venv-acceptance/bin/python -m pip check
           .venv-acceptance/bin/python -m pip freeze > dependencies.txt
           sha256sum dist/*.whl > wheel-sha256.txt
+      - name: Replay the archive in a fresh isolated process
+        run: |
+          .venv-acceptance/bin/python -I -m ssc_core.replay archive-fixture.json > archive-replay-evidence.json
       - name: Measure evaluator isolation on Linux
         run: |
           .venv-acceptance/bin/python -B docs/reference/verify_evaluator_isolation.py \
@@ -80,3 +92,6 @@ jobs:
             program-validation-evidence.json
             intent-fusion-evidence.json
             optimizer-evidence.json
+            archive-fixture.json
+            archive-checksum.json
+            archive-replay-evidence.json
