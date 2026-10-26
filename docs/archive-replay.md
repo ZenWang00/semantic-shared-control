@@ -39,7 +39,7 @@ arrival and acceptance timestamps remain unchanged.
 ## Format and completeness
 
 The file is UTF-8-compatible JSON with exactly `archive_version`,
-`sha256` and `payload`. Payload has these six collections:
+`sha256` and `payload`. Payload has these five fields:
 
 | Field | Required content |
 | --- | --- |
@@ -49,7 +49,7 @@ The file is UTF-8-compatible JSON with exactly `archive_version`,
 | resources | `{resource_id, media_type, sha256, base64}` with complete bytes for profile, installation, scenario, model, host constraints, calibration, input mapping, estimator/solver/policy definitions, observation assets, and additional evidence |
 | events | Ordered `{event_id, kind, data}` entries; storage order is preserved and never replaced by a timestamp sort |
 
-(The payload has five collections plus its manifest.) JSON is strict: duplicate
+JSON is strict: duplicate
 keys, nonfinite numbers and unknown fields in defined archive/event structures
 are errors. The file size limit is 64 MiB, including inline resource bytes.
 
@@ -165,4 +165,3 @@ identity reuse, missing dependencies/resources, corrupt bytes/source/binding/rec
 unknown versions, timing and diagnostic incompleteness, numerical mismatch and
 an import guard against ROS2/runtime access. Numerical tests run only on Linux;
 a non-Linux test verifies explicit refusal rather than an unbounded fallback.
-

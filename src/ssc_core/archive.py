@@ -433,6 +433,8 @@ class RunArchive:
                          "$.events.evaluation", "incomplete_record", identifier)
                 bindings = {b.program_id: b for b in snapshots[candidate.snapshot_id].bundle.execution_bindings}
                 diagnostics = {d.program_id: d for d in candidate.constraint_evaluations}
+                _require(len(diagnostics) == len(candidate.constraint_evaluations),
+                         "$.results.constraint_evaluations", "duplicate_evaluation", identifier)
                 _require(set(bindings) == set(diagnostics), "$.results.constraint_evaluations", "incomplete_record", identifier)
                 for program_id, diagnostic in diagnostics.items():
                     _require(diagnostic.normalization_scale == bindings[program_id].normalization_scale,

@@ -7,7 +7,6 @@ intent fusion are real. Numerical expectations use an analytical distance oracle
 
 import argparse
 from dataclasses import asdict
-from hashlib import sha256
 import json
 import math
 from pathlib import Path
@@ -171,7 +170,7 @@ def build_fixture(*, source_revision, wheel_sha256):
             writer.add_event(f"evaluation-{i}", "evaluation", {"result_id": f"result-{i}", "pose": pose})
         writer.add_event(f"arrival-{i}", "result_arrival", {"result_id": f"result-{i}", "received_at": stamp(ns + elapsed + 1_000_000)})
         writer.add_event(f"acceptance-{i}", "acceptance", {"result_id": f"result-{i}", "command_accepted": i != 1,
-            "reason": "scripted_earlier_epoch_after_release" if i == 1 else "scripted_accepted",
+            "reason": "scripted_host_rejection" if i == 1 else "scripted_accepted",
             "checked_at": stamp(ns + elapsed + 2_000_000), "applied_command_id": f"applied-{i}" if i != 1 else None})
         if i == 0:
             writer.add_event("request-0", "controller_request", {"at": stamp(ns + elapsed + 2_000_000), "result_id": "result-0",

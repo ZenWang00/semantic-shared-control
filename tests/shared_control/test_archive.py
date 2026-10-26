@@ -262,3 +262,90 @@ def test_cli_inspection_and_actionable_error(archive, tmp_path):
     failed = subprocess.run([sys.executable, "-I", "-m", "ssc_core.replay", str(bad)], capture_output=True, text=True, timeout=10)
     assert failed.returncode == 2
     assert json.loads(failed.stderr)["code"] == "invalid_fields"
+
+
+def test_exact_utf8_crlf_and_signed_zero_roundtrip(archive):
+    builder = builder_from(archive)
+    program = deepcopy(next(r["data"] for r in archive.to_dict()["records"] if r["record_type"] == "ConstraintProgram"))
+    program["program_id"] = "extra-source-bytes"
+    program["source_code"] = "# 几何残差\r\n" + program["source_code"].replace("\n", "\r\n")
+    program["source_sha256"] = sha256(program["source_code"].encode("utf-8")).hexdigest()
+    program["parameters"][0]["value"] = -0.0
+    builder.add_record("ConstraintProgram", program)
+    sealed = builder.seal()
+    actual = sealed.registry().get_record("ConstraintProgram", program["program_id"], session_id=sealed.manifest["session_id"])
+    assert actual.source_code.encode("utf-8") == program["source_code"].encode("utf-8")
+    assert actual.parameters[0].value.hex() == (-0.0).hex()
+    program["parameters"][0]["value"] = 0.0
+    with pytest.raises(RegistryError, match="immutable_conflict"):
+        builder.add_record("ConstraintProgram", program)
+
+
+@pytest.mark.parametrize("kind", ["record", "message", "resource"])
+def test_reader_rejects_conflicting_duplicate_identities(archive, kind):
+    payload = archive.to_dict()
+    if kind == "record":
+        copy = deepcopy(next(r for r in payload["records"] if r["record_type"] == "ConstraintProgram"))
+        copy["data"]["description"] += " changed"
+        payload["records"].append(copy)
+    elif kind == "message":
+        copy = deepcopy(next(m for m in payload["messages"] if m["message_type"] == "JoystickSample"))
+        copy["meta"]["sequence"] += 1
+        payload["messages"].append(copy)
+    else:
+        copy = deepcopy(payload["resources"][0])
+        copy["media_type"] += "; changed"
+        payload["resources"].append(copy)
+    with pytest.raises((ArchiveError, RegistryError), match="immutable_conflict"):
+        RunArchive.from_bytes(envelope(payload))
+
+
+def test_duplicate_diagnostics_cannot_be_collapsed_during_replay(archive):
+    payload = archive.to_dict()
+    diagnostics = next(m for m in payload["messages"] if m["message_type"] == "ControlResult")["payload"]["constraint_evaluations"]
+    hidden = deepcopy(diagnostics[0])
+    hidden["raw_g"] += 1
+    diagnostics.insert(0, hidden)
+    with pytest.raises(ArchiveError, match="duplicate_evaluation"):
+        RunArchive.from_bytes(envelope(payload))
+
+
+@pytest.mark.parametrize("identity", ["numeric-offline-v1", "solver-slsqp-v1", "intent-linear-v1"])
+def test_changed_configuration_is_not_silently_replaced(archive, identity):
+    import base64
+    payload = archive.to_dict()
+    resource = next(r for r in payload["resources"] if r["resource_id"] == identity)
+    value = json.loads(base64.b64decode(resource["base64"]))
+    value["changed"] = True
+    content = encode(value)
+    resource["base64"] = base64.b64encode(content).decode()
+    resource["sha256"] = sha256(content).hexdigest()
+    with pytest.raises(ArchiveError, match="unsupported_configuration"):
+        RunArchive.from_bytes(envelope(payload))
+
+
+@linux
+def test_forbidden_generated_source_never_executes_even_with_consistent_hashes(archive, tmp_path):
+    payload = archive.to_dict()
+    program = next(r["data"] for r in payload["records"] if r["record_type"] == "ConstraintProgram")
+    marker = tmp_path / "must-not-exist"
+    program["source_code"] = (
+        "def evaluate(p_tcp, R_control_tcp, keypoints, axis_dirs, params):\n"
+        f"    open({str(marker)!r}, 'w')\n    return 0\n")
+    digest = sha256(program["source_code"].encode()).hexdigest()
+    identifier = program["program_id"]
+
+    def update_refs(value):
+        if isinstance(value, dict):
+            if value.get("program_id") == identifier and "source_sha256" in value:
+                value["source_sha256"] = digest
+            for child in value.values():
+                update_refs(child)
+        elif isinstance(value, list):
+            for child in value:
+                update_refs(child)
+    update_refs(payload)
+    report = replay_archive(RunArchive.from_bytes(envelope(payload)))
+    assert not report["ok"]
+    assert not marker.exists()
+    assert any(not item["preparation"]["ok"] and item["preparation"]["stage"] == "compile" for item in report["evaluations"])
