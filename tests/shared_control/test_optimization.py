@@ -452,6 +452,29 @@ def group_gone(pgid, wait_s=1.):
 
 
 @linux
+@pytest.mark.parametrize("invalid_result", [False, True])
+def test_host_only_checker_failure_retires_real_process_group(invalid_result):
+    case = scenario()
+    solver = prepared(case)
+    pgid = solver._process.pid
+    def fail(**kwargs):
+        if invalid_result:
+            return None
+        raise RuntimeError("host-only final recheck failure")
+    solver._host_checker = fail  # worker still has its valid, independent checker
+    try:
+        outcome = run(solver, case)
+        assert (outcome.result.status, outcome.result.solver_status, outcome.code) == ("hold", "error", "host_checker")
+        assert outcome.result.next_tcp_pose is None and outcome.result.horizon_s is None
+        assert outcome.reaped is True and not solver.ready and group_gone(pgid)
+        assert run(solver, case).code == "not_prepared"
+        assert solver.prepare(case["resolved"].bundle, motion_disabled=True).result(10).ok
+        assert run(solver, case).result.status == "move"
+    finally:
+        solver.close().result(3)
+
+
+@linux
 @pytest.mark.parametrize("mode,status,code", [
     ("stall", "timeout", "timeout"), ("late", "timeout", "timeout"), ("crash", "error", "worker_crash"),
     ("wrong_id", "error", "malformed_response"), ("bad_limits", "error", "malformed_response"),

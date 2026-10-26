@@ -148,9 +148,17 @@ killed with the group and reaped by the system init process. In a container
 where the host process itself runs as PID 1, use an init (`docker run --init`)
 or a subreaper so those evaluators do not remain as zombies.
 
-`close()` is final. If a solve or preparation is in flight, it returns that
-operation's Future, so the result may be an `OptimizationOutcome` or a
-`PreparationOutcome`; otherwise it returns a new retirement Future.
+`close()` is final. If a solve or preparation has not committed its outcome,
+it withdraws that operation and returns its Future; the cancelled outcome is
+delivered after a bounded retirement attempt. The result may therefore be an
+`OptimizationOutcome` or a `PreparationOutcome`. Cancellation/deadline checking,
+the final status and removal of the active operation commit under one lock.
+Errors discovered by the host recheck retire the worker just like worker errors.
+
+Future delivery and callbacks run outside that lock. A `close()` after commit
+returns a separate retirement Future, even if delivery of the committed outcome
+is still pending; it cannot retroactively change that outcome. The local gate
+must still reject expired or withdrawn authority when consuming any proposal.
 
 ## Evidence
 

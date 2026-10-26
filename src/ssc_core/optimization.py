@@ -542,7 +542,13 @@ class SupervisedOptimizer:
         return future
 
     def close(self) -> Future:
-        """Withdraw in-flight work and retire the process group; final."""
+        """Withdraw uncommitted work and retire the process group; final.
+
+        An operation commits its outcome and clears ``_active`` under the same
+        lock as close. Future delivery/callbacks follow outside that lock. A
+        close after commit returns a separate retirement Future and does not
+        change the committed outcome, even if its delivery is still pending.
+        """
         with self._lock:
             self._closed, self._ready = True, False
             self._cancel.set()
@@ -733,27 +739,31 @@ class SupervisedOptimizer:
             code, diagnostic = exc.code, exc.diagnostic
         except Exception as exc:
             code, diagnostic = "supervisor_error", type(exc).__name__
-        if not ok:
+        retired = False
+        while True:
+            with self._lock:
+                if self._closed:
+                    ok, code, diagnostic = False, "cancelled", "closed before publication"
+                elif ok and time.monotonic_ns() >= deadline:
+                    ok, code, diagnostic = False, "preparation_deadline", "deadline expired before publication"
+                if ok or retired:
+                    # The final guard and state commit are one operation with
+                    # respect to close; callbacks must run after unlocking.
+                    self._ready = ok
+                    self._programs = programs if ok else None
+                    outcome = self._preparation(ok, code if ok or reaped else "cleanup_failed", diagnostic, started,
+                                                deadline, reply=reply, programs=programs, cleanup=cleanup,
+                                                reaped=None if ok else reaped)
+                    self._active = None
+                    break
             try:
-                # A worker that replied with a failure is waiting for EOF; others are forced.
+                # Retire outside the lock so close/input callers never wait for
+                # teardown. Recheck cancellation before committing the outcome.
                 elapsed, reaped = self._retire(graceful=reply is not None)
                 cleanup += elapsed
             except Exception:
                 reaped = False
-        with self._lock:
-            if self._closed and ok:
-                ok, code, diagnostic = False, "cancelled", "closed before publication"
-            withdraw = self._closed and self._process is not None
-        if withdraw:
-            elapsed, reaped = self._retire(graceful=True)
-            cleanup += elapsed
-        with self._lock:
-            self._ready = ok and not self._closed
-            self._programs = programs if self._ready else None
-            outcome = self._preparation(ok, code if ok or reaped else "cleanup_failed", diagnostic, started,
-                                        deadline, reply=reply, programs=programs, cleanup=cleanup,
-                                        reaped=None if ok else reaped)
-            self._active = None
+            retired = True  # one bounded attempt, even if reaping failed
         future.set_result(outcome)
 
     def _solve(self, future, payload, started, deadline):
@@ -761,7 +771,7 @@ class SupervisedOptimizer:
         problem = request.problem()
         status, code, diagnostic, evaluation_valid = "error", "supervisor_error", "", False
         reply, result, margins = None, None, ()
-        retire, cleanup, reaped = True, 0., None
+        cleanup, reaped = 0., None
         pid = self._process.pid if self._process is not None else None
         try:
             self._check(deadline)
@@ -774,7 +784,6 @@ class SupervisedOptimizer:
                 raise _Failure("error", "malformed_response", "unexpected solver status")
             code, diagnostic = str(reply.get("code"))[:64], str(reply.get("diagnostic") or "")[:400]
             evaluation_valid = reply["evaluation_valid"]
-            retire = status not in ("solved", "infeasible")
             if status == "solved":
                 result, margins = self._move(identity, request, problem, reply.get("report"), started)
                 code = "solved"
@@ -782,44 +791,50 @@ class SupervisedOptimizer:
         except _Failure as exc:
             status, code, diagnostic = exc.status, exc.code, exc.diagnostic
             evaluation_valid, result = exc.evaluation_valid, None
-            retire = retire or exc.code in ("malformed_response", "worker_crash", "timeout", "cancelled")
         except Exception as exc:
             status, code, diagnostic, evaluation_valid, result = "error", "supervisor_error", type(exc).__name__, False, None
-            retire = True
-        if retire:
+
+        # Serialize diagnostics before the final deadline/cancellation check,
+        # not between that check and publication or while holding the lock.
+        report_json = json.dumps(reply.get("report"), sort_keys=True) if reply and reply.get("report") is not None else None
+        evaluator_json = json.dumps({"failure": reply.get("evaluator"), "stats": reply.get("evaluator_stats")},
+                                    sort_keys=True) if reply else None
+        retired = False
+        while True:
+            with self._lock:
+                finished = time.monotonic_ns()
+                if self._closed:
+                    status, code, diagnostic, result = "timeout", "cancelled", "closed before publication", None
+                    evaluation_valid = False
+                elif finished >= deadline and status in ("solved", "infeasible"):
+                    status, code, diagnostic, result = "timeout", "timeout", "deadline expired before publication", None
+                    evaluation_valid = False
+                # The final status includes host-recheck errors and late
+                # cancellation/expiry, not just the worker's original reply.
+                retire = status in ("timeout", "error")
+                if not retire or retired:
+                    if result is None:
+                        result = _hold_result(identity, status, code, diagnostic or status,
+                                              evaluation_valid=evaluation_valid, solve_time_s=(finished - started) / 1e9)
+                    self._ready = not retire
+                    if retire:
+                        self._programs = None
+                    outcome = OptimizationOutcome(
+                        result, code, diagnostic, request, report_json, evaluator_json,
+                        margins, started, deadline, finished, pid, self._generation,
+                        reply.get("worker_elapsed_s") if reply else None, cleanup, reaped if retire else None,
+                        self._config, self._environment)
+                    # Commit under the same lock as the final guard. A later
+                    # close owns a separate retirement; it cannot revoke this
+                    # already-decided outcome. Future callbacks run unlocked.
+                    self._active = None
+                    break
             try:
                 # A worker that sent a well-formed reply exits on EOF; others are forced.
                 cleanup, reaped = self._retire(graceful=reply is not None and code != "malformed_response")
             except Exception:
                 reaped = False
-        with self._lock:
-            finished = time.monotonic_ns()
-            if self._closed:
-                status, code, diagnostic, result = "timeout", "cancelled", "closed before publication", None
-            elif finished >= deadline and result is not None:
-                status, code, diagnostic, result = "timeout", "timeout", "deadline expired before publication", None
-                evaluation_valid = False
-            withdraw = self._closed and self._process is not None and not retire
-        if withdraw:
-            cleanup, reaped = self._retire(graceful=True)
-            retire = True
-        with self._lock:
-            finished = time.monotonic_ns()
-            if result is None:
-                result = _hold_result(identity, status if status != "solved" else "error", code, diagnostic or status,
-                                      evaluation_valid=evaluation_valid, solve_time_s=(finished - started) / 1e9)
-            self._ready = not retire and not self._closed
-            if retire:
-                self._programs = None
-            outcome = OptimizationOutcome(
-                result, code, diagnostic, request,
-                json.dumps(reply.get("report"), sort_keys=True) if reply and reply.get("report") is not None else None,
-                json.dumps({"failure": reply.get("evaluator"), "stats": reply.get("evaluator_stats")}, sort_keys=True)
-                if reply else None,
-                margins, started, deadline, finished, pid, self._generation,
-                reply.get("worker_elapsed_s") if reply else None, cleanup, reaped if retire else None,
-                self._config, self._environment)
-            self._active = None
+            retired = True  # do not turn a cleanup failure into an unbounded loop
         future.set_result(outcome)
 
     def _move(self, identity, request, problem, report, started):
