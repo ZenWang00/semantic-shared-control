@@ -69,21 +69,31 @@ def test_batch_checked_inputs_match_scalar_and_refresh_changed_bindings():
         position = [x, 0., .3]
         expected = [p.evaluate(position, IDENTITY, b["keypoints"], b["axis_dirs"], b["params"])
                     for p, b in zip(batch.compiled, bindings)]
-        assert batch.evaluate((position, IDENTITY, bindings)) == expected
-    old = batch.evaluate((problem["p_tcp"], IDENTITY, bindings))
+        assert batch.evaluate((position, IDENTITY, bindings, None)) == expected
+    old = batch.evaluate((problem["p_tcp"], IDENTITY, bindings, None))
     changed = deepcopy(bindings)
     changed[0]["keypoints"][0][0] += .01
-    assert batch.evaluate((problem["p_tcp"], IDENTITY, changed)) != old
-    assert batch.evaluate((problem["p_tcp"], IDENTITY, bindings)) == old
-    # bool equals 0/1 in Python, but must never alias an accepted numeric cache.
+    assert batch.evaluate((problem["p_tcp"], IDENTITY, changed, None)) != old
+    assert batch.evaluate((problem["p_tcp"], IDENTITY, bindings, None)) == old
+    # Reuse only within one explicitly bound solve, never across solve IDs.
+    assert batch.evaluate((problem["p_tcp"], IDENTITY, bindings, "solve-a")) == old
+    assert batch.evaluate((problem["p_tcp"], IDENTITY, None, "solve-a")) == old
+    with pytest.raises(ValueError, match="solve scope"):
+        batch.evaluate((problem["p_tcp"], IDENTITY, None, "solve-b"))
+    updated = batch.evaluate((problem["p_tcp"], IDENTITY, changed, "solve-b"))
+    assert updated != old
+    assert batch.evaluate((problem["p_tcp"], IDENTITY, None, "solve-b")) == updated
+    with pytest.raises(ValueError, match="solve scope"):
+        batch.evaluate((problem["p_tcp"], IDENTITY, None, "solve-a"))
+    # bool equals 0/1 in Python, but must never alias accepted numeric inputs.
     malformed = deepcopy(bindings)
     malformed[0]["keypoints"][0][1] = False
     with pytest.raises(InterpreterError, match="input_type"):
-        batch.evaluate((problem["p_tcp"], IDENTITY, malformed))
+        batch.evaluate((problem["p_tcp"], IDENTITY, malformed, None))
     with pytest.raises(InterpreterError, match="invalid_rotation"):
-        batch.evaluate((problem["p_tcp"], [[0., 0., 0.]] * 3, bindings))
+        batch.evaluate((problem["p_tcp"], [[0., 0., 0.]] * 3, bindings, None))
     with pytest.raises(ValueError, match="identity/order"):
-        batch.evaluate((problem["p_tcp"], IDENTITY, list(reversed(bindings))))
+        batch.evaluate((problem["p_tcp"], IDENTITY, list(reversed(bindings)), None))
 
 
 @linux

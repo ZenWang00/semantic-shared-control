@@ -22,10 +22,11 @@ class BatchEvaluator(SupervisedEvaluator):
             self._count = len(programs) if type(programs) is list else 0
         return super()._operate(future, operation, payload, request_id, started, deadline)
 
-    def submit_batch(self, position, rotation, terms, *, deadline_ns, _inline=False):
-        bindings = [{key: term[key] for key in ("program_id", "keypoints", "axis_dirs", "params")}
-                    for term in terms]
-        return self._start("evaluate", (position, rotation, bindings), deadline_ns=deadline_ns, _inline=_inline)
+    def submit_batch(self, position, rotation, terms, *, deadline_ns, _inline=False, _scope=None):
+        bindings = None if terms is None else [
+            {key: term[key] for key in ("program_id", "keypoints", "axis_dirs", "params")} for term in terms]
+        return self._start("evaluate", (position, rotation, bindings, _scope),
+                           deadline_ns=deadline_ns, _inline=_inline)
 
     def _normalize_residual(self, residual):
         if (type(residual) is not list or len(residual) != self._count

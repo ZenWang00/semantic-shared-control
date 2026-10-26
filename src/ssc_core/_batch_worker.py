@@ -6,7 +6,6 @@ same 256 MiB address-space and bounded JSON transport as scalar evaluation.
 """
 import sys
 import time
-import json
 
 from ._worker import _limits
 from .supervision import EVALUATOR_LIMITS, _decode, _encode
@@ -27,25 +26,28 @@ def _compile(payload):
 class _Batch:
     def __init__(self, compiled):
         self.compiled = compiled
-        self.binding_key = None
+        self.scope = None
         self.checked_bindings = ()
 
     def evaluate(self, inputs):
         from .interpreter import InterpreterError, _vector, _matrix, _check_rotation
-        position, rotation, bindings = inputs
+        position, rotation, bindings, scope = inputs
         # Every program has the same frozen numeric policy. Check the common pose
         # once, with exactly the scalar interpreter's conversion and tolerances.
         position = _vector(position, 3, "$.p_tcp")
         rotation = _matrix(rotation, 3, "$.R_control_tcp")
         _check_rotation(rotation, self.compiled[0].policy.rotation_tolerance)
-        if type(bindings) is not list or len(bindings) != len(self.compiled):
-            raise ValueError("incomplete batch bindings")
-        # Exact JSON bytes distinguish Boolean/number and all content changes.
-        # Retain only the latest fully validated immutable binding tuple. This
-        # avoids re-copying fixed snapshot geometry for every SLSQP candidate.
-        # The outer request already passed the bounded JSON transport checks.
-        key = json.dumps(bindings, allow_nan=False, separators=(",", ":"))
-        if key != self.binding_key:
+        if scope is not None and (type(scope) is not str or not 1 <= len(scope) <= 64):
+            raise ValueError("invalid solve scope")
+        if bindings is None:
+            if scope is None or scope != self.scope:
+                raise ValueError("no bindings for this solve scope")
+        else:
+            if type(bindings) is not list or len(bindings) != len(self.compiled):
+                raise ValueError("incomplete batch bindings")
+            # The first candidate of EVERY solve provides the complete inputs.
+            # Copy/check once; subsequent requests can reference only that solve's
+            # unique identity. Never share bindings across solves or generations.
             checked = []
             for program, binding in zip(self.compiled, bindings):
                 if (type(binding) is not dict
@@ -53,7 +55,7 @@ class _Batch:
                         or binding["program_id"] != program.program.program_id):
                     raise ValueError("batch program identity/order mismatch")
                 checked.append(program._checked_bindings(binding["keypoints"], binding["axis_dirs"], binding["params"]))
-            self.checked_bindings, self.binding_key = tuple(checked), key
+            self.checked_bindings, self.scope = tuple(checked), scope
         values = []
         for program, binding in zip(self.compiled, self.checked_bindings):
             try:

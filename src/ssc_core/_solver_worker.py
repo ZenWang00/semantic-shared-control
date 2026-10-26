@@ -1,10 +1,11 @@
-"""Private solver process: SLSQP plus one supervised evaluator per bound program.
+"""Private solver process: SLSQP plus separately supervised residual evaluation.
 
 The host launches ``python -I -m ssc_core._solver_worker`` in a new process group.
 This process limits its own address space to 1 GiB, then imports NumPy/SciPy.
 Generated programs never execute here: each candidate residual comes from a
-separately spawned 256 MiB / 10 ms ``SupervisedEvaluator`` child, which this
-process prepares once while motion is disabled. The host checker is created from
+separately spawned 256 MiB / 10 ms child: one per program in v1, one complete
+candidate batch in v2. Preparation happens while motion is disabled.
+The host checker is created from
 a trusted ``module:attribute`` factory named in the preparation request.
 """
 import importlib
@@ -129,14 +130,18 @@ class _Worker:
         config = parse_record(SessionConfig, problem["configuration"], policy=NUMERIC_OFFLINE_V1)
         u_xy, dt = tuple(problem["u_xy"]), problem["dt_s"]
         stats = {"calls": 0, "max_elapsed_s": 0., "total_elapsed_s": 0.}
+        first_batch = True
 
         def evaluate_batch(terms, p_tcp, rotation):
-            outcome = self.batch.submit_batch(p_tcp, rotation, terms, deadline_ns=deadline, _inline=True).result(1)
+            nonlocal first_batch
+            outcome = self.batch.submit_batch(p_tcp, rotation, terms if first_batch else None,
+                deadline_ns=deadline, _inline=True, _scope=request["request_id"]).result(1)
             stats["calls"] += len(terms)
             stats["batch_calls"] = stats.get("batch_calls", 0) + 1
             stats["max_elapsed_s"] = max(stats["max_elapsed_s"], outcome.elapsed_s)
             stats["total_elapsed_s"] += outcome.elapsed_s
             if outcome.ok:
+                first_batch = False
                 return list(outcome.residual)
             status = "timeout" if outcome.code in ("timeout", "memory_limit", "cancelled") else "error"
             raise SolveFailure(status, f"evaluator_{outcome.code}", outcome.diagnostic[:300],
