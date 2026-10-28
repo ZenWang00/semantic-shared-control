@@ -1,12 +1,11 @@
 """Session-local immutable records and pure cross-record compatibility checks.
 
-Resolution establishes typed-record compatibility, never receipt trust, bundle
-activation, input freshness or motion authority. No source code is executed.
+Resolution establishes typed-record compatibility, never bundle activation,
+input freshness or motion authority. Candidate selection is explicit and replayable.
 Opaque resources without a record schema remain the caller's responsibility.
 """
 
 from dataclasses import dataclass
-from hashlib import sha256
 from typing import Any, TypeVar
 
 from . import records as r
@@ -23,26 +22,17 @@ class RegistryError(ValueError):
 
 
 @dataclass(frozen=True, slots=True)
-class ResolvedProgram:
-    program: r.ConstraintProgram
-    geometry: r.SceneGeometry
-    candidate: r.Object
-    keypoints: tuple[r.Vector3, ...]
-    axis_dirs: tuple[r.Vector3, ...]
-    params: tuple[r.Number, ...]
-
-
-@dataclass(frozen=True, slots=True)
 class ResolvedBundle:
     session_id: str
     configuration: r.SessionConfig
     task: r.TaskContext
     geometry: r.SceneGeometry
     semantic: r.SemanticContext
-    candidates: tuple[r.Object, ...]
-    programs: tuple[ResolvedProgram, ...]
-    execution_bindings: tuple[r.ProgramExecutionBinding, ...]
-    receipts: tuple[r.ProgramValidationReceipt, ...]
+    candidate_set: r.CandidateSet
+
+    @property
+    def candidates(self) -> tuple[r.CandidatePoint, ...]:
+        return self.candidate_set.candidates
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,21 +42,22 @@ class ResolvedSnapshot:
     joystick: r.Message
     robot_state: r.Message
     joystick_history: tuple[r.Message, ...]
+    previous_selection: r.CandidateSelection | None = None
+    previous_selection_snapshot: r.ControlSnapshot | None = None
 
 
 @dataclass(frozen=True, slots=True)
-class ResolvedWeights:
-    weights: r.ObjectWeights
+class ResolvedSelection:
+    selection: r.CandidateSelection
     snapshot: ResolvedSnapshot
-    candidate_weights: tuple[r.ObjectWeight, ...]
+    candidate: r.CandidatePoint | None
 
 
 _IDENTITIES = {
     r.SessionConfig: "config_id", r.TaskContext: "task_id",
     r.SceneObservation: "observation_id", r.SceneGeometry: "geometry_id",
-    r.SemanticContext: "semantic_id", r.ConstraintProgram: "program_id",
-    r.ProgramExecutionBinding: "binding_id", r.ProgramValidationReceipt: "receipt_id",
-    r.ControlSnapshot: "snapshot_id", r.ObjectWeights: "weights_id",
+    r.SemanticContext: "semantic_id", r.CandidateSet: "candidate_set_id",
+    r.ControlSnapshot: "snapshot_id", r.CandidateSelection: "selection_id",
     r.ControlResult: "result_id",
 }
 _TYPES = {cls.__name__: cls for cls in _IDENTITIES}
@@ -104,7 +95,12 @@ def _canonical(value: Any) -> tuple:
 
 
 def _content(record: r.Record) -> tuple:
-    return _canonical(to_dict(record))
+    value = to_dict(record)
+    if type(record) is r.CandidateSet:
+        # Candidate sets are unordered. The same stable IDs and values remain
+        # identical when a producer changes JSON array order.
+        value["candidates"].sort(key=lambda item: item["candidate_id"])
+    return _canonical(value)
 
 
 def _definition(geometry: r.SceneGeometry) -> tuple:
@@ -145,7 +141,6 @@ class SessionRegistry:
         self._messages: dict[str, r.Message] = {}
         self._definitions: dict[tuple[str, str], tuple] = {}
         self._coordinate_versions: dict[tuple[str, str, int], tuple] = {}
-        self._execution_settings: dict[tuple[str, str], tuple] = {}
 
     @property
     def session_id(self) -> str:
@@ -186,10 +181,6 @@ class SessionRegistry:
         if previous is not None and _content(previous) != _content(record):
             _fail(f"$.{_IDENTITIES[type(record)]}", "immutable_conflict",
                   "immutable identity is already registered with different content")
-        if type(record) is r.ConstraintProgram:
-            digest = sha256(record.source_code.encode("utf-8")).hexdigest()
-            if digest != record.source_sha256:
-                _fail("$.source_sha256", "source_hash_mismatch", "hash differs from exact UTF-8 source")
         if type(record) is r.SceneGeometry:
             known = self._definitions.get((record.scene_id, record.feature_set_id))
             if known is not None and known != _definition(record):
@@ -199,21 +190,12 @@ class SessionRegistry:
             if known_values is not None and known_values != _coordinates(record):
                 _fail("$.revision", "geometry_revision_conflict",
                       "changed coordinates or frame within a feature set require a new geometry revision")
-        if type(record) is r.ProgramExecutionBinding:
-            known_settings = self._execution_settings.get((record.config_id, record.program_id))
-            settings = _canonical((record.normalization_scale, record.weight))
-            if known_settings is not None and known_settings != settings:
-                _fail("$.config_id", "binding_configuration_conflict",
-                      "changed scale or weight for a program requires a new configuration")
 
     def _store_record(self, record: r.Record) -> None:
         self._records[self._key(record)] = record
         if type(record) is r.SceneGeometry:
             self._definitions[(record.scene_id, record.feature_set_id)] = _definition(record)
             self._coordinate_versions[(record.scene_id, record.feature_set_id, record.revision)] = _coordinates(record)
-        if type(record) is r.ProgramExecutionBinding:
-            self._execution_settings[(record.config_id, record.program_id)] = _canonical(
-                (record.normalization_scale, record.weight))
 
     def register_record(
         self, record_type: str | type[_R], data: dict | _R, *, session_id: str,
@@ -293,93 +275,30 @@ class SessionRegistry:
         self._observation(geometry.observation_id, geometry.scene_id, config)
         return geometry
 
-    def _program(self, program_ref: r.ProgramRef | dict, geometry: r.SceneGeometry) -> ResolvedProgram:
-        ref = self._parse(r.ProgramRef, program_ref)
-        program = self._get(r.ConstraintProgram, ref.program_id)
-        _same(program.source_sha256, ref.source_sha256, "$.program_ref.source_sha256")
-        objects = {obj.object_id: obj for obj in geometry.objects}
-        keypoints = {kp.keypoint_id: kp for kp in geometry.keypoints}
-        axes = {axis.axis_id: axis for axis in geometry.axes}
-        if program.object_id not in objects:
-            _fail("$.program.object_id", "missing_reference", "program candidate is absent from geometry")
-        for field, ids, available in (("keypoint_bindings", program.keypoint_bindings, keypoints),
-                                      ("axis_bindings", program.axis_bindings, axes)):
-            for index, feature_id in enumerate(ids):
-                if feature_id not in available:
-                    _fail(f"$.program.{field}[{index}]", "missing_reference",
-                          f"feature {feature_id!r} is absent from geometry")
-        return ResolvedProgram(
-            program, geometry, objects[program.object_id],
-            tuple(keypoints[key].position_xyz for key in program.keypoint_bindings),
-            tuple(axes[key].unit_direction_xyz for key in program.axis_bindings),
-            tuple(parameter.value for parameter in program.parameters),
-        )
-
-    def resolve_program(
-        self, program_ref: r.ProgramRef | dict, *, geometry_ref: r.GeometryRef | dict, config_id: str,
-    ) -> ResolvedProgram:
-        """Resolve ordered numeric-source tuples, including for later validation probes."""
-        return self._program(program_ref, self._geometry(geometry_ref, self._configuration(config_id)))
-
-    def _receipt(
-        self, receipt_id: str, program: r.ConstraintProgram, geometry: r.SceneGeometry,
-        config: r.SessionConfig,
-    ) -> r.ProgramValidationReceipt:
-        receipt = self._get(r.ProgramValidationReceipt, receipt_id)
-        for field, expected in (
-            ("program_id", program.program_id), ("source_sha256", program.source_sha256),
-            ("function_api_version", program.function_api_version),
-            ("scene_id", geometry.scene_id), ("feature_set_id", geometry.feature_set_id),
-            ("validator_policy_version", self.policy.policy_id), ("status", "accepted"),
-        ):
-            _same(getattr(receipt, field), expected, f"$.receipt.{field}")
-        provenance = self._geometry(r.GeometryRef(receipt.validation_geometry_id,
-                                                  receipt.validation_geometry_revision), config)
-        _same(provenance.scene_id, geometry.scene_id, "$.receipt.validation_geometry.scene_id")
-        _same(provenance.feature_set_id, geometry.feature_set_id, "$.receipt.validation_geometry.feature_set_id")
-        return receipt
-
     def resolve_bundle(
         self, *, config_id: str, task_ref: r.TaskRef | dict, geometry_ref: r.GeometryRef | dict,
-        semantic_id: str, program_refs: tuple[r.ProgramRef | dict, ...] | list,
-        execution_binding_refs: tuple[str, ...] | list[str],
+        semantic_id: str, candidate_set_id: str,
     ) -> ResolvedBundle:
-        """Resolve one compatible typed graph; returned receipts remain untrusted."""
+        """Resolve one compatible data-only graph, without granting motion authority."""
         config = self._configuration(config_id)
         task = self._get(r.TaskContext, self._parse(r.TaskRef, task_ref))
         geometry = self._geometry(geometry_ref, config)
         semantic = self._get(r.SemanticContext, semantic_id)
-        for field, expected in (("task_id", task.task_id), ("task_revision", task.revision),
-                                ("scene_id", geometry.scene_id), ("feature_set_id", geometry.feature_set_id)):
-            _same(getattr(semantic, field), expected, f"$.semantic.{field}")
-        self._observation(semantic.observation_id, geometry.scene_id, config)
-        # Semantic provenance can be an earlier capture of this same static scene.
-        if type(program_refs) not in (list, tuple) or type(execution_binding_refs) not in (list, tuple):
-            _fail("$.references", "invalid_reference", "references must be lists or tuples")
-        refs = tuple(self._parse(r.ProgramRef, ref) for ref in program_refs)
-        if len({ref.program_id for ref in refs}) != len(refs) or set(refs) != set(semantic.program_refs):
-            _fail("$.program_refs", "program_coverage", "programs must exactly cover semantic program references")
-        programs = tuple(self._program(ref, geometry) for ref in refs)
-        objects = {obj.object_id: obj for obj in geometry.objects}
-        candidate_ids = tuple(item.object_id for item in semantic.object_relevance)
-        for candidate_id in candidate_ids:
-            if candidate_id not in objects:
-                _fail("$.semantic.object_relevance", "missing_reference", f"candidate {candidate_id!r} is absent")
-        if {item.program.object_id for item in programs} != set(candidate_ids):
-            _fail("$.program_refs", "candidate_coverage", "each candidate needs programs and every program needs a candidate")
-        bindings = tuple(self._get(r.ProgramExecutionBinding, ref) for ref in execution_binding_refs)
-        by_program = {binding.program_id: binding for binding in bindings}
-        if len(by_program) != len(bindings) or set(by_program) != {ref.program_id for ref in refs}:
-            _fail("$.execution_binding_refs", "binding_coverage", "exactly one binding is required per program")
-        ordered_bindings, receipts = [], []
-        for item in programs:
-            binding = by_program[item.program.program_id]
-            _same(binding.config_id, config.config_id, "$.binding.config_id")
-            receipts.append(self._receipt(binding.validation_receipt_id, item.program, geometry, config))
-            ordered_bindings.append(binding)
-        return ResolvedBundle(self.session_id, config, task, geometry, semantic,
-                              tuple(objects[key] for key in candidate_ids), programs,
-                              tuple(ordered_bindings), tuple(receipts))
+        candidates = self._get(r.CandidateSet, candidate_set_id)
+        for record, prefix in ((semantic, "semantic"), (candidates, "candidate_set")):
+            for field, expected in (("task_id", task.task_id), ("task_revision", task.revision),
+                                    ("scene_id", geometry.scene_id), ("feature_set_id", geometry.feature_set_id)):
+                _same(getattr(record, field), expected, f"$.{prefix}.{field}")
+            self._observation(record.observation_id, geometry.scene_id, config)
+        _same(candidates.frame_id, config.control_frame, "$.candidate_set.frame_id")
+        _same(candidates.observation_id, geometry.observation_id, "$.candidate_set.observation_id")
+        objects = {obj.object_id for obj in geometry.objects}
+        relevance = {item.object_id for item in semantic.object_relevance}
+        owners = {item.object_id for item in candidates.candidates}
+        if owners != relevance or not owners <= objects:
+            _fail("$.candidate_set.candidates", "candidate_coverage",
+                  "candidate owners must exactly cover semantics and exist in geometry")
+        return ResolvedBundle(self.session_id, config, task, geometry, semantic, candidates)
 
     def _input(self, message_id: str, cls: type[_R]) -> r.Message:
         message = self.get_message(message_id, session_id=self.session_id)
@@ -396,8 +315,7 @@ class SessionRegistry:
         snapshot = self._get(r.ControlSnapshot, snapshot_id)
         bundle = self.resolve_bundle(
             config_id=snapshot.config_id, task_ref=snapshot.task_ref, geometry_ref=snapshot.geometry_ref,
-            semantic_id=snapshot.semantic_id, program_refs=snapshot.program_refs,
-            execution_binding_refs=snapshot.execution_binding_refs,
+            semantic_id=snapshot.semantic_id, candidate_set_id=snapshot.candidate_set_id,
         )
         joystick = self._input(snapshot.joystick_ref, r.JoystickSample)
         state = self._input(snapshot.robot_state_ref, r.RobotState)
@@ -408,14 +326,26 @@ class SessionRegistry:
             _same(sample.payload.mapping_id, joystick.payload.mapping_id, "$.joystick_history.mapping_id")
             _same(sample.payload.sampled_at.clock_id, joystick.payload.sampled_at.clock_id,
                   "$.joystick_history.sampled_at.clock_id")
-        return ResolvedSnapshot(snapshot, bundle, joystick, state, history)
+        previous = origin = None
+        if snapshot.previous_selection_id is not None:
+            previous = self._get(r.CandidateSelection, snapshot.previous_selection_id)
+            origin = self._get(r.ControlSnapshot, previous.snapshot_id)
+            for field in ("control_epoch", "config_id", "task_ref", "geometry_ref", "semantic_id", "candidate_set_id"):
+                _same(getattr(origin, field), getattr(snapshot, field), f"$.previous_selection.{field}")
+            _same(previous.candidate_set_id, snapshot.candidate_set_id, "$.previous_selection.candidate_set_id")
+            if origin.snapshot_seq >= snapshot.snapshot_seq:
+                _fail("$.previous_selection_id", "selection_lineage", "previous selection must precede current snapshot")
+            candidate_ids = {item.candidate_id for item in bundle.candidates}
+            if {item.candidate_id for item in previous.scores} != candidate_ids:
+                _fail("$.previous_selection.scores", "candidate_coverage", "previous scores differ from candidates")
+        return ResolvedSnapshot(snapshot, bundle, joystick, state, history, previous, origin)
 
-    def resolve_weights(self, weights_id: str) -> ResolvedWeights:
-        """Resolve weights and their exact causal snapshot, preserving candidates."""
-        weights = self._get(r.ObjectWeights, weights_id)
-        snapshot = self.resolve_snapshot(weights.snapshot_id)
-        by_object = {item.object_id: item for item in weights.weights}
-        candidate_ids = tuple(obj.object_id for obj in snapshot.bundle.candidates)
-        if set(by_object) != set(candidate_ids):
-            _fail("$.weights", "candidate_coverage", "weights must exactly cover the semantic candidate set")
-        return ResolvedWeights(weights, snapshot, tuple(by_object[key] for key in candidate_ids))
+    def resolve_selection(self, selection_id: str) -> ResolvedSelection:
+        """Resolve a diagnostic selection and its exact causal snapshot."""
+        selection = self._get(r.CandidateSelection, selection_id)
+        resolved = self.resolve_snapshot(selection.snapshot_id)
+        _same(selection.candidate_set_id, resolved.snapshot.candidate_set_id, "$.selection.candidate_set_id")
+        candidates = {item.candidate_id: item for item in resolved.bundle.candidates}
+        if set(candidates) != {item.candidate_id for item in selection.scores}:
+            _fail("$.selection.scores", "candidate_coverage", "scores must exactly cover candidates")
+        return ResolvedSelection(selection, resolved, candidates.get(selection.selected_candidate_id))

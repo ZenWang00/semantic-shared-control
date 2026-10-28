@@ -12,7 +12,7 @@ Read [Development Workflow](https://github.com/ZenWang00/semantic-shared-control
 | --- | --- | --- |
 | Perception and semantic preparation | Server | Maintain scene-processing and VLM integrations without granting them command authority. |
 | Shared records, validators, immutable artifact registration and reference resolution | Server | Supply versioned, transport-independent contracts and reusable pure-library code. |
-| Restricted numerical evaluation, isolated execution and host program validation | Server | Provide program/binding validation, receipts and residual evaluation; an accepted receipt does not activate a robot context. |
+| Candidate validation, intent selection and bounded numerical solving | Server | Validate data-only candidates, select one target and evaluate a fixed position objective in a supervised solver; validated data alone does not activate a robot context. |
 | Intent fusion and short-horizon optimization | Server | Implement algorithms that consume immutable inputs and propose results, without owning the live control lifecycle. |
 | Artifact archival, replay and offline analysis | Server | Preserve and inspect evidence without applying archived commands to a controller. |
 | Device, capture, measured-state, controller and transport adapters | ROS2 | Own device provenance, coordinate/unit conversion and actual controller interfaces. |
@@ -51,7 +51,7 @@ The inspected ROS2 baseline is the annotated Git tag [`v1.0.0`](https://github.c
 For future dependency updates and integration runs, preserve:
 
 - The server library version and exact source commit, ROS2 tag/version and exact source commit, dependency lock or installation manifest, and relevant runtime/platform versions.
-- The shared message schema version, generated-function ABI, validator policy version, and immutable configuration/profile IDs. Contract versions and package versions remain distinct; this governance change does not advance either contract.
+- The shared message schema version, candidate-point API version, validator policy version, and immutable configuration/profile IDs. Contract versions and package versions remain distinct; this governance change does not advance either contract.
 - The task/scene/artifact references, model/calibration identities, host-constraint configuration, timing budgets, numerical tolerances and simulation/hardware provenance required to reconstruct the run.
 - Commands and scenarios, expected/actual outcomes, acceptance decisions, controller observations when available, archive/checksum references, independent review and any outstanding compatibility limits.
 

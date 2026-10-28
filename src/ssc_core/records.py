@@ -1,4 +1,4 @@
-"""Immutable values for schema 1.0 scene, artifact and control records.
+"""Immutable values for schema 2.0 scene, artifact and control records.
 
 Direct dataclass construction is a value-container API, not validation. Use
 ``parse_record`` or ``parse_message`` at trust boundaries; those functions check
@@ -52,12 +52,6 @@ class AssetRef(Record):
 
 
 @dataclass(frozen=True, slots=True)
-class ProgramRef(Record):
-    program_id: str
-    source_sha256: str
-
-
-@dataclass(frozen=True, slots=True)
 class GeometryRef(Record):
     geometry_id: str
     revision: int
@@ -71,7 +65,7 @@ class TaskRef(Record):
 
 @dataclass(frozen=True, slots=True)
 class MessageMeta(Record):
-    schema_version: Literal["1.0"]
+    schema_version: Literal["2.0"]
     session_id: str
     message_id: str
     source_id: str
@@ -172,54 +166,26 @@ class SemanticContext(Record):
     feature_set_id: str
     observation_id: str
     object_relevance: tuple[ObjectRelevance, ...]
-    program_refs: tuple[ProgramRef, ...]
 
 
 @dataclass(frozen=True, slots=True)
-class Parameter(Record):
-    name: str
-    value: Number
-    unit: Unit
-
-
-@dataclass(frozen=True, slots=True)
-class ConstraintProgram(Record):
-    program_id: str
-    source_sha256: str
-    function_api_version: Literal["geometry-residual-v1"]
+class CandidatePoint(Record):
+    """Host-grounded TCP target in CandidateSet.frame_id, in metres."""
+    candidate_id: str
     object_id: str
-    description: str
-    entrypoint: Literal["evaluate"]
-    source_code: str
-    keypoint_bindings: tuple[str, ...]
-    axis_bindings: tuple[str, ...]
-    parameters: tuple[Parameter, ...]
-    output_unit: Unit
+    position_xyz: Vector3
 
 
 @dataclass(frozen=True, slots=True)
-class ProgramExecutionBinding(Record):
-    binding_id: str
-    program_id: str
-    config_id: str
-    normalization_scale: Number
-    weight: Number
-    validation_receipt_id: str
-
-
-@dataclass(frozen=True, slots=True)
-class ProgramValidationReceipt(Record):
-    receipt_id: str
-    program_id: str
-    source_sha256: str
-    function_api_version: Literal["geometry-residual-v1"]
+class CandidateSet(Record):
+    candidate_set_id: str
+    task_id: str
+    task_revision: int
     scene_id: str
     feature_set_id: str
-    validation_geometry_id: str
-    validation_geometry_revision: int
-    validator_policy_version: str
-    status: Literal["accepted", "rejected"]
-    diagnostics: tuple[str, ...]
+    observation_id: str
+    frame_id: str
+    candidates: tuple[CandidatePoint, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -256,29 +222,33 @@ class ControlSnapshot(Record):
     joystick_history_refs: tuple[str, ...]
     geometry_ref: GeometryRef
     semantic_id: str
-    program_refs: tuple[ProgramRef, ...]
-    execution_binding_refs: tuple[str, ...]
+    candidate_set_id: str
+    previous_selection_id: str | None
     previous_applied_command_id: str | None
 
 
 @dataclass(frozen=True, slots=True)
-class ObjectWeight(Record):
-    object_id: str
-    weight: Number
+class CandidateScore(Record):
+    candidate_id: str
+    score: Number
+    distance_m: Number
 
 
 @dataclass(frozen=True, slots=True)
-class ObjectWeights(Record):
-    weights_id: str
+class CandidateSelection(Record):
+    selection_id: str
     snapshot_id: str
     estimator_config_id: str
-    weights: tuple[ObjectWeight, ...]
+    candidate_set_id: str
+    selected_candidate_id: str | None
+    scores: tuple[CandidateScore, ...]
     assistance_strength: Number
 
 
 @dataclass(frozen=True, slots=True)
-class ConstraintEvaluation(Record):
-    program_id: str
+class CandidateEvaluation(Record):
+    candidate_id: str
+    distance_m: Number
     raw_g: Number
     normalization_scale: Number
     penalty: Number
@@ -290,7 +260,7 @@ class ControlResult(Record):
 
     result_id: str
     snapshot_id: str | None
-    weights_id: str | None
+    selection_id: str | None
     control_epoch: int
     command_seq: int
     source_joystick_seq: int | None
@@ -300,7 +270,7 @@ class ControlResult(Record):
     solver_status: Literal["solved", "infeasible", "timeout", "error", "not_run"]
     constraints_satisfied: bool | None
     solve_time_s: Number
-    constraint_evaluations: tuple[ConstraintEvaluation, ...]
+    candidate_evaluation: CandidateEvaluation | None
     next_tcp_pose: Pose | None = None
     horizon_s: Number | None = None
     reason: str | None = None
@@ -316,10 +286,9 @@ class CommandAcceptanceRecord(Record):
 
 
 Payload: TypeAlias = (
-    SessionConfig | TaskContext | SceneObservation | SceneGeometry
-    | SemanticContext | ConstraintProgram | Parameter | ProgramExecutionBinding
-    | ProgramValidationReceipt | JoystickSample | RobotState | ControlSnapshot
-    | ObjectWeights | ControlResult
+    SessionConfig | TaskContext | SceneObservation | SceneGeometry | SemanticContext
+    | CandidateSet | CandidateSelection | JoystickSample | RobotState
+    | ControlSnapshot | ControlResult
 )
 
 

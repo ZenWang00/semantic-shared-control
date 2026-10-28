@@ -1,25 +1,21 @@
-"""Pure, replayable intent-linear-v1 support; no execution or motion authority."""
+"""Pure deterministic selection of one explicit TCP candidate per snapshot."""
 
 from dataclasses import dataclass, fields
-from hashlib import sha256
 from math import fsum, hypot, isfinite
 from typing import Literal
 
 from . import records as r
 from .errors import ValidationError
-from .policy import NUMERIC_OFFLINE_V1, ValidationPolicy
-from .registry import ResolvedBundle, ResolvedProgram, ResolvedSnapshot
+from .policy import NUMERIC_CANDIDATES_V2, ValidationPolicy
+from .registry import ResolvedBundle, ResolvedSnapshot
 from .validation import parse_message, parse_record, to_dict
 
 
 @dataclass(frozen=True, slots=True)
 class IntentConfig:
-    """Local configuration resource, not a new wire record or tunable estimator."""
-
     estimator_config_id: str
     session_config_id: str
     alpha_active: float
-    approach_keypoints: tuple[tuple[str, str], ...]
     history_limit: int = 32
     history_window_s: float = 1.0
     direction_epsilon_m: float = 1e-12
@@ -27,40 +23,21 @@ class IntentConfig:
     relevance_coefficient: float = 1.0
     current_coefficient: float = 2.0
     history_coefficient: float = 0.5
+    switch_threshold: float = 0.1
 
 
 def get_intent_config(estimator_config_id: str) -> IntentConfig:
-    """Return a fresh immutable copy of an approved configuration.
-
-    Archive the complete dataclass content as well as its ID. Unknown IDs and
-    altered definitions are rejected; adding a profile requires a code revision.
-    """
-    if estimator_config_id == "intent-linear-v1":
-        session_id, alpha = "config-offline-v1", 0.5
-    elif estimator_config_id == "intent-linear-alpha0-v1":
-        session_id, alpha = "config-offline-alpha0-v1", 0.0
-    elif estimator_config_id == "intent-linear-batch-v2":
-        session_id, alpha = "config-offline-batch-v2", 0.5
-    elif estimator_config_id == "intent-linear-batch-alpha0-v2":
-        session_id, alpha = "config-offline-batch-alpha0-v2", 0.0
-    else:
-        raise ValueError(f"unsupported estimator configuration: {estimator_config_id!r}")
-    return IntentConfig(estimator_config_id, session_id, alpha, (
-        ("object-bottle-offline-v1", "kp-bottle-approach-offline-v1"),
-        ("object-cup-offline-v1", "kp-cup-approach-offline-v1"),
-    ))
+    if estimator_config_id == "intent-candidates-v2":
+        return IntentConfig(estimator_config_id, "config-candidates-v2", 0.5)
+    if estimator_config_id == "intent-candidates-alpha0-v2":
+        return IntentConfig(estimator_config_id, "config-candidates-alpha0-v2", 0.0)
+    raise ValueError(f"unsupported estimator configuration: {estimator_config_id!r}")
 
 
 @dataclass(frozen=True, slots=True)
 class IntentOutcome:
-    """active permits further computation only; disabled weights are diagnostic.
-
-    error contains no weights. Callers route disabled/error to their existing
-    local hold path; this function never creates a ControlResult or sends motion.
-    """
-
     disposition: Literal["active", "disabled", "error"]
-    weights: r.ObjectWeights | None
+    selection: r.CandidateSelection | None
     code: str
     diagnostic: str
 
@@ -89,109 +66,55 @@ def _message(value, kind, session_id, policy):
     return message
 
 
-def _unique(values, key, name):
-    result = {key(value): value for value in values}
-    _require(len(result) == len(values), "duplicate_reference", name)
-    return result
-
-
 def _validate(resolved, config, policy):
-    """Recheck consumed records and pinned links, even for constructed dataclasses.
-
-    Observation availability, receipt trust, snapshot creation-time freshness and
-    accepted-command provenance remain producer/host responsibilities. No live
-    registry, clock, authority ledger or hidden estimator state is consulted.
-    """
-    _require(type(policy) is ValidationPolicy and policy == NUMERIC_OFFLINE_V1,
-             "invalid_policy", "intent-linear-v1 requires the complete numeric-offline-v1 policy")
+    _require(type(policy) is ValidationPolicy and policy == NUMERIC_CANDIDATES_V2,
+             "invalid_policy", "candidate selection requires numeric-candidates-v2")
     _require(type(config) is IntentConfig, "invalid_config", "expected IntentConfig")
-    try:
-        expected = get_intent_config(config.estimator_config_id)
-    except ValueError as exc:
-        raise _Invalid("invalid_config", str(exc)) from exc
-    # Exact types also reject bool-as-number and mutable containers behind an ID.
-    _require(config == expected and
-             all(type(getattr(config, field.name)) is type(getattr(expected, field.name))
-                 for field in fields(expected)),
-             "invalid_config", "configuration content differs from its immutable definition")
+    expected = get_intent_config(config.estimator_config_id)
+    _require(config == expected and all(type(getattr(config, field.name)) is type(getattr(expected, field.name))
+                                      for field in fields(expected)),
+             "invalid_config", "configuration differs from its immutable definition")
     _require(type(resolved) is ResolvedSnapshot and type(resolved.bundle) is ResolvedBundle,
-             "input_type", "expected ResolvedSnapshot and ResolvedBundle")
+             "input_type", "expected detached resolved snapshot")
     bundle = resolved.bundle
-    _require(type(bundle.session_id) is str and bool(bundle.session_id), "input_reference", "session ID is required")
     snapshot = _record(r.ControlSnapshot, resolved.snapshot, policy)
-    _unique(snapshot.program_refs, lambda item: item.program_id, "snapshot program IDs")
-    _unique(snapshot.execution_binding_refs, lambda item: item, "snapshot binding IDs")
-    _unique(snapshot.joystick_history_refs, lambda item: item, "history message IDs")
-    _require(snapshot.joystick_ref not in snapshot.joystick_history_refs,
-             "invalid_history", "history must exclude the current sample")
     session = _record(r.SessionConfig, bundle.configuration, policy)
     task = _record(r.TaskContext, bundle.task, policy)
     geometry = _record(r.SceneGeometry, bundle.geometry, policy)
     semantic = _record(r.SemanticContext, bundle.semantic, policy)
+    candidates = _record(r.CandidateSet, bundle.candidate_set, policy)
     _require(snapshot.config_id == session.config_id == config.session_config_id and
              session.validation_policy_id == policy.policy_id and
              session.history_window_s == config.history_window_s,
              "config_reference", "snapshot/session/estimator configuration mismatch")
     _require(snapshot.task_ref == r.TaskRef(task.task_id, task.revision) and
-             (semantic.task_id, semantic.task_revision) == (task.task_id, task.revision) and
              snapshot.geometry_ref == r.GeometryRef(geometry.geometry_id, geometry.revision) and
-             snapshot.semantic_id == semantic.semantic_id and
-             (semantic.scene_id, semantic.feature_set_id) == (geometry.scene_id, geometry.feature_set_id) and
-             geometry.frame_id == session.control_frame,
-             "snapshot_reference", "task, geometry, semantics or frame differs from pinned snapshot")
-    candidates = _unique(tuple(_record(r.Object, obj, policy) for obj in bundle.candidates),
-                         lambda obj: obj.object_id, "candidate IDs")
+             snapshot.semantic_id == semantic.semantic_id and snapshot.candidate_set_id == candidates.candidate_set_id,
+             "snapshot_reference", "snapshot has incompatible artifact references")
+    for item in (semantic, candidates):
+        _require((item.task_id, item.task_revision, item.scene_id, item.feature_set_id) ==
+                 (task.task_id, task.revision, geometry.scene_id, geometry.feature_set_id),
+                 "snapshot_reference", "task/scene/feature context differs")
+    _require(candidates.observation_id == geometry.observation_id and
+             candidates.frame_id == geometry.frame_id == session.control_frame,
+             "snapshot_reference", "candidate observation or coordinate frame differs")
     relevance = {item.object_id: item.task_relevance for item in semantic.object_relevance}
-    objects = {obj.object_id: obj for obj in geometry.objects}
-    _require(bool(relevance) and set(candidates) == set(relevance) and
-             all(objects.get(key) == value for key, value in candidates.items()),
-             "candidate_coverage", "candidates must exactly cover nonempty semantics and match geometry")
-    keypoints = {point.keypoint_id: point for point in geometry.keypoints}
-    mappings = dict(config.approach_keypoints)
-    for key in candidates:
-        _require(key in mappings and mappings[key] in keypoints and keypoints[mappings[key]].object_id == key,
-                 "approach_mapping", f"missing or foreign approach keypoint for {key}")
-
-    _require(len(bundle.programs) <= 16, "program_coverage", "profile permits at most 16 programs")
-    programs = []
-    for item in bundle.programs:
-        _require(type(item) is ResolvedProgram, "input_type", "expected ResolvedProgram")
-        program = _record(r.ConstraintProgram, item.program, policy)
-        _require(sha256(program.source_code.encode("utf-8")).hexdigest() == program.source_sha256,
-                 "program_reference", "source hash mismatch")
-        _require(item.geometry == geometry and item.candidate == candidates.get(program.object_id),
-                 "program_reference", "program geometry/candidate mismatch")
-        axes = {axis.axis_id: axis for axis in geometry.axes}
-        _require(all(key in keypoints for key in program.keypoint_bindings) and
-                 all(key in axes for key in program.axis_bindings),
-                 "program_reference", "missing program feature binding")
-        _require(item.keypoints == tuple(keypoints[key].position_xyz for key in program.keypoint_bindings) and
-                 item.axis_dirs == tuple(axes[key].unit_direction_xyz for key in program.axis_bindings) and
-                 item.params == tuple(param.value for param in program.parameters),
-                 "program_reference", "resolved numerical bindings differ from artifacts")
-        programs.append(program)
-    by_program = _unique(programs, lambda item: item.program_id, "program IDs")
-    refs = {r.ProgramRef(item.program_id, item.source_sha256) for item in programs}
-    _require(refs == set(snapshot.program_refs) == set(semantic.program_refs) and
-             {item.object_id for item in programs} == set(candidates),
-             "program_coverage", "each candidate requires its pinned compatible programs")
-    bindings = tuple(_record(r.ProgramExecutionBinding, item, policy) for item in bundle.execution_bindings)
-    by_binding = _unique(bindings, lambda item: item.binding_id, "binding IDs")
-    binding_programs = _unique(bindings, lambda item: item.program_id, "binding program IDs")
-    _require(set(by_binding) == set(snapshot.execution_binding_refs) and set(binding_programs) == set(by_program),
-             "binding_coverage", "exactly one pinned binding is required per program")
-    receipts = tuple(_record(r.ProgramValidationReceipt, item, policy) for item in bundle.receipts)
-    by_receipt = _unique(receipts, lambda item: item.receipt_id, "receipt IDs")
-    _require(set(by_receipt) == {item.validation_receipt_id for item in bindings},
-             "binding_coverage", "missing or extra receipt")
-    for binding in bindings:
-        program, receipt = by_program[binding.program_id], by_receipt[binding.validation_receipt_id]
-        _require(binding.config_id == session.config_id and receipt.status == "accepted" and
-                 (receipt.program_id, receipt.source_sha256, receipt.function_api_version) ==
-                 (program.program_id, program.source_sha256, program.function_api_version) and
-                 (receipt.scene_id, receipt.feature_set_id, receipt.validator_policy_version) ==
-                 (geometry.scene_id, geometry.feature_set_id, policy.policy_id),
-                 "binding_reference", "incompatible program binding or receipt")
+    _require({point.object_id for point in candidates.candidates} == set(relevance) and
+             set(relevance) <= {item.object_id for item in geometry.objects},
+             "candidate_coverage", "candidate owners must exactly cover semantic objects")
+    previous, origin = resolved.previous_selection, resolved.previous_selection_snapshot
+    if snapshot.previous_selection_id is None:
+        _require(previous is None and origin is None, "selection_lineage", "unreferenced previous selection")
+    else:
+        previous = _record(r.CandidateSelection, previous, policy)
+        origin = _record(r.ControlSnapshot, origin, policy)
+        _require(previous.selection_id == snapshot.previous_selection_id and previous.snapshot_id == origin.snapshot_id and
+                 previous.candidate_set_id == snapshot.candidate_set_id and
+                 previous.estimator_config_id == config.estimator_config_id and origin.snapshot_seq < snapshot.snapshot_seq and
+                 all(getattr(origin, key) == getattr(snapshot, key) for key in
+                     ("control_epoch", "config_id", "task_ref", "geometry_ref", "semantic_id", "candidate_set_id")) and
+                 {item.candidate_id for item in previous.scores} == {point.candidate_id for point in candidates.candidates},
+                 "selection_lineage", "previous selection belongs to another context or a later snapshot")
     current = _message(resolved.joystick, "JoystickSample", bundle.session_id, policy)
     state = _message(resolved.robot_state, "RobotState", bundle.session_id, policy)
     _require(current.meta.message_id == snapshot.joystick_ref and state.meta.message_id == snapshot.robot_state_ref and
@@ -214,7 +137,7 @@ def _validate(resolved, config, policy):
                  (previous_sequence is None or item.meta.sequence > previous_sequence),
                  "invalid_history", "history must be earlier, ordered, unique and within one second")
         previous_time, previous_sequence = time, item.meta.sequence
-    return snapshot, current.payload, state.payload, history, relevance, keypoints
+    return snapshot, current.payload, state.payload, history, relevance
 
 
 def _direction(vector, epsilon=0.0):
@@ -231,40 +154,44 @@ def _direction(vector, epsilon=0.0):
 
 
 def estimate_intent(resolved: ResolvedSnapshot, configuration: IntentConfig, *,
-                    weights_id: str, policy: ValidationPolicy) -> IntentOutcome:
-    """Estimate once from detached snapshot values; identical inputs replay identically.
+                    selection_id: str, policy: ValidationPolicy) -> IntentOutcome:
+    """Rank candidates, retaining a prior selection unless another wins by >0.1.
 
-    Invalid inputs/configuration or arithmetic return error with no weights.
-    Neutral/disabled valid inputs return diagnostic weights, alpha=0 and disabled.
-    active (including alpha-zero) never authorizes a command or verifies freshness.
+    No hidden state is consulted. A neutral input emits a null selection; the
+    runtime clears the pinned predecessor on any release or invalidation.
     """
     try:
-        snapshot, current, state, history, relevance, keypoints = _validate(resolved, configuration, policy)
+        snapshot, current, state, history, relevance = _validate(resolved, configuration, policy)
         active = current.enabled and any(value != 0 for value in current.u_xy)
         direction = _direction(current.u_xy) if active else (0.0, 0.0)
         earlier = [_direction(item.payload.u_xy) for item in history
                    if item.payload.enabled and any(value != 0 for value in item.payload.u_xy)]
         mean = tuple(fsum(item[axis] for item in earlier) / len(earlier) for axis in range(2)) if earlier else (0.0, 0.0)
-        mappings, scores = dict(configuration.approach_keypoints), []
-        for object_id in sorted(relevance):
-            point = keypoints[mappings[object_id]].position_xyz
-            delta = tuple(float(point[axis]) - float(state.tcp_pose.position_xyz[axis]) for axis in range(2))
-            target = _direction(delta, configuration.direction_epsilon_m)
+        scores = []
+        for point in sorted(resolved.bundle.candidates, key=lambda item: item.candidate_id):
+            delta = tuple(float(point.position_xyz[axis]) - float(state.tcp_pose.position_xyz[axis]) for axis in range(3))
+            target = _direction(delta[:2], configuration.direction_epsilon_m)
             current_support = (1.0 + fsum(a * b for a, b in zip(direction, target))) / 2.0
             history_support = (1.0 + fsum(a * b for a, b in zip(mean, target))) / 2.0
-            score = (configuration.score_floor + configuration.relevance_coefficient * relevance[object_id] +
+            score = (configuration.score_floor + configuration.relevance_coefficient * relevance[point.object_id] +
                      configuration.current_coefficient * current_support + configuration.history_coefficient * history_support)
-            _require(isfinite(score) and score > 0, "nonfinite_computation", "invalid candidate support")
-            scores.append((object_id, score))
-        total = fsum(score for _, score in scores)
-        weights = parse_record(r.ObjectWeights, {
-            "weights_id": weights_id, "snapshot_id": snapshot.snapshot_id,
-            "estimator_config_id": configuration.estimator_config_id,
-            "weights": [{"object_id": key, "weight": score / total} for key, score in scores],
-            "assistance_strength": configuration.alpha_active if active else 0.0,
-        }, policy=policy)
-        return IntentOutcome("active" if active else "disabled", weights,
-                             "ok" if active else "input_disabled", "" if active else "no motion solve; diagnostic weights only")
+            distance = hypot(*delta)
+            _require(isfinite(score) and isfinite(distance), "nonfinite_computation", "invalid candidate support/distance")
+            scores.append(r.CandidateScore(point.candidate_id, score, distance))
+        best = min(scores, key=lambda item: (-item.score, item.distance_m, item.candidate_id))
+        selected = best.candidate_id if active else None
+        previous = resolved.previous_selection
+        if active and previous is not None and previous.selected_candidate_id is not None:
+            incumbent = next(item for item in scores if item.candidate_id == previous.selected_candidate_id)
+            # Addition avoids cancellation in (new - old) around the exact threshold.
+            if best.score <= incumbent.score + configuration.switch_threshold:
+                selected = incumbent.candidate_id
+        selection = _record(r.CandidateSelection, r.CandidateSelection(
+            selection_id, snapshot.snapshot_id, configuration.estimator_config_id,
+            snapshot.candidate_set_id, selected, tuple(scores), configuration.alpha_active if active else 0.0,
+        ), policy)
+        return IntentOutcome("active" if active else "disabled", selection,
+                             "ok" if active else "input_disabled", "" if active else "input released; selection cleared")
     except (ValidationError, _Invalid) as exc:
         return IntentOutcome("error", None, exc.code, str(exc))
     except (TypeError, ValueError, AttributeError, OverflowError) as exc:
