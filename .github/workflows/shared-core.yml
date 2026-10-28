@@ -9,18 +9,7 @@ on:
       - 'tests/shared_control/**'
       - 'tests/fixtures/shared_control/**'
       - 'pyproject.toml'
-      - 'docs/shared-package.md'
-      - 'docs/reference/verify_evaluator_isolation.py'
-      - 'docs/reference/verify_program_validation.py'
-      - 'docs/reference/verify_intent_fusion.py'
-      - 'docs/reference/intent_fixtures.py'
-      - 'docs/reference/verify_optimizer.py'
-      - 'docs/reference/verify_program_budget.py'
-      - 'docs/reference/optimizer_fixtures.py'
-      - 'docs/reference/archive_fixture.py'
-      - 'docs/archive-replay.md'
-      - 'docs/wiki/Generated-Constraint-Program-Contract.md'
-      - 'docs/wiki/Offline-Batch-Profile.md'
+      - 'docs/**'
       - '.github/workflows/shared-core.yml'
 
 permissions:
@@ -41,54 +30,29 @@ jobs:
       - name: Install wheel into a clean environment
         run: |
           python -m venv .venv-acceptance
-          .venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.10.0-py3-none-any.whl[test]'
-      - name: Build a complete control-run archive on Linux
+          .venv-acceptance/bin/python -m pip install 'dist/ssc_core-0.11.0-py3-none-any.whl[test]'
+      - name: Build a schema-2 candidate archive on Linux
         run: |
           .venv-acceptance/bin/python -B docs/reference/archive_fixture.py \
             --source-revision "$(git rev-parse HEAD)" \
             --wheel-sha256 "$(sha256sum dist/*.whl | cut -d ' ' -f 1)" \
             --output archive-fixture.json > archive-checksum.json
-      - name: Verify installed package
+      - name: Verify installed package and complete core suite
         run: |
           SSC_ARCHIVE_FIXTURE="$GITHUB_WORKSPACE/archive-fixture.json" \
             .venv-acceptance/bin/python -m pytest tests/shared_control --junitxml=test-results.xml
           .venv-acceptance/bin/python -m pip check
           .venv-acceptance/bin/python -m pip freeze > dependencies.txt
           sha256sum dist/*.whl > wheel-sha256.txt
-      - name: Replay the archive in a fresh isolated process
+      - name: Replay selections and fixed distance in a fresh isolated process
         run: |
           .venv-acceptance/bin/python -I -m ssc_core.replay archive-fixture.json > archive-replay-evidence.json
-      - name: Measure evaluator isolation on Linux
+      - name: Verify 1, 2 and 16 candidates, target heights and orientation
         run: |
-          .venv-acceptance/bin/python -B docs/reference/verify_evaluator_isolation.py \
+          .venv-acceptance/bin/python -B docs/reference/verify_candidates.py \
             --source-revision "$(git rev-parse HEAD)" \
             --wheel-sha256 "$(sha256sum dist/*.whl | cut -d ' ' -f 1)" \
-            --output evaluator-evidence.json
-      - name: Verify host receipt issuance and retain probes
-        run: |
-          .venv-acceptance/bin/python -B docs/reference/verify_program_validation.py \
-            --source-revision "$(git rev-parse HEAD)" \
-            --wheel-sha256 "$(sha256sum dist/*.whl | cut -d ' ' -f 1)" \
-            --output program-validation-evidence.json
-      - name: Verify deterministic intent support and fresh-process replay
-        run: |
-          .venv-acceptance/bin/python -B docs/reference/verify_intent_fusion.py \
-            --source-revision "$(git rev-parse HEAD)" \
-            --wheel-sha256 "$(sha256sum dist/*.whl | cut -d ' ' -f 1)" \
-            --output intent-fusion-evidence.json
-      - name: Verify supervised optimizer oracles, faults and residual replay
-        run: |
-          .venv-acceptance/bin/python -B docs/reference/verify_optimizer.py \
-            --source-revision "$(git rev-parse HEAD)" \
-            --wheel-sha256 "$(sha256sum dist/*.whl | cut -d ' ' -f 1)" \
-            --output optimizer-evidence.json
-      - name: Verify every allowed batch program count under the real solve budget
-        if: ${{ !cancelled() }}
-        run: |
-          .venv-acceptance/bin/python -B docs/reference/verify_program_budget.py \
-            --source-revision "$(git rev-parse HEAD)" \
-            --wheel-sha256 "$(sha256sum dist/*.whl | cut -d ' ' -f 1)" \
-            --output program-budget-evidence.json
+            --output candidate-evidence.json
       - name: Retain wheel and verification evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -99,11 +63,7 @@ jobs:
             test-results.xml
             dependencies.txt
             wheel-sha256.txt
-            evaluator-evidence.json
-            program-validation-evidence.json
-            intent-fusion-evidence.json
-            optimizer-evidence.json
-            program-budget-evidence.json
+            candidate-evidence.json
             archive-fixture.json
             archive-checksum.json
             archive-replay-evidence.json

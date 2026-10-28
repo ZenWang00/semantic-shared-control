@@ -1,0 +1,329 @@
+{
+  "fixture_kind": "synthetic_candidate_positions",
+  "messages": [
+    {
+      "message_type": "SessionConfig",
+      "meta": {
+        "schema_version": "2.0",
+        "session_id": "session-offline-v1",
+        "message_id": "message-sessionconfig-offline-v1",
+        "source_id": "synthetic-host-offline-v1",
+        "sequence": 0,
+        "produced_at": {
+          "clock_id": "synthetic-clock-offline-v1",
+          "sec": 10,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "config_id": "config-candidates-v2",
+        "control_frame": "synthetic_base",
+        "tcp_frame": "synthetic_tcp",
+        "robot_model_id": "synthetic-rotary-v1",
+        "validation_policy_id": "numeric-candidates-v2",
+        "motion_constraint_set_id": "synthetic-host-v1",
+        "control_period_s": 0.2,
+        "max_xy_speed_mps": 0.05,
+        "max_linear_speed_mps": 0.05,
+        "max_angular_speed_radps": 0.5,
+        "joystick_timeout_s": 0.5,
+        "robot_state_timeout_s": 0.5,
+        "solve_budget_s": 0.15,
+        "max_command_age_s": 0.2,
+        "history_window_s": 1,
+        "max_capture_skew_s": 0.01
+      }
+    },
+    {
+      "message_type": "TaskContext",
+      "meta": {
+        "schema_version": "2.0",
+        "session_id": "session-offline-v1",
+        "message_id": "message-taskcontext-offline-v1",
+        "source_id": "synthetic-host-offline-v1",
+        "sequence": 1,
+        "produced_at": {
+          "clock_id": "synthetic-clock-offline-v1",
+          "sec": 10,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "task_id": "task-bottle-cup-offline-v1",
+        "revision": 1,
+        "instruction": "Synthetic approach to candidate TCP targets near the bottle or cup."
+      }
+    },
+    {
+      "message_type": "SceneObservation",
+      "meta": {
+        "schema_version": "2.0",
+        "session_id": "session-offline-v1",
+        "message_id": "message-sceneobservation-offline-v1",
+        "source_id": "synthetic-host-offline-v1",
+        "sequence": 2,
+        "produced_at": {
+          "clock_id": "synthetic-clock-offline-v1",
+          "sec": 10,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "observation_id": "observation-bottle-cup-offline-v1",
+        "scene_id": "scene-bottle-cup-offline-v1",
+        "rgb_stamp": {
+          "clock_id": "synthetic-clock-offline-v1",
+          "sec": 10,
+          "nanosec": 0
+        },
+        "depth_stamp": {
+          "clock_id": "synthetic-clock-offline-v1",
+          "sec": 10,
+          "nanosec": 1000000
+        },
+        "camera_frame": "synthetic_camera_optical",
+        "rgb_ref": {
+          "asset_id": "rgb-synthetic-offline-v1",
+          "media_type": "image/png",
+          "encoding": "uint8_rgb",
+          "shape": [
+            480,
+            640,
+            3
+          ]
+        },
+        "depth_ref": {
+          "asset_id": "depth-synthetic-offline-v1",
+          "media_type": "application/octet-stream",
+          "encoding": "float32_m",
+          "shape": [
+            480,
+            640
+          ]
+        },
+        "K": [
+          [
+            600,
+            0,
+            319.5
+          ],
+          [
+            0,
+            600,
+            239.5
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ],
+        "projection_model": "pinhole_rectified",
+        "calibration_id": "calibration-synthetic-offline-v1",
+        "T_control_camera": {
+          "parent_frame": "synthetic_base",
+          "child_frame": "synthetic_camera_optical",
+          "sampled_at": {
+            "clock_id": "synthetic-clock-offline-v1",
+            "sec": 10,
+            "nanosec": 0
+          },
+          "pose": {
+            "position_xyz": [
+              0,
+              0,
+              0
+            ],
+            "quaternion_xyzw": [
+              0,
+              0,
+              0,
+              1
+            ]
+          }
+        }
+      }
+    },
+    {
+      "message_type": "SceneGeometry",
+      "meta": {
+        "schema_version": "2.0",
+        "session_id": "session-offline-v1",
+        "message_id": "message-scenegeometry-offline-v1",
+        "source_id": "synthetic-perception-offline-v1",
+        "sequence": 3,
+        "produced_at": {
+          "clock_id": "synthetic-clock-offline-v1",
+          "sec": 10,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "geometry_id": "geometry-bottle-cup-offline-v1",
+        "scene_id": "scene-bottle-cup-offline-v1",
+        "feature_set_id": "features-bottle-cup-offline-v1",
+        "revision": 1,
+        "observation_id": "observation-bottle-cup-offline-v1",
+        "frame_id": "synthetic_base",
+        "mode": "static",
+        "objects": [
+          {
+            "object_id": "object-bottle-offline-v1",
+            "label": "bottle"
+          },
+          {
+            "object_id": "object-cup-offline-v1",
+            "label": "cup"
+          }
+        ],
+        "keypoints": [
+          {
+            "keypoint_id": "kp-bottle-approach-offline-v1",
+            "object_id": "object-bottle-offline-v1",
+            "position_xyz": [
+              0.41,
+              0,
+              0.3
+            ]
+          },
+          {
+            "keypoint_id": "kp-cup-approach-offline-v1",
+            "object_id": "object-cup-offline-v1",
+            "position_xyz": [
+              0.39,
+              0,
+              0.3
+            ]
+          }
+        ],
+        "axes": []
+      }
+    },
+    {
+      "message_type": "SemanticContext",
+      "meta": {
+        "schema_version": "2.0",
+        "session_id": "session-offline-v1",
+        "message_id": "message-semanticcontext-offline-v1",
+        "source_id": "synthetic-perception-offline-v1",
+        "sequence": 4,
+        "produced_at": {
+          "clock_id": "synthetic-clock-offline-v1",
+          "sec": 10,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "semantic_id": "semantic-bottle-cup-offline-v1",
+        "task_id": "task-bottle-cup-offline-v1",
+        "task_revision": 1,
+        "scene_id": "scene-bottle-cup-offline-v1",
+        "feature_set_id": "features-bottle-cup-offline-v1",
+        "observation_id": "observation-bottle-cup-offline-v1",
+        "object_relevance": [
+          {
+            "object_id": "object-bottle-offline-v1",
+            "task_relevance": 0.5
+          },
+          {
+            "object_id": "object-cup-offline-v1",
+            "task_relevance": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "message_type": "CandidateSet",
+      "meta": {
+        "schema_version": "2.0",
+        "session_id": "session-offline-v1",
+        "message_id": "message-candidates-v2",
+        "source_id": "synthetic-perception-offline-v1",
+        "sequence": 6,
+        "produced_at": {
+          "clock_id": "synthetic-clock-offline-v1",
+          "sec": 10,
+          "nanosec": 0
+        }
+      },
+      "payload": {
+        "task_id": "task-bottle-cup-offline-v1",
+        "task_revision": 1,
+        "scene_id": "scene-bottle-cup-offline-v1",
+        "feature_set_id": "features-bottle-cup-offline-v1",
+        "observation_id": "observation-bottle-cup-offline-v1",
+        "candidate_set_id": "candidates-bottle-cup-v2",
+        "frame_id": "synthetic_base",
+        "candidates": [
+          {
+            "candidate_id": "candidate-bottle-v2",
+            "object_id": "object-bottle-offline-v1",
+            "position_xyz": [
+              0.41,
+              0,
+              0.3
+            ]
+          },
+          {
+            "candidate_id": "candidate-cup-v2",
+            "object_id": "object-cup-offline-v1",
+            "position_xyz": [
+              0.39,
+              0,
+              0.3
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "fixture_id": "bottle-cup-candidates-v2",
+  "profile_id": "candidates-reference-v2",
+  "notice": "Synthetic data-only TCP candidates, not robot measurements or real VLM output.",
+  "initial_pose": {
+    "position_xyz": [
+      0.4,
+      0,
+      0.3
+    ],
+    "quaternion_xyzw": [
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "initial_joint_names": [
+    "q1",
+    "q2",
+    "q3",
+    "q4",
+    "q5",
+    "q6"
+  ],
+  "initial_joint_positions_rad": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "current_input_xy": [
+    1,
+    0
+  ],
+  "dt_s": 0.2,
+  "earlier_input": {
+    "sampled_at": {
+      "clock_id": "synthetic-clock-offline-v1",
+      "sec": 9,
+      "nanosec": 980000000
+    },
+    "u_xy": [
+      1,
+      0
+    ],
+    "enabled": true
+  }
+}

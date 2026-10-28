@@ -11,7 +11,7 @@ from dataclasses import dataclass
 import math
 
 from .host_constraints import ConstraintMargin, HostConstraintResult
-from .policy import NUMERIC_OFFLINE_V1
+from .policy import NUMERIC_CANDIDATES_V2
 
 _LOWER, _UPPER, _SCALE = (.3, -.1, .2), (.5, .1, .4), .2
 _CENTER, _CLEARANCE = (.45, .07, .30), .0201
@@ -43,7 +43,7 @@ class WorkspaceSphereDouble:
         distance = _segment_distance(start, position, _CENTER)
         margins.append(ConstraintMargin("excluded_sphere_segment", (distance - _CLEARANCE) / _SCALE,
                                         "path enters excluded sphere"))
-        return HostConstraintResult(tuple(margins), policy=NUMERIC_OFFLINE_V1)
+        return HostConstraintResult(tuple(margins), policy=NUMERIC_CANDIDATES_V2)
 
 
 @dataclass(frozen=True, slots=True)

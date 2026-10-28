@@ -1,1 +1,1 @@
-Technical design: Design Draft v0.1 · Development Policy v1.1 · No real-time or robot-performance claim. [Version-controlled source](https://github.com/ZenWang00/semantic-shared-control/tree/main/docs/wiki).
+Candidate-point contract: schema 2.0 · Development Policy v1.1 · Offline position assistance only; no robot-performance claim. [Version-controlled source](https://github.com/ZenWang00/semantic-shared-control/tree/main/docs/wiki).

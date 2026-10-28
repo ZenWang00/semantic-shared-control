@@ -1,14 +1,8 @@
-"""Bounded short-horizon TCP optimization (solver-slsqp-v1); no motion authority.
+"""Supervised candidate-point position optimization with independent host checks.
 
-This host module is standard-library only. It validates one immutable snapshot,
-its matching ObjectWeights and the accepted-command reference, then hands a
-plain numerical problem to a supervised solver process (``_solver_worker``).
-That process runs SciPy SLSQP under a 1 GiB address-space limit and obtains
-every generated residual from its own separately spawned evaluator children.
-The host enforces the real monotonic deadline, tears down the whole process
-group on timeout or failure, independently rechecks hard margins at the emitted
-target and returns a ControlResult proposal. A move is only a proposal: the
-robot-side gate must still check authority, freshness and host constraints.
+The host remains standard-library only. Immutable snapshot and selection data
+form one fixed numerical problem; a bounded worker runs SLSQP. Deadline,
+cancellation and teardown are host-owned. Returned poses are proposals only.
 """
 from concurrent.futures import Future
 from dataclasses import dataclass
@@ -30,10 +24,9 @@ from uuid import uuid4
 from . import records as r
 from .fusion import IntentConfig, estimate_intent, get_intent_config
 from .host_constraints import HostConstraintResult, MeasuredStateView
-from .penalties import HostNormalization, residual_diagnostic
-from .policy import NUMERIC_OFFLINE_V1
+from .policy import NUMERIC_CANDIDATES_V2
 from .registry import ResolvedBundle, ResolvedSnapshot
-from .supervision import _decode, _encode
+from ._ipc import _decode, _encode
 from .validation import parse_record, to_dict
 
 SolverStatus = Literal["solved", "infeasible", "timeout", "error", "not_run"]
@@ -44,28 +37,30 @@ _SPEC = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*:[A-Za-z_]
 
 @dataclass(frozen=True, slots=True)
 class SolverConfig:
-    """Immutable solver-slsqp-v1 content; archive it together with its ID."""
+    """Immutable solver-candidates-v2 content; archive it together with its ID."""
 
     solver_config_id: str
     method: str
     smoothing_coefficient: float
+    distance_scale_m: float
+    distance_tolerance_m: float
     eps: float
     ftol: float
     maxiter: int
     variable_bound: float
     solve_budget_s: float
-    max_programs: int
+    max_candidates: int
     address_space_bytes: int
     payload_bytes: int
     preparation_timeout_s: float
     teardown_grace_s: float
 
 
-def get_solver_config(solver_config_id: str = "solver-slsqp-v1") -> SolverConfig:
-    """Return immutable v1 or candidate-batch v2 content; default stays v1."""
-    if solver_config_id not in ("solver-slsqp-v1", "solver-slsqp-batch-v2"):
+def get_solver_config(solver_config_id: str = "solver-candidates-v2") -> SolverConfig:
+    """Return the immutable candidate-position solver configuration."""
+    if solver_config_id != "solver-candidates-v2":
         raise ValueError(f"unsupported solver configuration: {solver_config_id!r}")
-    return SolverConfig(solver_config_id, "SLSQP", 0.1, 1e-6, 1e-9, 100, 1.0, 0.15, 16,
+    return SolverConfig(solver_config_id, "SLSQP", 0.1, 0.01, 0.0, 1e-6, 1e-9, 100, 1.0, 0.15, 16,
                         1024 * 1024 * 1024, 1024 * 1024, 5.0, 0.1)
 
 
@@ -108,7 +103,7 @@ class OptimizationRequest:
 
     session_id: str
     snapshot_id: str
-    weights_id: str
+    selection_id: str
     result_id: str
     control_epoch: int
     command_seq: int
@@ -134,8 +129,7 @@ class PreparationOutcome:
     finished_ns: int
     worker_pid: int | None
     worker_generation: str | None
-    evaluator_pids: tuple[tuple[str, int], ...]
-    program_ids: tuple[str, ...]
+    candidate_ids: tuple[str, ...]
     checker_factory: str
     solver_config: SolverConfig
     limits: tuple[tuple[str, tuple[int, int]], ...]
@@ -160,7 +154,6 @@ class OptimizationOutcome:
     diagnostic: str
     request: OptimizationRequest | None
     report_json: str | None
-    evaluator_json: str | None
     host_margins: tuple[tuple[str, float], ...]
     started_ns: int
     deadline_ns: int
@@ -233,8 +226,8 @@ def basic_step_margins(target: r.Pose, measured: r.Pose, u_xy, *, step_m: float,
 
 
 def _previous_reference(snapshot, session_id, previous, config):
-    """Return (kind, x_prev, r_prev); errors for missing or unaccepted references."""
-    zero = ([0.0] * 3, [0.0] * 3)
+    """Return (kind, x_prev); errors for missing or unaccepted references."""
+    zero = ([0.0] * 3,)
     if snapshot.previous_applied_command_id is None:
         _require(previous is None, "previous_reference", "snapshot has no previous command but one was supplied")
         return ("none",) + zero
@@ -243,11 +236,11 @@ def _previous_reference(snapshot, session_id, previous, config):
     _require(type(previous.result) is r.Message and type(previous.acceptance) is r.CommandAcceptanceRecord,
              "previous_reference", "expected a ControlResult message and acceptance record")
     message = previous.result
-    acceptance = parse_record(r.CommandAcceptanceRecord, to_dict(previous.acceptance), policy=NUMERIC_OFFLINE_V1)
+    acceptance = parse_record(r.CommandAcceptanceRecord, to_dict(previous.acceptance), policy=NUMERIC_CANDIDATES_V2)
     _require(message.message_type == "ControlResult" and type(message.payload) is r.ControlResult,
              "previous_reference", "previous record is not a ControlResult")
     _require(message.meta.session_id == session_id, "previous_reference", "previous command is from another session")
-    result = parse_record(r.ControlResult, to_dict(message.payload), policy=NUMERIC_OFFLINE_V1)
+    result = parse_record(r.ControlResult, to_dict(message.payload), policy=NUMERIC_CANDIDATES_V2)
     _require(acceptance.command_accepted and acceptance.result_id == result.result_id and
              acceptance.applied_command_id == snapshot.previous_applied_command_id,
              "previous_reference", "previous command was not accepted under this applied-command ID")
@@ -264,119 +257,75 @@ def _previous_reference(snapshot, session_id, previous, config):
     _require(result.horizon_s == source.snapshot.dt_s, "previous_reference", "previous horizon differs from its source")
     start, target, dt_prev = source.robot_state.payload.tcp_pose, result.next_tcp_pose, float(result.horizon_s)
     step_m = config.max_linear_speed_mps * float(snapshot.dt_s)
-    step_rad = config.max_angular_speed_radps * float(snapshot.dt_s)
     x_prev = [(float(a) - float(b)) / dt_prev * float(snapshot.dt_s) / step_m
               for a, b in zip(target.position_xyz, start.position_xyz)]
-    r_prev = [value / dt_prev * float(snapshot.dt_s) / step_rad
-              for value in _relative_rotvec(target.quaternion_xyzw, start.quaternion_xyzw)]
-    _require(all(math.isfinite(v) for v in x_prev + r_prev), "previous_reference", "nonfinite previous reference")
-    return "move", x_prev, r_prev
+    _require(all(math.isfinite(v) for v in x_prev), "previous_reference", "nonfinite previous reference")
+    return "move", x_prev
 
 
-def build_request(resolved: ResolvedSnapshot, weights: r.ObjectWeights, *, intent_config: IntentConfig,
+def build_request(resolved: ResolvedSnapshot, selection: r.CandidateSelection, *, intent_config: IntentConfig,
                   command_seq: int, previous_applied: AppliedCommandReference | None = None,
                   result_id: str | None = None, solver_config: SolverConfig | None = None,
-                  prepared_programs: dict | None = None) -> OptimizationRequest:
-    """Validate pinned inputs and form the numerical problem; pure and replayable.
-
-    Raises OptimizationInputError with a stable code. Weights must equal the
-    profile estimator's output for this exact snapshot (within 1e-12) and
-    alpha must equal the configuration. Receipt *trust* remains the activation
-    boundary's responsibility; this checks accepted-status metadata only.
-    """
+                  prepared_candidates: dict | None = None) -> OptimizationRequest:
+    """Form one fixed, replayable position problem from a pinned selection."""
     solver_config = solver_config or get_solver_config()
-    _require(solver_config == get_solver_config(solver_config.solver_config_id), "invalid_config",
-             "solver configuration differs from its immutable definition")
-    _require(type(resolved) is ResolvedSnapshot, "input_type", "expected ResolvedSnapshot")
-    _require(type(weights) is r.ObjectWeights, "input_type", "expected ObjectWeights")
-    _require(type(command_seq) is int and command_seq >= 0, "input_type", "command_seq must be a host counter")
-    try:
-        expected_config = get_intent_config(intent_config.estimator_config_id)
-    except (AttributeError, ValueError) as exc:
-        raise OptimizationInputError("invalid_config", str(exc)) from None
-    _require(type(intent_config) is IntentConfig and intent_config == expected_config, "invalid_config",
-             "intent configuration differs from its immutable definition")
-    weights = parse_record(r.ObjectWeights, to_dict(weights), policy=NUMERIC_OFFLINE_V1)
-    recomputed = estimate_intent(resolved, intent_config, weights_id=weights.weights_id, policy=NUMERIC_OFFLINE_V1)
-    if recomputed.disposition == "error":
-        raise OptimizationInputError(f"invalid_input_{recomputed.code}", recomputed.diagnostic)
-    if recomputed.disposition == "disabled":
-        raise OptimizationInputError("input_not_active", "neutral or disabled input uses the local hold path")
-    expected = recomputed.weights
-    _require(weights.snapshot_id == expected.snapshot_id and
-             weights.estimator_config_id == expected.estimator_config_id and
-             weights.assistance_strength == expected.assistance_strength and
-             [w.object_id for w in weights.weights] == [w.object_id for w in expected.weights] and
-             all(abs(a.weight - b.weight) <= NUMERIC_OFFLINE_V1.weight_sum_tolerance
-                 for a, b in zip(weights.weights, expected.weights)),
-             "weights_mismatch", "ObjectWeights differ from the estimator output for this snapshot")
-
+    _require(solver_config == get_solver_config(solver_config.solver_config_id), 'invalid_config',
+             'solver configuration differs from its immutable definition')
+    _require(type(resolved) is ResolvedSnapshot and type(selection) is r.CandidateSelection,
+             'input_type', 'expected ResolvedSnapshot and CandidateSelection')
+    _require(type(command_seq) is int and command_seq >= 0, 'input_type', 'command_seq must be a host counter')
+    _require(type(intent_config) is IntentConfig and intent_config == get_intent_config(intent_config.estimator_config_id),
+             'invalid_config', 'intent configuration differs from its immutable definition')
+    selection = parse_record(r.CandidateSelection, to_dict(selection), policy=NUMERIC_CANDIDATES_V2)
+    recomputed = estimate_intent(resolved, intent_config, selection_id=selection.selection_id,
+                                policy=NUMERIC_CANDIDATES_V2)
+    if recomputed.disposition == 'error':
+        raise OptimizationInputError(f'invalid_input_{recomputed.code}', recomputed.diagnostic)
+    if recomputed.disposition == 'disabled':
+        raise OptimizationInputError('input_not_active', 'neutral or disabled input uses the local hold path')
+    _require(selection == recomputed.selection, 'selection_mismatch',
+             'selection differs from the estimator output for this exact snapshot')
     bundle, snapshot = resolved.bundle, resolved.snapshot
     config = bundle.configuration
     _require(float(snapshot.dt_s) == float(config.control_period_s) and snapshot.dt_s > 0,
-             "dt_mismatch", "snapshot dt_s must equal the session control period")
+             'dt_mismatch', 'snapshot dt_s must equal the session control period')
     joystick, state = resolved.joystick.payload, resolved.robot_state.payload
     _require((state.frame_id, state.tcp_frame) == (config.control_frame, config.tcp_frame),
-             "frame_mismatch", "robot state frames differ from the session")
-    programs = {item.program.program_id: item for item in bundle.programs}
-    _require(len(programs) == len(bundle.programs) and 0 < len(programs) <= solver_config.max_programs,
-             "program_count", "expected 1-16 uniquely identified programs")
-    _require({(ref.program_id, ref.source_sha256) for ref in snapshot.program_refs} ==
-             {(p.program.program_id, p.program.source_sha256) for p in programs.values()},
-             "snapshot_reference", "snapshot programs differ from the resolved bundle")
-    bindings = {binding.program_id: binding for binding in bundle.execution_bindings}
-    _require(len(bindings) == len(bundle.execution_bindings) == len(programs) and bindings.keys() == programs.keys(),
-             "binding_coverage", "expected exactly one execution binding per program")
-    _require({b.binding_id for b in bindings.values()} == set(snapshot.execution_binding_refs),
-             "snapshot_reference", "snapshot binding references differ from the bundle")
-    receipts = {receipt.receipt_id: receipt for receipt in bundle.receipts}
-    weight_of = {item.object_id: float(item.weight) for item in weights.weights}
-    terms = []
-    for program_id in sorted(programs):
-        resolved_program, binding = programs[program_id], bindings[program_id]
-        program = resolved_program.program
-        receipt = receipts.get(binding.validation_receipt_id)
-        _require(binding.config_id == snapshot.config_id, "binding_reference", "binding configuration differs")
-        _require(receipt is not None and receipt.status == "accepted" and receipt.program_id == program_id and
-                 receipt.source_sha256 == program.source_sha256, "binding_reference",
-                 "binding lacks an accepted receipt for this exact program")
-        _require(program.object_id == resolved_program.candidate.object_id and program.object_id in weight_of,
-                 "candidate_reference", "program candidate is not a weighted semantic candidate")
-        if prepared_programs is not None:
-            _require(prepared_programs.get(program_id) == to_dict(program), "context_mismatch",
-                     "snapshot program differs from the prepared solver context")
-        terms.append({"program_id": program_id, "object_id": program.object_id,
-                      "object_weight": weight_of[program.object_id], "binding_weight": _float(binding.weight),
-                      "scale": _float(binding.normalization_scale), "output_unit": program.output_unit,
-                      "keypoints": [[_float(v) for v in point] for point in resolved_program.keypoints],
-                      "axis_dirs": [[_float(v) for v in axis] for axis in resolved_program.axis_dirs],
-                      "params": [_float(v) for v in resolved_program.params]})
-    if prepared_programs is not None:
-        _require(set(prepared_programs) == set(programs), "context_mismatch",
-                 "snapshot programs differ from the prepared solver context")
-    kind, x_prev, r_prev = _previous_reference(snapshot, bundle.session_id, previous_applied, config)
+             'frame_mismatch', 'robot state frames differ from the session')
+    candidates = {point.candidate_id: to_dict(point) for point in bundle.candidates}
+    _require(0 < len(candidates) == len(bundle.candidates) <= solver_config.max_candidates,
+             'candidate_count', 'expected 1-16 uniquely identified candidates')
+    _require(snapshot.candidate_set_id == bundle.candidate_set.candidate_set_id,
+             'snapshot_reference', 'snapshot candidate set differs from bundle')
+    if prepared_candidates is not None:
+        _require(candidates == prepared_candidates, 'context_mismatch', 'candidate set differs from prepared context')
+    candidate = candidates.get(selection.selected_candidate_id)
+    _require(candidate is not None, 'candidate_reference', 'selected candidate is missing')
+    kind, x_prev = _previous_reference(snapshot, bundle.session_id, previous_applied, config)
+    if selection.assistance_strength == 0:
+        x_prev[2] = 0.
     dt = float(snapshot.dt_s)
-    step_m, step_rad = float(config.max_linear_speed_mps) * dt, float(config.max_angular_speed_radps) * dt
-    _require(step_m > 0 and step_rad > 0, "invalid_config", "step scales must be positive")
+    step_m = float(config.max_linear_speed_mps) * dt
+    _require(step_m > 0, 'invalid_config', 'step scale must be positive')
     problem = {
-        "dt_s": dt, "L_m": step_m, "A_rad": step_rad,
-        "xy_gain": float(config.max_xy_speed_mps) * dt / step_m,
-        "u_xy": [_float(v) for v in joystick.u_xy], "alpha": _float(weights.assistance_strength),
-        "smoothing": solver_config.smoothing_coefficient,
-        "p_tcp": [_float(v) for v in state.tcp_pose.position_xyz],
-        "q_tcp": [_float(v) for v in state.tcp_pose.quaternion_xyzw],
-        "x_prev": x_prev, "r_prev": r_prev, "terms": terms,
-        "measured_state": {"frame_id": state.frame_id, "tcp_frame": state.tcp_frame,
-                           "tcp_pose": to_dict(state.tcp_pose), "joint_names": list(state.joint_names),
-                           "joint_positions_rad": [_float(v) for v in state.joint_positions_rad]},
-        "configuration": to_dict(config),
-        "hard_margin_tolerance": NUMERIC_OFFLINE_V1.hard_margin_tolerance,
+        'dt_s': dt, 'L_m': step_m,
+        'xy_gain': float(config.max_xy_speed_mps) * dt / step_m,
+        'u_xy': list(map(float, joystick.u_xy)), 'alpha': float(selection.assistance_strength),
+        'smoothing': solver_config.smoothing_coefficient,
+        'p_tcp': list(map(float, state.tcp_pose.position_xyz)),
+        'q_tcp': list(map(float, state.tcp_pose.quaternion_xyzw)), 'x_prev': x_prev,
+        'candidate_id': candidate['candidate_id'], 'candidate_position_xyz': candidate['position_xyz'],
+        'distance_scale_m': solver_config.distance_scale_m, 'distance_tolerance_m': solver_config.distance_tolerance_m,
+        'measured_state': {'frame_id': state.frame_id, 'tcp_frame': state.tcp_frame,
+                          'tcp_pose': to_dict(state.tcp_pose), 'joint_names': list(state.joint_names),
+                          'joint_positions_rad': list(map(float, state.joint_positions_rad))},
+        'configuration': to_dict(config), 'hard_margin_tolerance': NUMERIC_CANDIDATES_V2.hard_margin_tolerance,
     }
-    text = json.dumps(problem, sort_keys=True, allow_nan=False, separators=(",", ":"))
-    return OptimizationRequest(bundle.session_id, snapshot.snapshot_id, weights.weights_id,
-                               result_id or uuid4().hex, snapshot.control_epoch, command_seq,
-                               resolved.joystick.meta.sequence, resolved.robot_state.meta.sequence, dt,
-                               intent_config.estimator_config_id, solver_config.solver_config_id, kind, text)
+    text = json.dumps(problem, sort_keys=True, allow_nan=False, separators=(',', ':'))
+    return OptimizationRequest(bundle.session_id, snapshot.snapshot_id, selection.selection_id,
+        result_id or uuid4().hex, snapshot.control_epoch, command_seq, resolved.joystick.meta.sequence,
+        resolved.robot_state.meta.sequence, dt, intent_config.estimator_config_id,
+        solver_config.solver_config_id, kind, text)
 
 
 def _load_checker(spec: HostCheckerSpec):
@@ -396,14 +345,14 @@ class _Failure(Exception):
 
 def _hold_result(identity, status, code, diagnostic, *, evaluation_valid, solve_time_s):
     data = {"result_id": identity["result_id"], "snapshot_id": identity.get("snapshot_id"),
-            "weights_id": identity.get("weights_id"), "control_epoch": identity["control_epoch"],
+            "selection_id": identity.get("selection_id"), "control_epoch": identity["control_epoch"],
             "command_seq": identity["command_seq"],
             "source_joystick_seq": identity.get("source_joystick_seq"),
             "source_robot_state_seq": identity.get("source_robot_state_seq"),
             "status": "hold", "evaluation_valid": evaluation_valid, "solver_status": status,
             "constraints_satisfied": None, "solve_time_s": 0 if status == "not_run" else solve_time_s,
-            "constraint_evaluations": [], "reason": f"{code}: {diagnostic}"[:512].rstrip() or code}
-    return parse_record(r.ControlResult, data, policy=NUMERIC_OFFLINE_V1)
+            "candidate_evaluation": None, "reason": f"{code}: {diagnostic}"[:512].rstrip() or code}
+    return parse_record(r.ControlResult, data, policy=NUMERIC_CANDIDATES_V2)
 
 
 def _finite_list(value, length):
@@ -415,7 +364,7 @@ class SupervisedOptimizer:
     """One prepared solver process; one in-flight solve; no hidden warm start.
 
     ``prepare(bundle, motion_disabled=True)`` imports the trusted checker, starts
-    a fresh solver process group and prepares one evaluator per bound program.
+    a fresh solver process group and pins the candidate data.
     ``solve(...)`` validates inputs synchronously, then returns a Future that
     always completes with a parsed ControlResult (move or hold). It never waits
     in the caller beyond validation. A timeout, error or protocol fault retires
@@ -438,7 +387,7 @@ class SupervisedOptimizer:
         self._ready = False
         self._process = None
         self._generation = None
-        self._programs = None
+        self._candidates = None
         self._host_checker = None
         self._environment = tuple(sorted({
             "system": platform.system(), "release": platform.release(),
@@ -460,26 +409,35 @@ class SupervisedOptimizer:
         deadline = started + int(self._config.preparation_timeout_s * 1e9)
         future = Future()
         future.set_running_or_notify_cancel()
-        code = None
+        code, diagnostic, candidates = None, "", None
         if type(bundle) is not ResolvedBundle:
             code = "invalid_request"
         elif motion_disabled is not True:
             code = "motion_not_disabled"
+        else:
+            # Validate before claiming the lifecycle slot: serialization can
+            # reject directly constructed records, and every returned Future
+            # must still complete so the caller can recover or close.
+            try:
+                candidate_set = parse_record(r.CandidateSet, to_dict(bundle.candidate_set),
+                                             policy=NUMERIC_CANDIDATES_V2)
+                candidates = {item.candidate_id: to_dict(item) for item in candidate_set.candidates}
+            except (TypeError, ValueError, AttributeError, OverflowError) as exc:
+                code, diagnostic = "invalid_request", str(exc)[:400]
         with self._lock:
             if self._active is not None:
                 code = "busy"
             elif self._closed:
                 code = "closed"
             if code:
-                future.set_result(self._preparation(False, code, "", started, deadline))
+                future.set_result(self._preparation(False, code, diagnostic, started, deadline))
                 return future
             self._active, self._ready = future, False
             self._cancel.clear()
-        programs = {item.program.program_id: to_dict(item.program) for item in bundle.programs}
-        self._run(self._prepare, future, programs, started, deadline)
+        self._run(self._prepare, future, candidates, started, deadline)
         return future
 
-    def solve(self, resolved: ResolvedSnapshot, weights: r.ObjectWeights, *, intent_config: IntentConfig,
+    def solve(self, resolved: ResolvedSnapshot, selection: r.CandidateSelection, *, intent_config: IntentConfig,
               command_seq: int, previous_applied: AppliedCommandReference | None = None,
               result_id: str | None = None, deadline_ns: int | None = None) -> Future:
         """Validate, then solve asynchronously before min(start + 150 ms, deadline_ns).
@@ -502,7 +460,7 @@ class SupervisedOptimizer:
         snapshot = resolved.snapshot
         identity = {"result_id": result_id or uuid4().hex, "control_epoch": snapshot.control_epoch,
                     "command_seq": command_seq, "snapshot_id": snapshot.snapshot_id,
-                    "weights_id": getattr(weights, "weights_id", None),
+                    "selection_id": getattr(selection, "selection_id", None),
                     "source_joystick_seq": resolved.joystick.meta.sequence,
                     "source_robot_state_seq": resolved.robot_state.meta.sequence}
         future = Future()
@@ -512,10 +470,10 @@ class SupervisedOptimizer:
             if invalid_deadline:
                 raise OptimizationInputError("invalid_deadline", "deadline_ns must be a monotonic integer")
             with self._lock:
-                programs = self._programs if self._ready else None
-            request = build_request(resolved, weights, intent_config=intent_config, command_seq=command_seq,
+                candidates = self._candidates if self._ready else None
+            request = build_request(resolved, selection, intent_config=intent_config, command_seq=command_seq,
                                     previous_applied=previous_applied, result_id=identity["result_id"],
-                                    solver_config=self._config, prepared_programs=programs)
+                                    solver_config=self._config, prepared_candidates=candidates)
         except OptimizationInputError as exc:
             future.set_result(self._outcome(identity, "not_run", exc.code, str(exc), started, deadline,
                                             evaluation_valid=False))
@@ -530,7 +488,7 @@ class SupervisedOptimizer:
                 code = "busy"
             elif self._closed:
                 code = "closed"
-            elif not self._ready or self._programs is None or self._programs is not programs:
+            elif not self._ready or self._candidates is None or self._candidates is not candidates:
                 code = "not_prepared"  # includes a context re-prepared during validation
             if code:
                 future.set_result(self._outcome(identity, "not_run", code, "solver unavailable", started,
@@ -657,16 +615,7 @@ class SupervisedOptimizer:
                     return reply
 
     def _retire(self, *, graceful=False):
-        """Retire the solver process group and reap its leader.
-
-        Closing the pipes is an EOF request: a responsive worker closes (and
-        reaps) its own evaluators, then exits. ``graceful`` waits up to the
-        teardown grace for that orderly exit; it is used only when the worker
-        replied or motion is disabled. Otherwise, or if it does not exit, the
-        whole group is terminated, killed after the grace, and the leader is
-        reaped. Evaluators orphaned by a killed or crashed worker are killed
-        with the group and reaped by the system init process.
-        """
+        """Close IPC, terminate the process group if needed, and reap its leader."""
         started = time.monotonic_ns()
         process = self._process
         if process is None:
@@ -693,7 +642,7 @@ class SupervisedOptimizer:
             except subprocess.TimeoutExpired:
                 continue
         try:
-            # Remove any evaluator left running in the group after the leader.
+            # Ensure no process survives in the retired process group.
             os.killpg(group, signal.SIGKILL)
         except (ProcessLookupError, PermissionError):
             pass
@@ -705,7 +654,7 @@ class SupervisedOptimizer:
             reaped = False
         return (time.monotonic_ns() - started) / 1e9, reaped
 
-    def _prepare(self, future, programs, started, deadline):
+    def _prepare(self, future, candidates, started, deadline):
         ok, code, diagnostic, reply = False, "ok", "", None
         cleanup, reaped = 0., True
         try:
@@ -714,8 +663,8 @@ class SupervisedOptimizer:
             if not reaped:
                 raise _Failure("error", "cleanup_failed", "old solver has not been reaped")
             if sys.platform != "linux":
-                raise _Failure("error", "unsupported_platform", "solver-slsqp-v1 isolation requires Linux RLIMIT_AS")
-            self._generation, self._programs = uuid4().hex, None
+                raise _Failure("error", "unsupported_platform", "solver-candidates-v2 isolation requires Linux RLIMIT_AS")
+            self._generation, self._candidates = uuid4().hex, None
             try:
                 self._host_checker = _load_checker(self._checker_spec)
             except Exception as exc:
@@ -724,15 +673,14 @@ class SupervisedOptimizer:
             frame = _encode({"operation": "prepare", "request_id": request_id, "generation": self._generation,
                              "deadline_ns": deadline, "solver_config_id": self._config.solver_config_id,
                              "checker": self._checker_spec.factory,
-                             "programs": [programs[key] for key in sorted(programs)]})
+                             "candidates": [candidates[key] for key in sorted(candidates)]})
             self._check(deadline)
             self._spawn()
             reply = self._exchange(frame, request_id, deadline)
             if reply.get("status") != "ready":
                 raise _Failure("error", str(reply.get("code"))[:64], str(reply.get("diagnostic"))[:400])
-            pids = reply.get("evaluator_pids")
-            if type(pids) is not dict or set(pids) != set(programs) or not all(type(v) is int for v in pids.values()):
-                raise _Failure("error", "malformed_response", "evaluator preparation evidence is incomplete")
+            if reply.get("candidate_ids") != sorted(candidates):
+                raise _Failure("error", "malformed_response", "candidate preparation evidence is incomplete")
             self._check(deadline)
             ok = True
         except _Failure as exc:
@@ -750,9 +698,9 @@ class SupervisedOptimizer:
                     # The final guard and state commit are one operation with
                     # respect to close; callbacks must run after unlocking.
                     self._ready = ok
-                    self._programs = programs if ok else None
+                    self._candidates = candidates if ok else None
                     outcome = self._preparation(ok, code if ok or reaped else "cleanup_failed", diagnostic, started,
-                                                deadline, reply=reply, programs=programs, cleanup=cleanup,
+                                                deadline, reply=reply, candidates=candidates, cleanup=cleanup,
                                                 reaped=None if ok else reaped)
                     self._active = None
                     break
@@ -797,8 +745,6 @@ class SupervisedOptimizer:
         # Serialize diagnostics before the final deadline/cancellation check,
         # not between that check and publication or while holding the lock.
         report_json = json.dumps(reply.get("report"), sort_keys=True) if reply and reply.get("report") is not None else None
-        evaluator_json = json.dumps({"failure": reply.get("evaluator"), "stats": reply.get("evaluator_stats")},
-                                    sort_keys=True) if reply else None
         retired = False
         while True:
             with self._lock:
@@ -818,9 +764,9 @@ class SupervisedOptimizer:
                                               evaluation_valid=evaluation_valid, solve_time_s=(finished - started) / 1e9)
                     self._ready = not retire
                     if retire:
-                        self._programs = None
+                        self._candidates = None
                     outcome = OptimizationOutcome(
-                        result, code, diagnostic, request, report_json, evaluator_json,
+                        result, code, diagnostic, request, report_json,
                         margins, started, deadline, finished, pid, self._generation,
                         reply.get("worker_elapsed_s") if reply else None, cleanup, reaped if retire else None,
                         self._config, self._environment)
@@ -841,25 +787,20 @@ class SupervisedOptimizer:
         """Recheck the worker's solved report on the host; return (ControlResult, margins)."""
         if type(report) is not dict:
             raise _Failure("error", "malformed_response", "solved reply lacks a report")
-        for key, length in (("x", 3), ("r", 3), ("position_xyz", 3), ("quaternion_xyzw", 4)):
+        for key, length in (("x", 3), ("position_xyz", 3), ("quaternion_xyzw", 4)):
             if not _finite_list(report.get(key), length):
                 raise _Failure("error", "malformed_response", f"invalid {key}")
-        evaluations = report.get("evaluations")
-        terms = problem["terms"]
-        if (type(evaluations) is not list or [e.get("program_id") for e in evaluations if type(e) is dict]
-                != [t["program_id"] for t in terms]):
-            raise _Failure("error", "malformed_response", "final evaluations do not cover every program")
         try:
             target = parse_record(r.Pose, {"position_xyz": report["position_xyz"],
-                                           "quaternion_xyzw": report["quaternion_xyzw"]}, policy=NUMERIC_OFFLINE_V1)
+                                           "quaternion_xyzw": report["quaternion_xyzw"]}, policy=NUMERIC_CANDIDATES_V2)
         except Exception:
             raise _Failure("error", "malformed_response", "emitted pose is not a valid normalized pose") from None
         state = problem["measured_state"]
-        measured = parse_record(r.Pose, state["tcp_pose"], policy=NUMERIC_OFFLINE_V1)
+        measured = parse_record(r.Pose, state["tcp_pose"], policy=NUMERIC_CANDIDATES_V2)
         u_xy = tuple(problem["u_xy"])
-        tolerance = NUMERIC_OFFLINE_V1.hard_margin_tolerance
-        basic = basic_step_margins(target, measured, u_xy, step_m=problem["L_m"], step_rad=problem["A_rad"])
-        config = parse_record(r.SessionConfig, problem["configuration"], policy=NUMERIC_OFFLINE_V1)
+        tolerance = NUMERIC_CANDIDATES_V2.hard_margin_tolerance
+        basic = basic_step_margins(target, measured, u_xy, step_m=problem["L_m"], step_rad=1.0)
+        config = parse_record(r.SessionConfig, problem["configuration"], policy=NUMERIC_CANDIDATES_V2)
         view = MeasuredStateView(state["frame_id"], state["tcp_frame"], measured,
                                  tuple(state["joint_names"]), tuple(state["joint_positions_rad"]))
         try:
@@ -873,26 +814,34 @@ class SupervisedOptimizer:
         violated = [name for name, value in margins if not value >= -tolerance]
         if violated:
             raise _Failure("infeasible", "host_recheck", ", ".join(violated)[:300], evaluation_valid=True)
-        constraint_evaluations = []
-        for term, evaluation in zip(terms, evaluations):
-            raw = evaluation.get("raw_g")
-            try:
-                diagnostic = residual_diagnostic(raw, output_unit=term["output_unit"], normalization=HostNormalization(
-                    term["output_unit"], term["scale"], term["binding_weight"]))
-            except (TypeError, ValueError):
-                raise _Failure("error", "malformed_response", "final residual is not a finite scalar") from None
-            constraint_evaluations.append({"program_id": term["program_id"], "raw_g": diagnostic.raw_residual,
-                                           "normalization_scale": term["scale"], "penalty": diagnostic.penalty})
-        satisfied = all(item["raw_g"] <= 1e-9 for item in constraint_evaluations)
+        if any(abs(v) > 1e-12 for v in _relative_rotvec(target.quaternion_xyzw, measured.quaternion_xyzw)):
+            raise _Failure("infeasible", "orientation_changed", "position assistance must preserve measured orientation",
+                           evaluation_valid=True)
+        if problem["alpha"] == 0 and target.position_xyz[2] != measured.position_xyz[2]:
+            raise _Failure("infeasible", "disabled_z_motion", "assistance-disabled commands must remain in XY",
+                           evaluation_valid=True)
+        distance = math.dist(target.position_xyz, problem["candidate_position_xyz"])
+        raw = distance - problem["distance_tolerance_m"]
+        diagnostic = {"candidate_id": problem["candidate_id"], "distance_m": distance, "raw_g": raw,
+                      "normalization_scale": problem["distance_scale_m"],
+                      "penalty": (max(0., raw) / problem["distance_scale_m"]) ** 2}
+        actual = report.get("candidate_evaluation")
+        if (type(actual) is not dict or set(actual) != set(diagnostic) or
+            actual.get("candidate_id") != diagnostic["candidate_id"] or
+            any(type(actual[k]) not in (int, float) or not math.isfinite(actual[k]) or
+                not math.isclose(actual[k], diagnostic[k], rel_tol=1e-9, abs_tol=1e-9)
+                for k in diagnostic if k != "candidate_id")):
+            raise _Failure("error", "malformed_response", "candidate diagnostic differs from fixed host calculation")
+        satisfied = raw <= 1e-9
         data = {"result_id": identity["result_id"], "snapshot_id": request.snapshot_id,
-                "weights_id": request.weights_id, "control_epoch": request.control_epoch,
+                "selection_id": request.selection_id, "control_epoch": request.control_epoch,
                 "command_seq": request.command_seq, "source_joystick_seq": request.source_joystick_seq,
                 "source_robot_state_seq": request.source_robot_state_seq, "status": "move",
                 "evaluation_valid": True, "solver_status": "solved", "constraints_satisfied": satisfied,
                 "solve_time_s": (time.monotonic_ns() - started) / 1e9,
-                "constraint_evaluations": constraint_evaluations,
+                "candidate_evaluation": diagnostic,
                 "next_tcp_pose": to_dict(target), "horizon_s": request.dt_s}
-        return parse_record(r.ControlResult, data, policy=NUMERIC_OFFLINE_V1), margins
+        return parse_record(r.ControlResult, data, policy=NUMERIC_CANDIDATES_V2), margins
 
     # ----- outcome helpers ---------------------------------------------------
     def _outcome(self, identity, status, code, diagnostic, started, deadline, *, request=None,
@@ -900,13 +849,12 @@ class SupervisedOptimizer:
         finished = time.monotonic_ns()
         result = _hold_result(identity, status, code, diagnostic, evaluation_valid=evaluation_valid,
                               solve_time_s=(finished - started) / 1e9)
-        return OptimizationOutcome(result, code, diagnostic, request, None, None, (), started, deadline,
+        return OptimizationOutcome(result, code, diagnostic, request, None, (), started, deadline,
                                    finished, None, self._generation, None, 0., None, self._config,
                                    self._environment)
 
-    def _preparation(self, ok, code, diagnostic, started, deadline, *, reply=None, programs=None,
+    def _preparation(self, ok, code, diagnostic, started, deadline, *, reply=None, candidates=None,
                      cleanup=0., reaped=None):
-        pids = reply.get("evaluator_pids") if reply else None
         environment = dict(self._environment)
         if reply and type(reply.get("environment")) is dict:
             environment.update({k: str(v) for k, v in reply["environment"].items()})
@@ -914,8 +862,7 @@ class SupervisedOptimizer:
             ok, code, diagnostic[:512], started, deadline, time.monotonic_ns(),
             self._process.pid if self._process is not None and ok and code == "ok" else None,
             self._generation if ok and code == "ok" else None,
-            tuple(sorted(pids.items())) if type(pids) is dict else (),
-            tuple(sorted(programs)) if programs else (), self._checker_spec.factory, self._config,
+            tuple(sorted(candidates)) if candidates else (), self._checker_spec.factory, self._config,
             (("address_space", (self._config.address_space_bytes,) * 2), ("core", (0, 0))),
             tuple(sorted(environment.items())), cleanup, reaped)
 

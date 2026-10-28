@@ -1,15 +1,13 @@
 """Strict schema parsing without reference resolution or execution authority.
 
-Hashes are checked for format only. Parsing a receipt does not issue or trust it.
-Cross-record identity, calibration, source hashing, and execution checks belong
-to later layers. A policy must be selected explicitly at every parse boundary.
+Cross-record identity and calibration checks belong to later layers.
+A policy must be selected explicitly at every parse boundary.
 """
 
 from collections.abc import Callable
 from dataclasses import fields
 import json
 import math
-import re
 from typing import Any, TypeVar, overload
 
 from .errors import ValidationError
@@ -17,7 +15,6 @@ from .policy import ValidationPolicy
 from . import records as r
 
 MAX_SAFE_INTEGER = 9007199254740991
-_HASH = re.compile(r"[0-9a-f]{64}\Z")
 _R = TypeVar("_R", bound=r.Record)
 _Validator = Callable[[Any, str, ValidationPolicy], Any]
 
@@ -139,17 +136,6 @@ def _enum(*allowed: str) -> _Validator:
     return validate
 
 
-_unit = _enum("m", "rad", "dimensionless")
-_abi = _enum("geometry-residual-v1")
-
-
-def _hash(value: Any, path: str, policy: ValidationPolicy) -> str:
-    value = _string(value, path, policy)
-    if _HASH.fullmatch(value) is None:
-        _fail(path, "value", "expected exactly 64 lowercase hexadecimal characters")
-    return value
-
-
 def _array(
     item: _Validator, *, length: int | None = None,
     minimum: int = 0, limit: str | None = None,
@@ -175,17 +161,6 @@ def _nullable(validate: _Validator) -> _Validator:
     return lambda value, path, policy: None if value is None else validate(value, path, policy)
 
 
-def _source(value: Any, path: str, policy: ValidationPolicy) -> str:
-    value = _string(value, path, policy)
-    try:
-        size = len(value.encode("utf-8"))
-    except UnicodeEncodeError:
-        _fail(path, "value", "source must be encodable as exact UTF-8 bytes")
-    if size > policy.max_source_bytes:
-        _fail(path, "limit", f"source exceeds {policy.max_source_bytes} UTF-8 bytes")
-    return value
-
-
 _vector3 = _array(_number, length=3)
 _SCHEMAS: dict[type[r.Record], dict[str, _Validator]] = {
     r.TimePoint: {"clock_id": _identifier, "sec": _integer, "nanosec": _nanosecond},
@@ -198,11 +173,10 @@ _SCHEMAS: dict[type[r.Record], dict[str, _Validator]] = {
         "asset_id": _identifier, "media_type": _string, "encoding": _string,
         "shape": _array(_revision),
     },
-    r.ProgramRef: {"program_id": _identifier, "source_sha256": _hash},
     r.GeometryRef: {"geometry_id": _identifier, "revision": _revision},
     r.TaskRef: {"task_id": _identifier, "revision": _revision},
     r.MessageMeta: {
-        "schema_version": _enum("1.0"), "session_id": _identifier,
+        "schema_version": _enum("2.0"), "session_id": _identifier,
         "message_id": _identifier, "source_id": _identifier,
         "sequence": _counter, "produced_at": _nested(r.TimePoint),
     },
@@ -241,7 +215,7 @@ _SCHEMAS: dict[type[r.Record], dict[str, _Validator]] = {
         "feature_set_id": _identifier, "revision": _revision,
         "observation_id": _identifier, "frame_id": _identifier, "mode": _enum("static"),
         "objects": _array(_nested(r.Object), minimum=1),
-        "keypoints": _array(_nested(r.Keypoint), minimum=1),
+        "keypoints": _array(_nested(r.Keypoint)),
         "axes": _array(_nested(r.Axis)),
     },
     r.ObjectRelevance: {"object_id": _identifier, "task_relevance": _score},
@@ -252,29 +226,15 @@ _SCHEMAS: dict[type[r.Record], dict[str, _Validator]] = {
         "object_relevance": _array(
             _nested(r.ObjectRelevance), minimum=1, limit="max_candidate_objects",
         ),
-        "program_refs": _array(_nested(r.ProgramRef)),
     },
-    r.Parameter: {"name": _identifier, "value": _number, "unit": _unit},
-    r.ConstraintProgram: {
-        "program_id": _identifier, "source_sha256": _hash,
-        "function_api_version": _abi, "object_id": _identifier,
-        "description": _string, "entrypoint": _enum("evaluate"), "source_code": _source,
-        "keypoint_bindings": _array(_identifier, limit="max_keypoint_bindings"),
-        "axis_bindings": _array(_identifier, limit="max_axis_bindings"),
-        "parameters": _array(_nested(r.Parameter), limit="max_parameters"),
-        "output_unit": _unit,
+    r.CandidatePoint: {
+        "candidate_id": _identifier, "object_id": _identifier, "position_xyz": _vector3,
     },
-    r.ProgramExecutionBinding: {
-        "binding_id": _identifier, "program_id": _identifier, "config_id": _identifier,
-        "normalization_scale": _positive, "weight": _nonnegative,
-        "validation_receipt_id": _identifier,
-    },
-    r.ProgramValidationReceipt: {
-        "receipt_id": _identifier, "program_id": _identifier, "source_sha256": _hash,
-        "function_api_version": _abi, "scene_id": _identifier,
-        "feature_set_id": _identifier, "validation_geometry_id": _identifier,
-        "validation_geometry_revision": _revision, "validator_policy_version": _identifier,
-        "status": _enum("accepted", "rejected"), "diagnostics": _array(_explanation),
+    r.CandidateSet: {
+        "candidate_set_id": _identifier, "task_id": _identifier, "task_revision": _revision,
+        "scene_id": _identifier, "feature_set_id": _identifier,
+        "observation_id": _identifier, "frame_id": _identifier,
+        "candidates": _array(_nested(r.CandidatePoint), minimum=1, limit="max_candidates"),
     },
     r.JoystickSample: {
         "sampled_at": _nested(r.TimePoint), "mapping_id": _identifier,
@@ -292,30 +252,33 @@ _SCHEMAS: dict[type[r.Record], dict[str, _Validator]] = {
         "config_id": _identifier, "task_ref": _nested(r.TaskRef), "dt_s": _positive,
         "joystick_ref": _identifier, "robot_state_ref": _identifier,
         "joystick_history_refs": _array(_identifier), "geometry_ref": _nested(r.GeometryRef),
-        "semantic_id": _identifier, "program_refs": _array(_nested(r.ProgramRef)),
-        "execution_binding_refs": _array(_identifier),
+        "semantic_id": _identifier, "candidate_set_id": _identifier,
+        "previous_selection_id": _nullable(_identifier),
         "previous_applied_command_id": _nullable(_identifier),
     },
-    r.ObjectWeight: {"object_id": _identifier, "weight": _nonnegative},
-    r.ObjectWeights: {
-        "weights_id": _identifier, "snapshot_id": _identifier,
-        "estimator_config_id": _identifier,
-        "weights": _array(_nested(r.ObjectWeight), minimum=1, limit="max_candidate_objects"),
+    r.CandidateScore: {
+        "candidate_id": _identifier, "score": _positive, "distance_m": _nonnegative,
+    },
+    r.CandidateSelection: {
+        "selection_id": _identifier, "snapshot_id": _identifier,
+        "estimator_config_id": _identifier, "candidate_set_id": _identifier,
+        "selected_candidate_id": _nullable(_identifier),
+        "scores": _array(_nested(r.CandidateScore), minimum=1, limit="max_candidates"),
         "assistance_strength": _score,
     },
-    r.ConstraintEvaluation: {
-        "program_id": _identifier, "raw_g": _number,
+    r.CandidateEvaluation: {
+        "candidate_id": _identifier, "distance_m": _nonnegative, "raw_g": _number,
         "normalization_scale": _positive, "penalty": _nonnegative,
     },
     r.ControlResult: {
         "result_id": _identifier, "snapshot_id": _nullable(_identifier),
-        "weights_id": _nullable(_identifier), "control_epoch": _counter,
+        "selection_id": _nullable(_identifier), "control_epoch": _counter,
         "command_seq": _counter, "source_joystick_seq": _nullable(_counter),
         "source_robot_state_seq": _nullable(_counter), "status": _enum("move", "hold"),
         "evaluation_valid": _boolean,
         "solver_status": _enum("solved", "infeasible", "timeout", "error", "not_run"),
         "constraints_satisfied": _nullable(_boolean), "solve_time_s": _nonnegative,
-        "constraint_evaluations": _array(_nested(r.ConstraintEvaluation)),
+        "candidate_evaluation": _nullable(_nested(r.CandidateEvaluation)),
         "next_tcp_pose": _nested(r.Pose), "horizon_s": _positive, "reason": _explanation,
     },
     r.CommandAcceptanceRecord: {
@@ -333,9 +296,8 @@ _TYPES = {cls.__name__: cls for cls in _SCHEMAS}
 _MESSAGE_TYPES = {
     cls.__name__: cls for cls in (
         r.SessionConfig, r.TaskContext, r.SceneObservation, r.SceneGeometry,
-        r.SemanticContext, r.ConstraintProgram, r.Parameter,
-        r.ProgramExecutionBinding, r.ProgramValidationReceipt,
-        r.JoystickSample, r.RobotState, r.ControlSnapshot, r.ObjectWeights, r.ControlResult,
+        r.SemanticContext, r.CandidateSet, r.CandidateSelection,
+        r.JoystickSample, r.RobotState, r.ControlSnapshot, r.ControlResult,
     )
 }
 
@@ -407,21 +369,11 @@ def _robot_state(record: r.RobotState, path: str) -> None:
             _fail(f"{path}.{field}", "dimension", "length must match joint_names")
 
 
-def _weights(record: r.ObjectWeights, path: str, policy: ValidationPolicy) -> None:
-    _unique(record.weights, f"{path}.weights", "object_id")
-    try:
-        total = math.fsum(item.weight for item in record.weights)
-    except OverflowError:
-        _fail(f"{path}.weights", "range", "weight sum exceeds finite numeric range")
-    if abs(total - 1) > policy.weight_sum_tolerance:
-        _fail(f"{path}.weights", "range", f"weights must sum to one within {policy.weight_sum_tolerance}")
-
-
 def _control_result(record: r.ControlResult, path: str) -> None:
     if record.solver_status == "not_run" and record.solve_time_s != 0:
         _fail(f"{path}.solve_time_s", "value", "not_run requires zero solve time")
     if record.status == "move":
-        for field in ("snapshot_id", "weights_id", "source_joystick_seq", "source_robot_state_seq"):
+        for field in ("snapshot_id", "selection_id", "source_joystick_seq", "source_robot_state_seq"):
             if getattr(record, field) is None:
                 _fail(f"{path}.{field}", "value", "move requires a nonnull input reference")
         if not record.evaluation_valid:
@@ -453,21 +405,24 @@ def _parse(cls: type[_R], data: Any, path: str, policy: ValidationPolicy) -> _R:
         _geometry(record, path)
     elif isinstance(record, r.SemanticContext):
         _unique(record.object_relevance, f"{path}.object_relevance", "object_id")
-        _unique(record.program_refs, f"{path}.program_refs", "program_id")
-    elif isinstance(record, r.ConstraintProgram):
-        _unique(record.keypoint_bindings, f"{path}.keypoint_bindings")
-        _unique(record.axis_bindings, f"{path}.axis_bindings")
-        _unique(record.parameters, f"{path}.parameters", "name")
-    elif isinstance(record, r.ProgramValidationReceipt):
-        if record.status == "rejected" and not record.diagnostics:
-            _fail(f"{path}.diagnostics", "value", "a rejected receipt needs an explanation")
+    elif isinstance(record, r.CandidateSet):
+        _unique(record.candidates, f"{path}.candidates", "candidate_id")
+    elif isinstance(record, r.CandidateSelection):
+        _unique(record.scores, f"{path}.scores", "candidate_id")
+        if record.selected_candidate_id is not None and record.selected_candidate_id not in {
+                item.candidate_id for item in record.scores}:
+            _fail(f"{path}.selected_candidate_id", "reference", "selected candidate lacks a score")
+        if record.selected_candidate_id is None and record.assistance_strength != 0:
+            _fail(f"{path}.assistance_strength", "value", "disabled selection requires zero assistance")
+    elif isinstance(record, r.ControlSnapshot):
+        _unique(record.joystick_history_refs, f"{path}.joystick_history_refs")
+        if record.joystick_ref in record.joystick_history_refs:
+            _fail(f"{path}.joystick_history_refs", "reference", "history includes current input")
     elif isinstance(record, r.JoystickSample):
         if math.hypot(*record.u_xy) > 1:
             _fail(f"{path}.u_xy", "range", "joystick vector must lie in the unit disk")
     elif isinstance(record, r.RobotState):
         _robot_state(record, path)
-    elif isinstance(record, r.ObjectWeights):
-        _weights(record, path, policy)
     elif isinstance(record, r.ControlResult):
         _control_result(record, path)
     return record

@@ -1,4 +1,4 @@
-"""Self-contained offline evidence, never restored command or receipt authority.
+"""Self-contained offline evidence, never restored command or motion authority.
 
 The archive digest detects corruption, not authorship. Pin the returned digest
 outside the archive when transporting it. One archive contains one session;
@@ -20,12 +20,11 @@ import tempfile
 from . import records as r
 from .fusion import get_intent_config
 from .optimization import get_solver_config
-from .policy import NUMERIC_OFFLINE_V1
+from .policy import NUMERIC_CANDIDATES_V2
 from .registry import SessionRegistry, _canonical
-from .supervision import EVALUATOR_LIMITS
 from .validation import parse_record, to_dict
 
-ARCHIVE_VERSION = "ssc-run-v1"
+ARCHIVE_VERSION = "ssc-run-v2"
 MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
 _SHA = re.compile(r"[0-9a-f]{64}")
 _REVISION = re.compile(r"[0-9a-f]{40}")
@@ -103,13 +102,13 @@ def environment():
 
 
 def _manifest(value):
-    _fields(value, "run_id session_id schema_version function_api_version profile_id "
-            "evaluator_policy_id solver_config_id software environment installation_id "
+    _fields(value, "run_id session_id schema_version candidate_api_version profile_id "
+            "validation_policy_id solver_config_id software environment installation_id "
             "scenario_id evidence_scope replay_tolerances", "$.manifest")
     for name in ("run_id", "session_id", "profile_id", "installation_id", "scenario_id", "evidence_scope"):
         _text(value[name], f"$.manifest.{name}")
-    for name, expected in (("schema_version", "1.0"), ("function_api_version", "geometry-residual-v1"),
-                           ("evaluator_policy_id", "numeric-offline-v1")):
+    for name, expected in (("schema_version", "2.0"), ("candidate_api_version", "candidate-points-v2"),
+                           ("validation_policy_id", "numeric-candidates-v2")):
         _require(value[name] == expected, f"$.manifest.{name}", "unsupported_contract", expected)
     get_solver_config(value["solver_config_id"])
     _fields(value["software"], "server ros2", "$.manifest.software")
@@ -132,11 +131,11 @@ def _manifest(value):
     _require(packages["ssc-core"] == value["software"]["server"]["package_version"],
              "$.manifest.software.server.package_version", "incompatible_reference", "environment version differs")
     _require(value["replay_tolerances"] == {"atol": 1e-9, "rtol": 1e-9},
-             "$.manifest.replay_tolerances", "unsupported_policy", "offline-reference-v1 requires atol=rtol=1e-9")
+             "$.manifest.replay_tolerances", "unsupported_policy", "candidate-reference-v2 requires atol=rtol=1e-9")
 
 
 def _stamp(value, path):
-    stamp = parse_record(r.TimePoint, value, policy=NUMERIC_OFFLINE_V1)
+    stamp = parse_record(r.TimePoint, value, policy=NUMERIC_CANDIDATES_V2)
     return stamp.clock_id, stamp.sec * 1_000_000_000 + stamp.nanosec
 
 
@@ -156,7 +155,7 @@ class ArchiveBuilder:
     def __init__(self, manifest):
         self._manifest = _copy(manifest)
         _manifest(self._manifest)
-        self._registry = SessionRegistry(manifest["session_id"], policy=NUMERIC_OFFLINE_V1)
+        self._registry = SessionRegistry(manifest["session_id"], policy=NUMERIC_CANDIDATES_V2)
         self._records, self._messages, self._resources, self._events = {}, {}, {}, {}
 
     def add_record(self, record_type, data):
@@ -271,7 +270,7 @@ class RunArchive:
 
     @staticmethod
     def _registry(payload):
-        registry = SessionRegistry(payload["manifest"]["session_id"], policy=NUMERIC_OFFLINE_V1)
+        registry = SessionRegistry(payload["manifest"]["session_id"], policy=NUMERIC_CANDIDATES_V2)
         for index, record in enumerate(payload["records"]):
             _fields(record, "record_type data", f"$.records[{index}]")
             registry.register_record(record["record_type"], record["data"], session_id=registry.session_id)
@@ -310,17 +309,16 @@ class RunArchive:
         manifest = payload["manifest"]
         for name in ("profile_id", "installation_id", "scenario_id"):
             _require(bool(resource(manifest[name])), "$.manifest." + name, "incomplete_record", "empty resource")
-        settings(manifest["evaluator_policy_id"], {"validation": asdict(NUMERIC_OFFLINE_V1),
-                                                 "execution": asdict(EVALUATOR_LIMITS)})
+        settings(manifest["validation_policy_id"], asdict(NUMERIC_CANDIDATES_V2))
         settings(manifest["solver_config_id"], asdict(get_solver_config(manifest["solver_config_id"])))
         # Enumerate the supplied objects, not registry internals. Envelopes may
         # duplicate standalone artifacts; the registry has checked their identity.
-        records = [parse_record(item["record_type"], item["data"], policy=NUMERIC_OFFLINE_V1)
+        records = [parse_record(item["record_type"], item["data"], policy=NUMERIC_CANDIDATES_V2)
                    for item in payload["records"]]
         messages = [registry.get_message(item["meta"]["message_id"], session_id=registry.session_id)
                     for item in payload["messages"]]
         records += [message.payload for message in messages]
-        snapshots, results, weights = {}, {}, {}
+        snapshots, results, selections = {}, {}, {}
         for record in records:
             if type(record) is r.SessionConfig:
                 resource(record.robot_model_id)
@@ -334,13 +332,13 @@ class RunArchive:
                 resource(record.mapping_id)
             elif type(record) is r.ControlSnapshot:
                 snapshots[record.snapshot_id] = registry.resolve_snapshot(record.snapshot_id)
-            elif type(record) is r.ObjectWeights:
-                resolved = registry.resolve_weights(record.weights_id)
+            elif type(record) is r.CandidateSelection:
+                resolved = registry.resolve_selection(record.selection_id)
                 settings(record.estimator_config_id, asdict(get_intent_config(record.estimator_config_id)))
                 _require(get_intent_config(record.estimator_config_id).session_config_id ==
-                         resolved.snapshot.snapshot.config_id, "$.weights.estimator_config_id",
-                         "incompatible_reference", record.weights_id)
-                weights[record.weights_id] = record
+                         resolved.snapshot.snapshot.config_id, "$.selections.estimator_config_id",
+                         "incompatible_reference", record.selection_id)
+                selections[record.selection_id] = record
             elif type(record) is r.ControlResult:
                 results[record.result_id] = record
         _require(bool(snapshots), "$.records", "incomplete_record", "run requires at least one snapshot")
@@ -386,15 +384,15 @@ class RunArchive:
                 _require(data["snapshot_id"] not in dispatches, path, "duplicate_dispatch", data["snapshot_id"])
                 dispatches[data["snapshot_id"]] = data
             elif kind == "acceptance":
-                acceptance = parse_record(r.CommandAcceptanceRecord, data, policy=NUMERIC_OFFLINE_V1)
+                acceptance = parse_record(r.CommandAcceptanceRecord, data, policy=NUMERIC_CANDIDATES_V2)
                 result(acceptance.result_id)
                 if acceptance.command_accepted:
                     ArchiveBuilder._put(applied, acceptance.applied_command_id, data, path)
             elif kind == "evaluation":
                 _fields(data, "result_id pose", path)
                 candidate = result(data["result_id"])
-                pose = parse_record(r.Pose, data["pose"], policy=NUMERIC_OFFLINE_V1)
-                _require(bool(candidate.constraint_evaluations), path, "incompatible_reference", "result has no residual diagnostics")
+                pose = parse_record(r.Pose, data["pose"], policy=NUMERIC_CANDIDATES_V2)
+                _require(bool(candidate.candidate_evaluation), path, "incompatible_reference", "result has no residual diagnostics")
                 if candidate.status == "move":
                     _require(pose == candidate.next_tcp_pose, path, "incompatible_reference", "evaluated pose differs from proposed target")
                 _require(candidate.result_id not in evaluations, path, "duplicate_evaluation", candidate.result_id)
@@ -424,21 +422,21 @@ class RunArchive:
         for identifier, candidate in results.items():
             if candidate.snapshot_id is not None:
                 _require(candidate.snapshot_id in snapshots, "$.results.snapshot_id", "missing_reference", identifier)
-            if candidate.weights_id is not None:
-                _require(candidate.weights_id in weights, "$.results.weights_id", "missing_reference", identifier)
-                _require(weights[candidate.weights_id].snapshot_id == candidate.snapshot_id,
-                         "$.results.weights_id", "incompatible_reference", identifier)
-            if candidate.constraint_evaluations or candidate.status == "move":
+            if candidate.selection_id is not None:
+                _require(candidate.selection_id in selections, "$.results.selection_id", "missing_reference", identifier)
+                _require(selections[candidate.selection_id].snapshot_id == candidate.snapshot_id,
+                         "$.results.selection_id", "incompatible_reference", identifier)
+            if candidate.candidate_evaluation or candidate.status == "move":
                 _require(identifier in evaluations and candidate.snapshot_id in snapshots,
                          "$.events.evaluation", "incomplete_record", identifier)
-                bindings = {b.program_id: b for b in snapshots[candidate.snapshot_id].bundle.execution_bindings}
-                diagnostics = {d.program_id: d for d in candidate.constraint_evaluations}
-                _require(len(diagnostics) == len(candidate.constraint_evaluations),
-                         "$.results.constraint_evaluations", "duplicate_evaluation", identifier)
-                _require(set(bindings) == set(diagnostics), "$.results.constraint_evaluations", "incomplete_record", identifier)
-                for program_id, diagnostic in diagnostics.items():
-                    _require(diagnostic.normalization_scale == bindings[program_id].normalization_scale,
-                             "$.results.constraint_evaluations", "incompatible_reference", "normalization differs from binding")
+                selection = selections.get(candidate.selection_id)
+                _require(selection is not None and candidate.candidate_evaluation is not None,
+                         '$.results.candidate_evaluation', 'incomplete_record', identifier)
+                _require(candidate.candidate_evaluation.candidate_id == selection.selected_candidate_id,
+                         '$.results.candidate_evaluation', 'incompatible_reference', 'evaluation is not selected candidate')
+                _require(candidate.candidate_evaluation.normalization_scale ==
+                         get_solver_config(manifest['solver_config_id']).distance_scale_m,
+                         '$.results.candidate_evaluation', 'incompatible_reference', 'normalization differs from fixed solver')
 
 
 def inspect_archive(archive: RunArchive):

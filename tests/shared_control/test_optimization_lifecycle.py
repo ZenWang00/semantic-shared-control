@@ -23,11 +23,10 @@ F = runpy.run_path(str(Path(__file__).resolve().parents[2] / "docs/reference/opt
 @pytest.fixture
 def host(monkeypatch):
     case = F["scenario"]()
-    request = build_request(case["resolved"], case["weights"],
+    request = build_request(case["resolved"], case["selection"],
                             intent_config=case["intent_config"], command_seq=1)
     report = solve_problem(
         request.problem(),
-        lambda term, p, rotation: math.dist(p, term["keypoints"][0]) - term["params"][0],
         lambda p, q: (["free"], [1.0]), deadline_ns=10**30,
     )
     clock = SimpleNamespace(now=1_000_000_000)
@@ -50,8 +49,7 @@ def host(monkeypatch):
 
         def _exchange(self, frame, *args):
             if json.loads(frame)["operation"] == "prepare":
-                return {"status": "ready", "evaluator_pids": {
-                    p.program.program_id: 12346 + i for i, p in enumerate(case["resolved"].bundle.programs)}}
+                return {"status": "ready", "candidate_ids": sorted(p.candidate_id for p in case["resolved"].bundle.candidates)}
             return {"status": "solved", "code": "solved", "diagnostic": "", "evaluation_valid": True,
                     "report": report, "worker_elapsed_s": .001}
 
@@ -65,7 +63,7 @@ def prepare(solver, case):
 
 
 def submit(solver, case):
-    return solver.solve(case["resolved"], case["weights"], intent_config=case["intent_config"], command_seq=1)
+    return solver.solve(case["resolved"], case["selection"], intent_config=case["intent_config"], command_seq=1)
 
 
 def assert_retired_hold(solver, outcome, status, code):
@@ -271,3 +269,26 @@ def test_failed_retirement_is_not_retried_indefinitely(host):
         assert calls == [1] and not solver.ready
     finally:
         solver._retire = retire
+
+
+@pytest.mark.parametrize("malformation", ["nonfinite", "short_vector", "duplicate_id", "empty"])
+def test_invalid_preparation_completes_and_does_not_claim_lifecycle(host, malformation):
+    from dataclasses import replace
+    solver, case, _ = host
+    bundle = case["resolved"].bundle
+    points = bundle.candidates
+    if malformation == "nonfinite":
+        points = (replace(points[0], position_xyz=(float("nan"), 0, 0)),)
+    elif malformation == "short_vector":
+        points = (replace(points[0], position_xyz=(0, 0)),)
+    elif malformation == "duplicate_id":
+        points = (points[0], points[0])
+    else:
+        points = ()
+    invalid = replace(bundle, candidate_set=replace(bundle.candidate_set, candidates=points))
+    outcome = solver.prepare(invalid, motion_disabled=True).result(1)
+    assert not outcome.ok and outcome.code == "invalid_request"
+    assert solver._active is None
+    assert prepare(solver, case).result(2).ok
+    assert submit(solver, case).result(2).result.status == "move"
+    assert solver.close().result(2).reaped is True
